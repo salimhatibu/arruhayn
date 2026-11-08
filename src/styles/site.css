@@ -364,6 +364,10 @@ label { display: block; font-weight: 500; margin-bottom: 0.35rem; color: var(--i
   animation: fade 0.2s var(--ease);
 }
 .gloss-pop strong { color: var(--plum); display: block; margin-bottom: 0.2rem; }
+.gloss-pop { width: max-content; max-width: min(320px, 80vw); }
+@media (max-width: 600px) {
+  .gloss-pop { position: fixed; left: 16px !important; right: 16px; bottom: 16px; top: auto !important; width: auto; max-width: none; z-index: 60; }
+}
 
 /* Bookmark */
 .bookmark { display: inline-flex; align-items: center; gap: 0.35rem; }

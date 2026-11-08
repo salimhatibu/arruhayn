@@ -2,16 +2,23 @@
 
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 
-// A glossary term inside article text. Opens on hover, tap, or Enter, and closes with Escape.
+// A glossary term inside article text. A mouse opens it on hover; a tap, click, or Enter pins it
+// open. Escape or a click elsewhere closes it.
 export function GlossaryTerm({ term, definition, children }: { term: string; definition: string; children: ReactNode }) {
-  const [open, setOpen] = useState(false)
+  const [hover, setHover] = useState(false)
+  const [pinned, setPinned] = useState(false)
+  const open = hover || pinned
   const id = useId()
   const ref = useRef<HTMLSpanElement>(null)
 
   useEffect(() => {
     if (!open) return
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
-    const onClick = (e: MouseEvent) => !ref.current?.contains(e.target as Node) && setOpen(false)
+    const close = () => {
+      setHover(false)
+      setPinned(false)
+    }
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close()
+    const onClick = (e: MouseEvent) => !ref.current?.contains(e.target as Node) && close()
     document.addEventListener('keydown', onKey)
     document.addEventListener('click', onClick)
     return () => {
@@ -24,8 +31,13 @@ export function GlossaryTerm({ term, definition, children }: { term: string; def
   const slug = encodeURIComponent(term)
 
   return (
-    <span ref={ref} style={{ position: 'relative' }} onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
-      <button type="button" className="gloss" aria-expanded={open} aria-describedby={open ? id : undefined} onClick={() => setOpen((o) => !o)}>
+    <span
+      ref={ref}
+      style={{ position: 'relative' }}
+      onPointerEnter={(e) => e.pointerType === 'mouse' && setHover(true)}
+      onPointerLeave={(e) => e.pointerType === 'mouse' && setHover(false)}
+    >
+      <button type="button" className="gloss" aria-expanded={open} aria-describedby={open ? id : undefined} onClick={() => setPinned((p) => !p)}>
         {children}
       </button>
       {open ? (

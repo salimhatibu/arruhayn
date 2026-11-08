@@ -4,6 +4,7 @@ import { buildMatchQuery, normalize } from '@/lib/arabic'
 import { fastingDays, islamicDates, mondayThursdayExceptions } from '@/lib/fasting'
 import { addDays, isoDay, toGregorian, toHijri, umalqura, umalquraMonthStart, utcDay } from '@/lib/hijri'
 import { buildCalendar, foldLine } from '@/lib/ics'
+import { safeHref, textDir } from '@/lib/format'
 
 describe('hijri', () => {
   it('matches the Umm al-Qura start of 1447', () => {
@@ -93,5 +94,25 @@ describe('ics', () => {
     const ics = buildCalendar('Test', [{ uid: 'a@x', title: 'Fast', start: '2026-11-09', allDay: true }])
     expect(ics).toContain('DTSTART;VALUE=DATE:20261109')
     expect(ics).toContain('DTEND;VALUE=DATE:20261110')
+  })
+})
+
+describe('links and text direction from stored content', () => {
+  it('keeps web, email, phone, and in-site links', () => {
+    expect(safeHref('https://t.me/x')).toBe('https://t.me/x')
+    expect(safeHref('mailto:a@b.co')).toBe('mailto:a@b.co')
+    expect(safeHref('/en/fatwas/1')).toBe('/en/fatwas/1')
+    expect(safeHref('#top')).toBe('#top')
+  })
+  it('drops script and data links', () => {
+    expect(safeHref('javascript:alert(1)')).toBeUndefined()
+    expect(safeHref(' JavaScript:alert(1)')).toBeUndefined()
+    expect(safeHref('data:text/html,hi')).toBeUndefined()
+    expect(safeHref('')).toBeUndefined()
+  })
+  it('marks untranslated English on Arabic pages', () => {
+    expect(textDir('Conditions of the Nikkah', 'ar')).toEqual({ dir: 'ltr', lang: 'en' })
+    expect(textDir('شروط النكاح', 'ar')).toEqual({ dir: 'auto' })
+    expect(textDir('Conditions of the Nikkah', 'en')).toEqual({ dir: 'auto' })
   })
 })

@@ -41,3 +41,12 @@ export const href = (locale: Locale, path = '') => `/${locale}${path}`
 export function textDir(text: string | null | undefined, locale: Locale): { dir: 'ltr' | 'auto'; lang?: 'en' } {
   return locale === 'ar' && text && !/[؀-ۿ]/.test(text) ? { dir: 'ltr', lang: 'en' } : { dir: 'auto' }
 }
+
+// Links from stored content (rich text, fatwa sources) only go to web, email, or phone
+// addresses, or within the site. Anything else, such as javascript: URLs, becomes inert.
+export function safeHref(url: string | null | undefined): string | undefined {
+  const value = (url ?? '').trim()
+  if (!value) return undefined
+  if (/^(https?:|mailto:|tel:)/i.test(value) || /^[/#?]/.test(value)) return value
+  return undefined
+}

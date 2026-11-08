@@ -9,7 +9,7 @@ import { RichText } from '@/components/site/RichText'
 import { ShareButton } from '@/components/site/ShareButton'
 import type { Fatwa, Topic } from '@/payload-types'
 import { t, type Locale } from '@/i18n/dictionary'
-import { formatDate, formatNumber, textDir } from '@/lib/format'
+import { formatDate, formatNumber, safeHref, textDir } from '@/lib/format'
 import { excerpt, lexicalToText } from '@/lib/lexical'
 import { getGlossary, getPayloadClient } from '@/lib/payload'
 
@@ -174,7 +174,7 @@ export default async function FatwaPage({ params }: Props) {
               <h2>{d.sources}</h2>
               <ul>
                 {(fatwa.sources ?? []).map((s) => (
-                  <li key={s.id}>{s.url ? <a href={s.url}>{s.reference}</a> : s.reference}</li>
+                  <li key={s.id}>{safeHref(s.url) ? <a href={safeHref(s.url)} rel="noopener noreferrer" target="_blank">{s.reference}</a> : s.reference}</li>
                 ))}
                 {fatwa.originalUrl ? (
                   <li>

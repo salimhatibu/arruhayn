@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 
 import type { Glossary } from '@/payload-types'
+import { safeHref } from '@/lib/format'
 import type { LexicalValue } from '@/lib/lexical'
 
 import { GlossaryTerm } from './GlossaryTerm'
@@ -107,7 +108,8 @@ export function RichText({
         return <li key={key}>{kids()}</li>
       case 'link':
       case 'autolink': {
-        const href = node.fields?.url ?? node.url ?? '#'
+        const href = safeHref(node.fields?.url ?? node.url)
+        if (!href) return <span key={key}>{kids()}</span>
         const external = /^https?:/.test(href)
         return (
           <a key={key} href={href} {...(external || node.fields?.newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>

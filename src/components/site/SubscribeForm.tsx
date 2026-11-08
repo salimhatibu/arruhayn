@@ -20,7 +20,7 @@ export function SubscribeForm({ locale, siteKey }: { locale: Locale; siteKey: st
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ email, locale, token }),
-    }).catch(() => null)
+    }).catch((): null => null)
     const data = (await res?.json().catch(() => ({}))) as { pending?: boolean; error?: string }
     if (!res?.ok) return setState({ kind: 'error', message: data?.error ?? d.invalidEmail })
     setState({ kind: 'done', message: data.pending ? d.subscribedPending : d.subscribed })

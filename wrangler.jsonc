@@ -53,6 +53,8 @@
     },
     "admin": {
       "name": "arruhayn-admin",
+      // Scheduled newsletters and clean-up (see worker.ts and /svc/staff/jobs).
+      "triggers": { "crons": ["*/15 * * * *"] },
       "vars": {
         "SITE_MODE": "admin",
         "PUBLIC_URL": "https://arruhayn.salimhatibu786.workers.dev",

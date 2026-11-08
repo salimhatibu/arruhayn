@@ -6,14 +6,15 @@ import { useEffect, useState } from 'react'
 import type { Locale } from '@/i18n/dictionary'
 
 export function NavToggle({ label }: { label: string }) {
-  const [open, setOpen] = useState(false)
   const pathname = usePathname()
-  useEffect(() => setOpen(false), [pathname])
+  // The menu belongs to the page it was opened on, so it closes when the page changes.
+  const [openOn, setOpenOn] = useState<string | null>(null)
+  const open = openOn === pathname
   useEffect(() => {
     document.getElementById('site-header')?.setAttribute('data-open', String(open))
   }, [open])
   return (
-    <button className="btn ghost nav-toggle" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+    <button className="btn ghost nav-toggle" aria-expanded={open} onClick={() => setOpenOn(open ? null : pathname)}>
       {label}
     </button>
   )

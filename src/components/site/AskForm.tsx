@@ -23,7 +23,7 @@ export function AskForm({ locale, siteKey }: { locale: Locale; siteKey: string }
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ question, language, email, token }),
-    }).catch(() => null)
+    }).catch((): null => null)
     if (!res?.ok) {
       setState('idle')
       return setError(d.failed)

@@ -4,7 +4,7 @@ import { verifyTurnstile } from '@/lib/turnstile'
 
 // Public "ask a question" form. Questions are stored privately for reviewers.
 export async function POST(request: Request) {
-  const body = (await request.json().catch(() => null)) as {
+  const body = (await request.json().catch((): null => null)) as {
     question?: string
     language?: string
     email?: string

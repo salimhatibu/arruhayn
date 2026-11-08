@@ -5,9 +5,9 @@ import { verifyTurnstile } from '@/lib/turnstile'
 const token = () => crypto.randomUUID().replace(/-/g, '')
 
 // Saves a newsletter sign-up as pending. A confirmation email goes out once email sending is on
-// (see the jobs Worker); until then sign-ups wait as pending.
+// (see the scheduled jobs in worker.ts); until then sign-ups wait as pending.
 export async function POST(request: Request) {
-  const body = (await request.json().catch(() => null)) as { email?: string; locale?: string; token?: string } | null
+  const body = (await request.json().catch((): null => null)) as { email?: string; locale?: string; token?: string } | null
   const email = body?.email?.trim().toLowerCase() ?? ''
   if (!/^\S+@\S+\.\S+$/.test(email) || email.length > 254) return errorJson('Enter a valid email address.', 400)
   if (!(await verifyTurnstile(body?.token, request.headers.get('cf-connecting-ip')))) {

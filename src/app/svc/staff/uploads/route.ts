@@ -10,7 +10,7 @@ const MAX_BYTES = 2 * 1024 * 1024 * 1024
 export async function POST(request: Request) {
   const user = await staffUser(request)
   if (!user || !hasRole(user, 'admin', 'teacher')) return errorJson('Sign in as a teacher to upload.', 401)
-  const body = (await request.json().catch(() => null)) as { ext?: string; contentType?: string; size?: number } | null
+  const body = (await request.json().catch((): null => null)) as { ext?: string; contentType?: string; size?: number } | null
   const contentType = body?.contentType ?? ''
   if (!ALLOWED.test(contentType)) return errorJson('Upload an MP3, M4A, OGG, or WebM audio file.', 400)
   if (!body?.size || body.size > MAX_BYTES) return errorJson('The file is too large (2 GB at most).', 400)

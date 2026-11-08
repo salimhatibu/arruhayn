@@ -66,7 +66,6 @@ export default async function GuidePage({ params, searchParams }: Props) {
         <Checklist
           storageKey={`guide:${guide.slug}`}
           items={steps.map((s) => ({ id: s.id ?? s.title, title: s.title }))}
-          labels={{ progress: d.guides.progress, savedOnDevice: d.guides.savedOnDevice }}
           locale={locale}
         />
       </article>

@@ -59,6 +59,15 @@ export const Questions: CollectionConfig = {
     { name: 'answeredAt', type: 'date', index: true, admin: { position: 'sidebar', readOnly: true } },
   ],
   hooks: {
+    beforeChange: [
+      ({ data, originalDoc }) => {
+        // The 90-day deletion clock starts when a question is answered or declined.
+        if ((data.status === 'answered' || data.status === 'declined') && originalDoc?.status !== data.status) {
+          data.answeredAt = data.answeredAt ?? new Date().toISOString()
+        }
+        return data
+      },
+    ],
     afterChange: [
       async ({ doc, data, req, operation }) => {
         if (operation !== 'update' || !data?.createDraft || doc.linkedFatwa) return doc

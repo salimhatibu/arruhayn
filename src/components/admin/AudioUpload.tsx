@@ -79,7 +79,7 @@ export function AudioUpload() {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ ext, contentType, size: body.size }),
       })
-      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? 'The upload could not start.')
+      if (!res.ok) throw new Error(((await res.json().catch(() => ({}))) as { error?: string }).error ?? 'The upload could not start.')
       const { uploadUrl, key: fileKey } = (await res.json()) as { uploadUrl: string; key: string }
 
       setStatus('Uploading… 0%')

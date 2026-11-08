@@ -33,7 +33,9 @@ function loadScript(): Promise<void> {
 export function Turnstile({ siteKey, onToken, locale }: { siteKey: string; onToken: (token: string) => void; locale: string }) {
   const ref = useRef<HTMLDivElement>(null)
   const cb = useRef(onToken)
-  cb.current = onToken
+  useEffect(() => {
+    cb.current = onToken
+  })
 
   useEffect(() => {
     let id: string | undefined

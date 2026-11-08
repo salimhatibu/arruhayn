@@ -180,7 +180,7 @@ async function seedSamples() {
     await payload.create({
       collection: 'classes',
       locale: 'en',
-      data: { title: `${SAMPLE}Fiqh of nikah, lesson 1`, teacher: admin.docs[0].id, startsAt: start.toISOString(), durationMinutes: 90 },
+      data: { title: `${SAMPLE}Fiqh of nikah, lesson 1`, teacher: admin.docs[0].id, startsAt: start.toISOString(), durationMinutes: 90, status: 'scheduled' },
     })
   }
   payload.logger.info('Created sample content')

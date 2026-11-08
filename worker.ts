@@ -5,6 +5,8 @@ import { default as handler } from './.open-next/worker.js'
 
 const STAFF_ROUTES = /^\/(admin|api|teach|svc\/staff)(\/|$)/
 
+type Env = CloudflareEnv & { SITE_MODE?: string; JOBS_SECRET?: string; ADMIN_URL?: string }
+
 export default {
   async fetch(request, env, ctx) {
     const { pathname } = new URL(request.url)
@@ -13,4 +15,12 @@ export default {
     }
     return handler.fetch(request, env, ctx)
   },
-} satisfies ExportedHandler<CloudflareEnv>
+
+  // Cron trigger (admin Worker only): publishes scheduled newsletters and tidies up.
+  async scheduled(_event, env, ctx) {
+    if (env.SITE_MODE !== 'admin' || !env.JOBS_SECRET) return
+    const url = new URL('/svc/staff/jobs', env.ADMIN_URL ?? 'https://admin.internal')
+    const res = await handler.fetch(new Request(url, { method: 'POST', headers: { 'x-jobs-secret': env.JOBS_SECRET } }), env, ctx)
+    console.log(JSON.stringify({ job: 'scheduled', status: res.status, result: await res.text() }))
+  },
+} satisfies ExportedHandler<Env>

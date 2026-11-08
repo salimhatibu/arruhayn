@@ -1,46 +1,30 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-
-import type { Locale } from '@/i18n/dictionary'
+import { t, type Locale } from '@/i18n/dictionary'
+import { useLocalValue } from '@/lib/use-local'
 
 // A checklist whose ticks are saved in this browser only.
 export function Checklist({
   storageKey,
   items,
-  labels,
   locale,
 }: {
   storageKey: string
   items: { id: string; title: string }[]
-  labels: { progress: (a: number, b: number) => string; savedOnDevice: string }
   locale: Locale
 }) {
-  const [done, setDone] = useState<string[]>([])
-
-  useEffect(() => {
-    try {
-      setDone(JSON.parse(localStorage.getItem(storageKey) ?? '[]'))
-    } catch {
-      setDone([])
-    }
-  }, [storageKey])
+  const d = t(locale).guides
+  const [done, setDone] = useLocalValue<string[]>(storageKey, [])
 
   function toggle(id: string) {
-    const next = done.includes(id) ? done.filter((x) => x !== id) : [...done, id]
-    setDone(next)
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(next))
-    } catch {
-      // Storage unavailable; ticks last until the page is closed.
-    }
+    setDone(done.includes(id) ? done.filter((x) => x !== id) : [...done, id])
   }
 
   const count = items.filter((i) => done.includes(i.id)).length
   return (
-    <section style={{ marginTop: '1.5rem' }} lang={locale}>
+    <section style={{ marginTop: '1.5rem' }}>
       <p className="muted small" aria-live="polite">
-        {labels.progress(count, items.length)}
+        {d.progress(count, items.length)}
       </p>
       <div className="progress" aria-hidden="true">
         <span style={{ width: `${items.length ? (count / items.length) * 100 : 0}%` }} />
@@ -55,7 +39,7 @@ export function Checklist({
           </li>
         ))}
       </ul>
-      <p className="help">{labels.savedOnDevice}</p>
+      <p className="help">{d.savedOnDevice}</p>
     </section>
   )
 }

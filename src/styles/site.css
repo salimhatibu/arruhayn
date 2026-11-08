@@ -11,7 +11,7 @@
   --ink: #24121f;
   --ink-2: #3d2a38;
   --muted: #6e5f6a;
-  --faint: #9a8d96;
+  --faint: #786a73;
   --line: #e6dfd1;
   --line-strong: #d3c8b6;
   --rule: #24121f;
@@ -68,6 +68,8 @@ img { max-width: 100%; height: auto; }
 a { color: var(--plum); text-decoration-color: rgb(74 20 66 / 0.35); text-underline-offset: 3px; transition: color 0.2s var(--ease), text-decoration-color 0.2s var(--ease); }
 a:hover { color: var(--magenta); text-decoration-color: currentColor; }
 :focus-visible { outline: 2px solid var(--rust); outline-offset: 3px; border-radius: 4px; }
+/* On the dark masthead, hero, and footer the focus ring is cream so it stays visible. */
+:is(.site-header, .hero, .site-footer, .live-banner) :focus-visible { outline-color: #f3dcc7; }
 
 h1, h2, h3, h4 { font-family: var(--font-serif); color: var(--ink); line-height: 1.12; text-wrap: balance; font-weight: 700; letter-spacing: -0.015em; }
 [dir='rtl'] :is(h1, h2, h3, h4) { font-family: var(--font-ar); font-weight: 700; line-height: 1.45; letter-spacing: 0; }
@@ -415,7 +417,7 @@ label { display: block; font-weight: 500; margin-bottom: 0.35rem; color: var(--i
 .footer-icons { display: flex; gap: 1.25rem; }
 .footer-icons a { color: rgb(244 238 242 / 0.75); transition: color 0.2s var(--ease), transform 0.2s var(--ease); }
 .footer-icons a:hover { color: #fff; transform: translateY(-2px); }
-.footer-base { border-top: 1px solid rgb(255 255 255 / 0.12); padding-top: 1.5rem; display: flex; flex-wrap: wrap; gap: 0.75rem 3rem; justify-content: space-between; color: rgb(244 238 242 / 0.5); font-size: 0.82rem; }
+.footer-base { border-top: 1px solid rgb(255 255 255 / 0.12); padding-top: 1.5rem; display: flex; flex-wrap: wrap; gap: 0.75rem 3rem; justify-content: space-between; color: rgb(244 238 242 / 0.6); font-size: 0.82rem; }
 .footer-base p { margin: 0; max-width: 70ch; }
 
 /* Checklist */
@@ -472,7 +474,7 @@ a.boxed:hover { background: var(--rust); color: #fff; }
 .story-list > .story { padding-block: 1.6rem; border-bottom: 1px solid var(--line-strong); }
 .story-list > .story:first-child { padding-top: 0; }
 .story-list > .story:last-child { border-bottom: 0; }
-.story-title { font-size: 1.4rem; line-height: 1.2; margin: 0 0 0.45rem; font-weight: 700; }
+.story-title { font-size: 1.4rem; line-height: 1.2; margin: 0 0 0.45rem; font-weight: 700; letter-spacing: -0.015em; }
 .story-title a, .front-title a { color: var(--ink); text-decoration: none; background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat; transition: background-size 0.45s var(--ease), color 0.2s var(--ease); }
 [dir='rtl'] :is(.story-title, .front-title) a { background-position: 100% 100%; }
 .story-title a:hover, .front-title a:hover { color: var(--plum); background-size: 100% 1px; }
@@ -516,6 +518,8 @@ a.boxed:hover { background: var(--rust); color: #fff; }
 [dir='rtl'] .front-title { line-height: 1.45; letter-spacing: 0; }
 .front-deck { font-family: var(--font-serif); font-size: 1.22rem; line-height: 1.6; color: var(--ink-2); margin: 0 0 1rem; }
 [dir='rtl'] .front-deck { font-family: var(--font-ar); font-size: 1.25rem; line-height: 1.9; }
+/* The first paragraph contains its drop cap, so a short opening line doesn't indent the next. */
+.dropcap, .dropcap-first > p:first-child { display: flow-root; }
 .dropcap::first-letter, .dropcap-first > p:first-child::first-letter {
   float: inline-start; font-family: var(--font-serif); font-weight: 800; color: var(--plum);
   font-size: 3.6em; line-height: 0.82; margin: 0.06em 0.1em 0 0; padding: 0;
@@ -755,3 +759,19 @@ a.boxed:hover { background: var(--rust); color: #fff; }
 .songbook-rss { display: flex; justify-content: space-between; margin-top: 1.1rem; color: var(--ink-2); text-decoration: none; font-size: 0.9rem; }
 .songbook-rss:hover { color: var(--rust); }
 @media (max-width: 1000px) { .songbook { position: static; } }
+
+/* Print: a fatwa, newsletter, or guide prints as a clean newspaper page with its address. */
+@media print {
+  @page { margin: 18mm 16mm; }
+  body { background: #fff !important; color: #000; font-size: 11pt; }
+  .site-header, .site-footer, .live-banner, .hero-art, .scroll-cue, .article-aside, .story-actions, .share, .bookmark, .skip, .disclaimer-note, .newsletter-band, .tab-list { display: none !important; }
+  main > .wrap:first-child, main > article.wrap:first-child { padding: 0 !important; }
+  .article-grid { display: block; }
+  .question-box { border: 1px solid #000; border-top-width: 3px; background: none; }
+  .prose { font-size: 12pt; max-width: none; color: #000; }
+  a { color: #000; text-decoration: underline; }
+  .prose a[href^='http']::after, .sources a[href^='http']::after { content: ' (' attr(href) ')'; font-size: 9pt; word-break: break-all; }
+  h1, h2, h3 { break-after: avoid; }
+  p, li, blockquote { orphans: 3; widows: 3; }
+  [data-reveal] { opacity: 1 !important; transform: none !important; filter: none !important; }
+}

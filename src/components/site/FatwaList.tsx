@@ -58,7 +58,8 @@ export function StoryActions({
   )
 }
 
-export function FatwaList({ fatwas, locale }: { fatwas: Fatwa[]; locale: Locale }) {
+export function FatwaList({ fatwas, locale, level = 'h3' }: { fatwas: Fatwa[]; locale: Locale; level?: 'h2' | 'h3' }) {
+  const Title = level
   const d = t(locale)
   if (!fatwas.length) return <p className="muted">{d.noFatwas}</p>
   return (
@@ -68,9 +69,9 @@ export function FatwaList({ fatwas, locale }: { fatwas: Fatwa[]; locale: Locale 
         return (
           <li key={f.id} className="story" data-reveal>
             <Dateline fatwa={f} locale={locale} />
-            <h3 className="story-title" {...textDir(f.title, locale)}>
+            <Title className="story-title" {...textDir(f.title, locale)}>
               <Link href={`/${locale}/fatwas/${f.number}`}>{f.title}</Link>
-            </h3>
+            </Title>
             <p className="story-deck" {...textDir(f.question, locale)}>
               {excerpt(f.question, 200)}
             </p>

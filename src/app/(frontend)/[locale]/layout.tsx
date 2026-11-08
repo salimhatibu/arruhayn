@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { notFound } from 'next/navigation'
 import type { ReactNode } from 'react'
 
@@ -9,6 +9,9 @@ import { LiveBanner } from '@/components/site/LiveBanner'
 import { Motion } from '@/components/site/Motion'
 import { fontVariables } from '@/fonts'
 import { dir, isLocale, LOCALES, t } from '@/i18n/dictionary'
+
+// The phone's browser bar matches the dark masthead.
+export const viewport: Viewport = { themeColor: '#24130f', colorScheme: 'light' }
 
 // Every page reads from the database, so nothing is pre-rendered at build time.
 export const dynamic = 'force-dynamic'

@@ -124,7 +124,7 @@ export default async function FatwasPage({ params, searchParams }: Props) {
               {d.search.none} <Link href={`/${locale}/ask`}>{d.ask.title}</Link>
             </p>
           ) : (
-            <FatwaList fatwas={fatwas} locale={locale} />
+            <FatwaList fatwas={fatwas} locale={locale} level="h2" />
           )}
           {issues.length ? (
             <section className="paper-section">

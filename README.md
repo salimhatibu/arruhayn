@@ -12,21 +12,67 @@ and Next.js, and hosted entirely on Cloudflare Workers.
 
 See [docs/SETUP.md](docs/SETUP.md) for the dashboard steps, deploying, and operations.
 
-## Local development
+## Running it on your computer
 
-Requires Node 24.22+ (see `.node-version`) and pnpm.
+You need Node 24.22 or newer (see `.node-version`) and pnpm. Check with `node -v`. If it shows an
+older version, install Node 24 with your version manager (for example `nvm install 24`), or put a
+downloaded Node 24 first on your `PATH`:
 
 ```bash
-pnpm install
-cp .env.example .env          # set PAYLOAD_SECRET and DEV_STAFF_EMAIL
-pnpm payload migrate          # create the local database
-SEED_SAMPLES=1 pnpm seed you@example.com "Your Name"
+export PATH=$HOME/.local/share/node-v24.22.2-linux-x64/bin:$PATH
+```
+
+### First time only
+
+1. Install the packages:
+
+   ```bash
+   pnpm install
+   ```
+
+2. Create your settings file, then open `.env` and fill in `PAYLOAD_SECRET` (any long random
+   string, for example from `openssl rand -hex 32`) and `DEV_STAFF_EMAIL` (your email):
+
+   ```bash
+   cp .env.example .env
+   ```
+
+3. Create the local database:
+
+   ```bash
+   pnpm payload migrate
+   ```
+
+4. Load the topics, glossary, and guides, and make yourself an admin:
+
+   ```bash
+   pnpm seed you@example.com "Your Name"
+   ```
+
+   Add `SEED_SAMPLES=1` in front to also create clearly marked sample newsletters, news, and a
+   class for trying the site out. Never use it on production.
+
+5. Import the marriage fatwas from Q&A Benefits (takes a minute or two):
+
+   ```bash
+   pnpm import:qab
+   ```
+
+### Every time
+
+```bash
 pnpm dev
 ```
 
-Open http://localhost:3000. Locally you are signed in to `/admin` as `DEV_STAFF_EMAIL`, standing
-in for Cloudflare Access. `SEED_SAMPLES=1` adds clearly marked sample content; never use it on
-production.
+Then open:
+
+- http://localhost:3000 for the public site (English at `/en`, Arabic at `/ar`)
+- http://localhost:3000/admin for the admin. Locally you are signed in as `DEV_STAFF_EMAIL`,
+  standing in for Cloudflare Access.
+
+Stop it with `Ctrl+C`. The local database lives in `.wrangler/` and is separate from production,
+so nothing you do with `pnpm dev` changes the live site. (`pnpm preview` is different: it uses the
+production database. Only use it when you mean to.)
 
 ## Layout
 

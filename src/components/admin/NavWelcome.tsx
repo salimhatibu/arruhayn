@@ -12,7 +12,6 @@ export function NavWelcome({ user }: ServerProps) {
           الرُّحَين
         </span>
         <span className="nav-brand-title">Staff desk</span>
-        <span className="nav-brand-sub">Arruhayn · fatwas, papers, classes</span>
       </Link>
       {user ? (
         <div className="nav-welcome">

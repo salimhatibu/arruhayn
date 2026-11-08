@@ -128,13 +128,6 @@ a {
   font-weight: 700;
   font-size: 1.15rem;
 }
-.nav-brand-sub {
-  font-family: var(--desk-mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--desk-dim);
-}
 
 .nav-welcome {
   display: flex;
@@ -275,9 +268,13 @@ a.nav__link[aria-current='page'] {
     flex: 1;
     display: grid;
     place-items: center;
-    height: 48px;
+    height: 52px;
     color: var(--desk-dim);
     transition: color 0.2s, background-color 0.2s;
+    svg {
+      width: 22px;
+      height: 22px;
+    }
     &:hover {
       color: var(--desk-gold);
       background: rgb(243 220 199 / 0.05);
@@ -289,11 +286,15 @@ a.nav__link[aria-current='page'] {
   padding: 0 var(--gutter-h, 20px);
   border-top: 1px solid var(--desk-line);
   justify-content: center;
-  a {
+  a, button {
     color: var(--desk-dim);
-    height: 44px;
+    height: 52px;
     display: grid;
     place-items: center;
+    svg {
+      width: 22px;
+      height: 22px;
+    }
     &:hover {
       color: var(--desk-rust);
     }
@@ -344,6 +345,16 @@ a.nav__link[aria-current='page'] {
 .gravatar-account {
   border-radius: 50%;
   box-shadow: 0 0 0 2px var(--color-base-150);
+  width: 34px !important;
+  height: 34px !important;
+}
+.app-header .localizer-button,
+.app-header .account__button {
+  font-size: 0.92rem;
+}
+.app-header .account__button svg {
+  width: 20px;
+  height: 20px;
 }
 
 /* ───── Headings, buttons, tables ───── */
@@ -862,6 +873,11 @@ select,
   color: var(--color-base-600);
   font-size: 1rem;
   line-height: 1.6;
+}
+
+// Hide Payload's default "Create new" no-results button when the header already has one.
+.collection-list__no-results .list-create-new-doc {
+  display: none;
 }
 
 // Create button: a filled, labelled action.

@@ -189,7 +189,21 @@ main { min-height: 60vh; }
 main > .wrap:first-child, main > article.wrap:first-child { padding-block: 3.5rem 5rem; }
 
 /* Hero */
-.hero { position: relative; overflow: hidden; padding: calc(var(--header-h) + clamp(4rem, 10vw, 7.5rem)) 0 clamp(4rem, 9vw, 7rem); isolation: isolate; }
+.hero {
+  position: relative; overflow: hidden; isolation: isolate;
+  min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; justify-content: center;
+  padding: calc(var(--header-h) + clamp(2rem, 6vh, 4rem)) 0 clamp(5rem, 12vh, 7rem);
+}
+.hero-inner { width: 100%; }
+.scroll-cue {
+  position: absolute; left: 50%; bottom: 34px; transform: translateX(-50%); z-index: 3;
+  display: grid; justify-items: center; gap: 0.5rem; color: rgb(243 220 199 / 0.6); text-decoration: none;
+  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.24em; text-transform: uppercase;
+}
+.scroll-cue:hover { color: #fff; }
+.scroll-cue span { width: 1px; height: 42px; background: linear-gradient(to bottom, rgb(243 220 199 / 0.7), transparent); animation: cue 2.2s ease-in-out infinite; transform-origin: top; }
+@keyframes cue { 0% { transform: scaleY(0); opacity: 0; } 40% { transform: scaleY(1); opacity: 1; } 100% { transform: scaleY(1) translateY(20px); opacity: 0; } }
+@media (max-height: 640px) { .scroll-cue { display: none; } }
 .hero {
   background:
     radial-gradient(70% 90% at 85% 60%, rgb(107 31 51 / 0.45), transparent 70%),

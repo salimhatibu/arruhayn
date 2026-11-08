@@ -269,9 +269,13 @@ export default async function Home({ params }: { params: Promise<{ locale: Local
             </Link>
           </div>
         </div>
+        <a className="scroll-cue" href="#front-page">
+          {d.paper.scroll}
+          <span aria-hidden="true" />
+        </a>
       </section>
 
-      <div className="paper">
+      <div className="paper" id="front-page">
         <div className="wrap">
           <div className="edition-bar">
             <span>

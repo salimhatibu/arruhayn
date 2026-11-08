@@ -75,6 +75,8 @@ export default buildConfig({
   admin: {
     user: Users.slug,
     theme: 'light',
+    // Browser extensions change attributes on <html> before React loads; don't warn about that.
+    suppressHydrationWarning: true,
     meta: {
       titleSuffix: ' · Arruhayn staff',
       icons: [{ rel: 'icon', url: '/favicon.ico' }],

@@ -14,7 +14,7 @@ export function Logo() {
 export function Icon() {
   return (
     <span className="admin-icon" lang="ar">
-      ر
+      الرُّحَين
     </span>
   )
 }

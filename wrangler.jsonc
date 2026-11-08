@@ -1,0 +1,75 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // worker.ts wraps the OpenNext build and blocks staff routes on the public Worker.
+  "main": "worker.ts",
+  "name": "arruhayn-dev",
+  "compatibility_date": "2025-08-15",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+  },
+  "observability": { "enabled": true },
+
+  // Top level is local development (`pnpm dev`). It uses a local copy of the dev database.
+  "vars": {
+    "SITE_MODE": "admin",
+    "PUBLIC_URL": "http://localhost:3000",
+    "ADMIN_URL": "http://localhost:3000",
+    "TURNSTILE_SITE_KEY": "1x00000000000000000000AA",
+    "RTK_HOST_PRESET": "webinar_presenter",
+    "RTK_VIEWER_PRESET": "webinar_viewer",
+  },
+  "d1_databases": [
+    {
+      "binding": "D1",
+      "database_id": "4b56852b-4191-4dfc-bba6-1b58646aa9a3",
+      "database_name": "arruhayn-db-dev",
+    },
+  ],
+  "r2_buckets": [{ "binding": "R2", "bucket_name": "arruhayn-media" }],
+
+  // Bindings are not inherited by environments, so each one repeats them.
+  "env": {
+    "public": {
+      "name": "arruhayn",
+      "vars": {
+        "SITE_MODE": "public",
+        "PUBLIC_URL": "https://arruhayn.salimhatibu786.workers.dev",
+        "ADMIN_URL": "https://arruhayn-admin.salimhatibu786.workers.dev",
+        "TURNSTILE_SITE_KEY": "1x00000000000000000000AA",
+        "RTK_HOST_PRESET": "webinar_presenter",
+        "RTK_VIEWER_PRESET": "webinar_viewer",
+      },
+      "d1_databases": [
+        {
+          "binding": "D1",
+          "database_id": "15f60a03-cfe3-40ee-8e8c-0a57c49c4546",
+          "database_name": "arruhayn-db",
+          "remote": true,
+        },
+      ],
+      "r2_buckets": [{ "binding": "R2", "bucket_name": "arruhayn-media" }],
+    },
+    "admin": {
+      "name": "arruhayn-admin",
+      "vars": {
+        "SITE_MODE": "admin",
+        "PUBLIC_URL": "https://arruhayn.salimhatibu786.workers.dev",
+        "ADMIN_URL": "https://arruhayn-admin.salimhatibu786.workers.dev",
+        "TURNSTILE_SITE_KEY": "1x00000000000000000000AA",
+        "RTK_HOST_PRESET": "webinar_presenter",
+        "RTK_VIEWER_PRESET": "webinar_viewer",
+      },
+      "d1_databases": [
+        {
+          "binding": "D1",
+          "database_id": "15f60a03-cfe3-40ee-8e8c-0a57c49c4546",
+          "database_name": "arruhayn-db",
+          "remote": true,
+        },
+      ],
+      "r2_buckets": [{ "binding": "R2", "bucket_name": "arruhayn-media" }],
+    },
+  },
+}

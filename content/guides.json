@@ -1,0 +1,61 @@
+[
+  {
+    "slug": "questions-before-nikah",
+    "type": "article",
+    "title": { "en": "Questions to ask before nikah", "ar": "أسئلة قبل النكاح" },
+    "summary": {
+      "en": "Topics to discuss with a prospective spouse and their family before agreeing to marry.",
+      "ar": "موضوعات يحسن الحديث فيها مع الخاطب وأهله قبل الموافقة على الزواج."
+    },
+    "steps": [
+      { "title": { "en": "Religion and practice", "ar": "الدين والالتزام" } },
+      { "title": { "en": "Seeking knowledge", "ar": "طلب العلم" } },
+      { "title": { "en": "Where you will live", "ar": "مكان السكنى" } },
+      { "title": { "en": "Work, study, and finances", "ar": "العمل والدراسة والمال" } },
+      { "title": { "en": "Family and in-laws", "ar": "الأهل والأصهار" } },
+      { "title": { "en": "Children and their upbringing", "ar": "الأولاد وتربيتهم" } },
+      { "title": { "en": "Health", "ar": "الصحة" } },
+      { "title": { "en": "Expectations of each other", "ar": "ما يتوقعه كل منكما من الآخر" } }
+    ]
+  },
+  {
+    "slug": "nikah-checklist",
+    "type": "checklist",
+    "title": { "en": "Nikah checklist", "ar": "قائمة النكاح" },
+    "summary": {
+      "en": "The steps to complete before and on the day of the nikah.",
+      "ar": "الخطوات التي تُنجز قبل يوم العقد وفيه."
+    },
+    "steps": [
+      { "title": { "en": "Istikharah prayer made", "ar": "صلاة الاستخارة" } },
+      { "title": { "en": "Wali identified and agreed", "ar": "تحديد الولي وموافقته" } },
+      { "title": { "en": "Bride's consent confirmed", "ar": "التأكد من رضا المرأة" } },
+      { "title": { "en": "Mahr agreed", "ar": "الاتفاق على المهر" } },
+      { "title": { "en": "Any conditions written down", "ar": "كتابة الشروط إن وجدت" } },
+      { "title": { "en": "Two upright witnesses arranged", "ar": "ترتيب شاهدين عدلين" } },
+      { "title": { "en": "Person to conduct the nikah arranged", "ar": "ترتيب من يتولى العقد" } },
+      { "title": { "en": "Civil registration, where required", "ar": "التوثيق الرسمي حيث يلزم" } },
+      { "title": { "en": "Walimah planned", "ar": "الإعداد للوليمة" } },
+      { "title": { "en": "Housing ready", "ar": "تهيئة السكن" } }
+    ]
+  },
+  {
+    "slug": "spousal-rights-path",
+    "type": "path",
+    "title": { "en": "Reading path: rights of spouses", "ar": "مسار قراءة: الحقوق الزوجية" },
+    "summary": {
+      "en": "A step-by-step reading path through the rulings on what spouses owe each other.",
+      "ar": "مسار قراءة متدرج في أحكام الحقوق بين الزوجين."
+    },
+    "steps": [
+      { "title": { "en": "Why marriage has rights", "ar": "مكانة الحقوق في النكاح" } },
+      { "title": { "en": "The wife's right to mahr", "ar": "حق الزوجة في المهر" } },
+      { "title": { "en": "Maintenance and housing", "ar": "النفقة والسكنى" } },
+      { "title": { "en": "Kind treatment", "ar": "المعاشرة بالمعروف" } },
+      { "title": { "en": "The husband's rights", "ar": "حقوق الزوج" } },
+      { "title": { "en": "Justice between wives", "ar": "العدل بين الزوجات" } },
+      { "title": { "en": "When disputes arise", "ar": "عند وقوع الخلاف" } },
+      { "title": { "en": "Rights after separation", "ar": "الحقوق بعد الفرقة" } }
+    ]
+  }
+]

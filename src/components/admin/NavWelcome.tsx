@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import type { ServerProps } from 'payload'
 
 // The top of the admin sidebar: the wordmark, then who is signed in and their roles.
@@ -6,13 +7,13 @@ export function NavWelcome({ user }: ServerProps) {
   const roles = ((user as { roles?: string[] } | undefined)?.roles ?? []).join(' · ')
   return (
     <>
-      <a className="nav-brand" href="/admin">
+      <Link className="nav-brand" href="/admin">
         <span className="nav-brand-ar" lang="ar">
           الرُّحَين
         </span>
         <span className="nav-brand-title">Staff desk</span>
         <span className="nav-brand-sub">Arruhayn · fatwas, papers, classes</span>
-      </a>
+      </Link>
       {user ? (
         <div className="nav-welcome">
           <span className="nav-welcome-avatar" aria-hidden="true">

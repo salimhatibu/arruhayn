@@ -104,8 +104,8 @@ pnpm dev
 - Public site: http://localhost:3000 (`/en` and `/ar`)
 - Staff desk: http://localhost:3000/admin. While `DEV_STAFF_EMAIL` is set in `.env` you are signed
   in automatically as that person. To use the real sign-in screen instead, empty
-  `DEV_STAFF_EMAIL`, restart `pnpm dev`, and give yourself a local password (see below, without the
-  `CLOUDFLARE_ENV` and `NODE_ENV` parts).
+  `DEV_STAFF_EMAIL`, restart `pnpm dev`, and give yourself a local password with
+  `pnpm set-password you@example.com`.
 
 Stop it with `Ctrl+C`. The local database lives in `.wrangler/` and is separate from production,
 so nothing you do with `pnpm dev` changes the live site. (`pnpm preview` is different: it uses the
@@ -113,21 +113,20 @@ production database.)
 
 ## Staff passwords
 
-Passwords are set from the terminal, so they never appear in the command or in your shell
-history. These two commands work in both zsh and bash. The first waits for you to type the password
-(nothing shows as you type; at least 12 characters) and press Enter:
+Set or reset a staff password from the project folder:
 
 ```bash
-read -rs STAFF_PASSWORD
+CLOUDFLARE_ENV=admin NODE_ENV=production pnpm set-password you@example.com
 ```
 
-```bash
-STAFF_PASSWORD="$STAFF_PASSWORD" CLOUDFLARE_ENV=admin NODE_ENV=production pnpm set-password you@example.com; unset STAFF_PASSWORD
-```
+It asks for the password twice (at least 12 characters). Nothing shows as you type, and the
+password never appears in the command or your shell history. When it's done you'll see
+`Password set for you@example.com`. Leave out `CLOUDFLARE_ENV=admin NODE_ENV=production` to set a
+password in your local database instead.
 
-You'll see `Password set for you@example.com`. Use the same commands to reset a forgotten password
-or unlock an account. To add a staff member, an admin creates them under **Settings → Staff** in the
-staff desk (with a password, or set one with the commands above).
+Use the same command to reset a forgotten password or unlock an account. To add a staff member, an
+admin creates them under **Settings → Staff** in the staff desk (with a password, or set one with
+the command above).
 
 ## Content scripts
 

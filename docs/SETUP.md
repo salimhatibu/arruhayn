@@ -31,13 +31,11 @@ add it once the site has its own domain (see section 6).
    CLOUDFLARE_ENV=admin pnpm run deploy:database
    ```
 
-2. Give the first admin a password. The password is read from `STAFF_PASSWORD` so it never ends up
-   in your shell history. Use at least 12 characters:
+2. Give the first admin a password. The command asks for it twice without showing it (at least 12
+   characters), so it never ends up in your shell history:
 
    ```bash
-   read -rs STAFF_PASSWORD && export STAFF_PASSWORD
    CLOUDFLARE_ENV=admin NODE_ENV=production pnpm set-password you@example.com
-   unset STAFF_PASSWORD
    ```
 
    If the admin account doesn't exist yet, create it first with

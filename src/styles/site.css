@@ -213,6 +213,8 @@ main > .wrap:first-child, main > article.wrap:first-child { padding-block: 3.5re
 .scroll-cue span { width: 1px; height: 42px; background: linear-gradient(to bottom, rgb(243 220 199 / 0.7), transparent); animation: cue 2.2s ease-in-out infinite; transform-origin: top; }
 @keyframes cue { 0% { transform: scaleY(0); opacity: 0; } 40% { transform: scaleY(1); opacity: 1; } 100% { transform: scaleY(1) translateY(20px); opacity: 0; } }
 @media (max-height: 640px) { .scroll-cue { display: none; } }
+/* On phones the hero's content is taller, so leave room under it for the cue. */
+@media (max-width: 700px) { .hero { padding-bottom: 8.5rem; } .scroll-cue { bottom: 22px; } }
 .hero {
   background:
     radial-gradient(70% 90% at 85% 60%, rgb(107 31 51 / 0.45), transparent 70%),

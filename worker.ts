@@ -6,14 +6,23 @@
 import { default as handler } from './.open-next/worker.js'
 
 const STAFF_ROUTES = /^\/(admin|api|teach|svc\/staff)(\/|$)/
+const PUBLIC_PAGES = /^\/(en|ar)(\/|$)/
 
-type Env = CloudflareEnv & { SITE_MODE?: string; JOBS_SECRET?: string; ADMIN_URL?: string }
+type Env = CloudflareEnv & { SITE_MODE?: string; JOBS_SECRET?: string; ADMIN_URL?: string; PUBLIC_URL?: string }
 
 export default {
   async fetch(request, env, ctx) {
-    const { pathname } = new URL(request.url)
+    const url = new URL(request.url)
+    const { pathname } = url
     if (env.SITE_MODE === 'public' && STAFF_ROUTES.test(pathname)) {
       return new Response('Not found', { status: 404 })
+    }
+    // The admin Worker's address opens the staff desk; public pages live on the public Worker.
+    if (env.SITE_MODE === 'admin') {
+      if (pathname === '/') return Response.redirect(new URL('/admin', url), 302)
+      if (PUBLIC_PAGES.test(pathname) && env.PUBLIC_URL) {
+        return Response.redirect(new URL(pathname + url.search, env.PUBLIC_URL), 302)
+      }
     }
     return handler.fetch(request, env, ctx)
   },

@@ -1,14 +1,46 @@
 'use client'
 
+import Lenis from 'lenis'
+import 'lenis/dist/lenis.css'
 import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
 
-// Page-wide motion: fades sections in as they scroll into view, and tells the header whether the
-// page has scrolled (it condenses) and whether this is the home page (it sits over the hero).
-// Everything is visible without JavaScript and for people who prefer reduced motion.
+// Page-wide motion: smooth, eased scrolling (Lenis), sections that fade up as they scroll into view,
+// and telling the header whether the page has scrolled (it condenses) and whether this is the home
+// page (it sits over the hero). Everything still works without JavaScript, and people who prefer
+// reduced motion get the browser's own scrolling and no fades.
 
 export function Motion(): null {
   const pathname = usePathname()
+
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const lenis = new Lenis({ lerp: 0.085, smoothWheel: true, wheelMultiplier: 0.95 })
+    let frame = requestAnimationFrame(function raf(time) {
+      lenis.raf(time)
+      frame = requestAnimationFrame(raf)
+    })
+    // Pause while the phone menu is open, and jump smoothly to in-page links.
+    const menu = new MutationObserver(() =>
+      document.documentElement.hasAttribute('data-menu-open') ? lenis.stop() : lenis.start(),
+    )
+    menu.observe(document.documentElement, { attributes: true, attributeFilter: ['data-menu-open'] })
+    const onClick = (e: MouseEvent) => {
+      const link = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[href^="#"]')
+      const target = link && document.querySelector(link.getAttribute('href') ?? '')
+      if (target instanceof HTMLElement) {
+        e.preventDefault()
+        lenis.scrollTo(target, { offset: -88 })
+      }
+    }
+    document.addEventListener('click', onClick)
+    return () => {
+      cancelAnimationFrame(frame)
+      menu.disconnect()
+      document.removeEventListener('click', onClick)
+      lenis.destroy()
+    }
+  }, [])
 
   useEffect(() => {
     const header = document.getElementById('site-header')

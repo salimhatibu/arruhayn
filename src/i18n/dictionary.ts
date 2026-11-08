@@ -32,8 +32,8 @@ const en = {
     body: 'Answers from the people of knowledge on marriage, divorce, and family life, with newsletters and live classes.',
     searchPlaceholder: 'Search fatwas: mahr, wali, khul’…',
     searchButton: 'Search',
-    titleBefore: 'Knowledge of marriage,',
-    titleAccent: 'made clear.',
+    titleBefore: 'Your daily dose of',
+    titleAccent: 'Salafiyyah',
     exploreTopics: 'Explore topics',
   },
   home: {
@@ -293,8 +293,8 @@ const ar: Dictionary = {
     body: 'أجوبة أهل العلم في النكاح والطلاق وشؤون الأسرة، مع النشرات والدروس المباشرة.',
     searchPlaceholder: 'ابحث في الفتاوى: المهر، الولي، الخلع…',
     searchButton: 'بحث',
-    titleBefore: 'فقهُ النكاح،',
-    titleAccent: 'بوضوح.',
+    titleBefore: 'جرعتك اليومية من',
+    titleAccent: 'السلفية',
     exploreTopics: 'تصفح الموضوعات',
   },
   home: {

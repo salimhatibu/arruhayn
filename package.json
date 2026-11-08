@@ -22,7 +22,8 @@
     "reindex": "cross-env NODE_OPTIONS=--no-deprecation payload run scripts/reindex.ts",
     "deploy:all": "opennextjs-cloudflare build && wrangler deploy --env public && wrangler deploy --env admin",
     "preview": "opennextjs-cloudflare build && wrangler dev --env admin",
-    "import:qab": "cross-env NODE_OPTIONS=--no-deprecation payload run scripts/import-qandabenefits.ts"
+    "import:qab": "cross-env NODE_OPTIONS=--no-deprecation payload run scripts/import-qandabenefits.ts",
+    "set-password": "cross-env NODE_OPTIONS=--no-deprecation payload run scripts/set-password.ts"
   },
   "dependencies": {
     "@breezystack/lamejs": "^1.2.7",
@@ -38,6 +39,7 @@
     "dotenv": "16.4.7",
     "graphql": "^16.8.1",
     "jose": "^6.2.15",
+    "lenis": "1.1.20",
     "next": "16.3.3",
     "payload": "3.93.0",
     "react": "19.2.6",

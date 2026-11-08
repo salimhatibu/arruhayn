@@ -26,7 +26,7 @@ export function Header({ locale }: { locale: Locale }) {
           </span>
           <span className="wordmark-en">Arruhayn</span>
         </Link>
-        <nav className="site-nav" id="site-nav" aria-label={d.nav.menu}>
+        <nav className="site-nav" id="site-nav" aria-label={d.nav.menu} data-lenis-prevent>
           <NavLinks locale={locale} links={links} />
           <LanguageSwitch locale={locale} label={d.switchLanguage} className="lang-switch mobile-only" />
         </nav>

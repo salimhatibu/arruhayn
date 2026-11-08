@@ -1,9 +1,10 @@
 import { createRemoteJWKSet, jwtVerify } from 'jose'
 import type { AuthStrategy } from 'payload'
 
-// Staff sign in through Cloudflare Access in front of the admin Worker. Access adds a signed token
-// to every request; this strategy verifies it and finds the matching staff user by email.
-// There is no password login.
+// Optional sign-in through Cloudflare Access, for when Access sits in front of the admin domain.
+// Access adds a signed token to every request; this strategy verifies it and finds the matching
+// staff user by email. Without ACCESS_TEAM_DOMAIN and ACCESS_AUD it does nothing, and staff use
+// their email and password instead.
 
 let jwks: ReturnType<typeof createRemoteJWKSet> | undefined
 
@@ -30,7 +31,8 @@ export const cloudflareAccess: AuthStrategy = {
     const token = headers.get('cf-access-jwt-assertion')
     let email = token ? await emailFromAccessToken(token) : null
 
-    // Local development has no Access in front of it, so it signs in as DEV_STAFF_EMAIL.
+    // Local development can skip the login form by signing in as DEV_STAFF_EMAIL. Leave it empty in
+    // .env to use the login form locally.
     if (!email && process.env.NODE_ENV === 'development' && process.env.DEV_STAFF_EMAIL) {
       email = process.env.DEV_STAFF_EMAIL.toLowerCase()
     }

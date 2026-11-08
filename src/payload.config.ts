@@ -74,9 +74,10 @@ export default buildConfig({
   serverURL: process.env.SITE_MODE === 'admin' ? process.env.ADMIN_URL : process.env.PUBLIC_URL,
   admin: {
     user: Users.slug,
+    theme: 'light',
     meta: {
       titleSuffix: ' · Arruhayn staff',
-      icons: [{ rel: 'icon', type: 'image/png', url: '/brand/icon-192.png' }],
+      icons: [{ rel: 'icon', url: '/favicon.ico' }],
     },
     components: {
       beforeLogin: ['@/components/admin/StaffNotice#StaffNotice'],

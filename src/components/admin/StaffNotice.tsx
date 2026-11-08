@@ -1,13 +1,10 @@
-// Shown on the admin login screen. Staff never type a password: Cloudflare Access signs them in,
-// so reaching this screen means their email isn't set up as staff yet.
+// Shown above the admin login form.
 export function StaffNotice() {
   return (
-    <div style={{ maxWidth: 420, lineHeight: 1.6 }}>
-      <h2 style={{ marginBottom: 8 }}>Your email isn&apos;t set up as staff yet</h2>
-      <p>
-        You signed in through Cloudflare Access, but there&apos;s no staff account with that email. Ask an
-        admin to add you under Settings → Staff, then reload this page.
-      </p>
+    <div className="staff-notice">
+      <p className="staff-notice-kicker">Staff · الموظفون</p>
+      <h1>Sign in to Arruhayn</h1>
+      <p>Use the email and password an admin set up for you. After five wrong attempts the account locks for 15 minutes.</p>
     </div>
   )
 }

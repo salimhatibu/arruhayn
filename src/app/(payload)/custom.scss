@@ -1,0 +1,227 @@
+// The admin in the public site's look: newsprint paper, mahogany sidebar like the masthead,
+// Crimson Pro headings, IBM Plex for text, square-ish corners, and wine and rust accents.
+// These rules sit outside Payload's style layer, so they win over its defaults.
+
+:root {
+  // Warm greys from paper to espresso, replacing Payload's neutral scale.
+  --color-base-0: #fffdf8;
+  --color-base-50: #f8f4eb;
+  --color-base-100: #f1ebdf;
+  --color-base-150: #e7dfd0;
+  --color-base-200: #dcd2c0;
+  --color-base-250: #cfc3af;
+  --color-base-300: #c1b39e;
+  --color-base-350: #b2a28d;
+  --color-base-400: #a2917d;
+  --color-base-450: #92806e;
+  --color-base-500: #82705f;
+  --color-base-550: #726152;
+  --color-base-600: #635345;
+  --color-base-650: #554539;
+  --color-base-700: #47382f;
+  --color-base-750: #3b2d26;
+  --color-base-800: #30221d;
+  --color-base-850: #261915;
+  --color-base-900: #1d120f;
+  --color-base-950: #150c0a;
+  --color-base-1000: #0e0706;
+
+  // "Success" (published, saved) in the plant's sage green.
+  --color-success-50: #eef3ec;
+  --color-success-100: #dfe9dc;
+  --color-success-150: #cddcc8;
+  --color-success-200: #bacdb4;
+  --color-success-250: #a7bf9f;
+  --color-success-300: #93b08b;
+  --color-success-350: #80a177;
+  --color-success-400: #6e9165;
+  --color-success-450: #5f8157;
+  --color-success-500: #52724b;
+  --color-success-550: #466441;
+  --color-success-600: #3b5637;
+  --color-success-650: #31482e;
+  --color-success-700: #283b26;
+  --color-success-750: #202f1e;
+  --color-success-800: #182417;
+
+  --font-body: var(--font-plex), var(--font-plex-ar), system-ui, sans-serif;
+  --font-serif: var(--font-crimson), var(--font-amiri), Georgia, serif;
+  --style-radius-s: 2px;
+  --style-radius-m: 3px;
+  --style-radius-l: 4px;
+  --arr-wine: #6b1f33;
+  --arr-rust: #bb3e37;
+  --arr-night: #24130f;
+  --arr-cream: #f3dcc7;
+}
+
+html[data-theme='light'] body {
+  background: var(--color-base-50);
+}
+
+// Headings set like the public site.
+.view-title,
+.doc-header__title,
+.collection-list h1,
+.dashboard h1,
+.dashboard__label,
+.render-title {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+[dir='rtl'] :is(.view-title, .doc-header__title, .render-title) {
+  font-family: var(--font-amiri), serif;
+}
+
+// Primary buttons in mahogany, turning wine on hover; secondary buttons with a ruled edge.
+.btn--style-primary {
+  background-color: var(--arr-night);
+  color: var(--arr-cream);
+  &:hover,
+  &:focus-visible {
+    background-color: var(--arr-wine);
+    color: #fff;
+  }
+}
+.btn--style-secondary {
+  box-shadow: inset 0 0 0 1px var(--color-base-700);
+}
+
+a {
+  text-underline-offset: 3px;
+}
+::selection {
+  background: rgb(187 62 55 / 0.2);
+}
+
+// The sidebar as a dark masthead: the same warm scale, reversed.
+.nav {
+  --theme-elevation-0: var(--arr-night);
+  --theme-elevation-50: #2d1914;
+  --theme-elevation-100: #38201a;
+  --theme-elevation-150: #452821;
+  --theme-elevation-200: #55342b;
+  --theme-elevation-400: #8c7062;
+  --theme-elevation-500: #a68b7c;
+  --theme-elevation-800: #ead6c4;
+  --theme-elevation-900: var(--arr-cream);
+  --theme-elevation-1000: #fff6ec;
+  --theme-text: var(--arr-cream);
+  --theme-bg: var(--arr-night);
+  background: var(--arr-night);
+  color: var(--arr-cream);
+  a {
+    color: rgb(243 220 199 / 0.82);
+  }
+  a:hover,
+  a.active,
+  .nav__link.active {
+    color: #fff;
+  }
+}
+.nav__link-indicator {
+  background: #e8806f;
+}
+
+// Wordmark in the sidebar and on the login screen.
+.admin-wordmark {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  line-height: 1;
+  color: var(--arr-night);
+}
+.admin-wordmark-ar {
+  font-family: var(--font-amiri), serif;
+  font-weight: 700;
+  font-size: 3.2rem;
+  line-height: 1.15;
+}
+.admin-wordmark-en {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.admin-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  background: var(--arr-night);
+  color: var(--arr-cream);
+  font-family: var(--font-amiri), serif;
+  font-weight: 700;
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+// Login: newsprint with a double rule, like the public front page.
+.template-minimal {
+  background: var(--color-base-50);
+}
+.template-minimal__wrap {
+  border-top: 3px solid var(--arr-night);
+  box-shadow: inset 0 4px 0 -1px var(--color-base-50), inset 0 5px 0 0 var(--arr-night);
+  padding-top: 2rem;
+}
+.staff-notice {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  h1 {
+    font-family: var(--font-serif);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0.25rem 0 0.5rem;
+  }
+  p {
+    color: var(--theme-elevation-600);
+    line-height: 1.6;
+    margin: 0;
+  }
+}
+.staff-notice-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.7rem !important;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--arr-rust) !important;
+}
+
+// Cards and tables with ruled edges rather than soft shadows.
+.card,
+.dashboard__card-list .card {
+  border: 1px solid var(--theme-elevation-150);
+  box-shadow: none;
+  &:hover {
+    border-color: var(--arr-rust);
+  }
+}
+.table table th {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+// Group headings on the dashboard and section titles in forms.
+.dashboard :is(h1, h2, h3),
+.collection-list :is(h1, h2),
+.array-field__header-heading,
+.group-field__title {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.dashboard h2 {
+  border-bottom: 2px solid var(--arr-night);
+  padding-bottom: 0.35rem;
+}
+
+// A thin mahogany rule across the top of every admin page, like the public masthead.
+.template-default {
+  border-top: 3px solid var(--arr-night);
+}

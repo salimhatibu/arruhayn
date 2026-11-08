@@ -19,34 +19,33 @@ npx wrangler secret put NAME --env admin
 
 and again with `--env public` where the table says both.
 
-## 1. Protect the admin Worker with Cloudflare Access (required before inviting staff)
+## 1. Staff sign-in
 
-Until this is done nobody can sign in to the admin, so the staff side stays closed.
+Staff sign in at https://arruhayn-admin.salimhatibu786.workers.dev/admin with an email and password.
+After five wrong attempts an account locks for 15 minutes. Cloudflare Access is optional for now;
+add it once the site has its own domain (see section 6).
 
-1. Dashboard → **Zero Trust**. If asked, choose a team name (for example `arruhayn`) and the Free plan.
-2. Zero Trust → **Settings → Authentication**: make sure **One-time PIN** is enabled.
-3. Dashboard → **Workers & Pages → arruhayn-admin → Settings → Domains & Routes**. On the
-   `workers.dev` row, turn on **Cloudflare Access**. Do the same for **Preview URLs**.
-4. Zero Trust → **Access → Applications**: open the application that was just created.
-   - Create an Access group `arruhayn-staff` (Access → Access groups) with the staff emails.
-   - Set the application's policy to **Allow** → Include → Access group `arruhayn-staff`.
-   - Session duration: 24 hours.
-   - Copy the **Application Audience (AUD) Tag**.
-5. Set the secrets on the admin Worker:
-
-   | Secret | Value |
-   | --- | --- |
-   | `ACCESS_TEAM_DOMAIN` | `<team>.cloudflareaccess.com` |
-   | `ACCESS_AUD` | the AUD tag |
-
-6. Create the first admin (an email that's in the Access group):
+1. Apply the database change that adds passwords (once):
 
    ```bash
-   CLOUDFLARE_ENV=admin NODE_ENV=production pnpm seed you@example.com "Your Name"
+   CLOUDFLARE_ENV=admin pnpm run deploy:database
    ```
 
-   This also loads the 12 topics, 25 glossary terms, and 3 guides. Add other staff from the
-   admin under **Settings → Staff**, and add their emails to the `arruhayn-staff` Access group.
+2. Give the first admin a password. The password is read from `STAFF_PASSWORD` so it never ends up
+   in your shell history. Use at least 12 characters:
+
+   ```bash
+   read -rs STAFF_PASSWORD && export STAFF_PASSWORD
+   CLOUDFLARE_ENV=admin NODE_ENV=production pnpm set-password you@example.com
+   unset STAFF_PASSWORD
+   ```
+
+   If the admin account doesn't exist yet, create it first with
+   `CLOUDFLARE_ENV=admin NODE_ENV=production pnpm seed you@example.com "Your Name"`.
+
+3. Add other staff from the admin under **Settings → Staff**, then set their password the same way
+   (or open their record and use **Change password**). Password-reset emails start working once
+   email sending is set up with the domain; until then, reset passwords with `pnpm set-password`.
 
 ## 2. Live classes (RealtimeKit)
 
@@ -114,8 +113,11 @@ Repeat for `arruhayn-admin` with `--env admin`.
 1. Add the domain to Cloudflare (or buy it through Cloudflare Registrar).
 2. **arruhayn → Settings → Domains & Routes → Add custom domain**: `yourdomain.com`.
    **arruhayn-admin**: `admin.yourdomain.com`.
-3. Zero Trust → Access → add a **self-hosted application** for `admin.yourdomain.com` with the same
-   `arruhayn-staff` policy. Update `ACCESS_AUD`, then turn off the admin Worker's `workers.dev` route.
+3. Optional, for a second layer in front of the password: Zero Trust → Access → add a
+   **self-hosted application** for `admin.yourdomain.com` with an `arruhayn-staff` group of staff
+   emails. Set `ACCESS_TEAM_DOMAIN` (`<team>.cloudflareaccess.com`) and `ACCESS_AUD` (the
+   application's AUD tag) as secrets on the admin Worker; staff are then signed in automatically
+   by Access. Turn off the admin Worker's `workers.dev` route.
 4. Update `PUBLIC_URL` and `ADMIN_URL` in `wrangler.jsonc`, the Turnstile hostnames, and
    `docs/r2-cors.json`. Redeploy.
 5. Email: set up Cloudflare Email Service for the domain (SPF, DKIM, DMARC). Check that its terms

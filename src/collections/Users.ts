@@ -12,8 +12,13 @@ export const Users: CollectionConfig = {
     hidden: hiddenUnless('admin'),
     group: 'Settings',
   },
+  // Staff sign in with email and password. Cloudflare Access can also sign them in once it is set
+  // up on the admin domain (it does nothing until ACCESS_TEAM_DOMAIN and ACCESS_AUD are set).
   auth: {
-    disableLocalStrategy: true,
+    tokenExpiration: 60 * 60 * 12,
+    maxLoginAttempts: 5,
+    lockTime: 15 * 60 * 1000,
+    cookies: { sameSite: 'Lax', secure: process.env.NODE_ENV === 'production' },
     strategies: [cloudflareAccess],
   },
   access: {
@@ -31,7 +36,7 @@ export const Users: CollectionConfig = {
       required: true,
       unique: true,
       index: true,
-      admin: { description: 'Must match the email this person uses to sign in through Cloudflare Access.' },
+      admin: { description: 'The email this person signs in with.' },
       hooks: { beforeChange: [({ value }) => (typeof value === 'string' ? value.toLowerCase() : value)] },
     },
     { name: 'name', type: 'text', required: true },

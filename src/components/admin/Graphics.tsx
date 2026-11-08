@@ -1,9 +1,20 @@
-/* eslint-disable @next/next/no-img-element */
+// The admin uses the same text wordmark as the public site.
 
 export function Logo() {
-  return <img src="/brand/logo.webp" alt="الرُّحَين" width={180} height={180} style={{ borderRadius: 16 }} />
+  return (
+    <span className="admin-wordmark">
+      <span className="admin-wordmark-ar" lang="ar">
+        الرُّحَين
+      </span>
+      <span className="admin-wordmark-en">Arruhayn · Staff</span>
+    </span>
+  )
 }
 
 export function Icon() {
-  return <img src="/brand/icon-192.png" alt="الرُّحَين" width={28} height={28} style={{ borderRadius: 6 }} />
+  return (
+    <span className="admin-icon" lang="ar">
+      ر
+    </span>
+  )
 }

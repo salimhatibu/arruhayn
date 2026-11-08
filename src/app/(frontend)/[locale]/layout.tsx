@@ -35,7 +35,8 @@ export default async function LocaleLayout({ children, params }: Props) {
   if (!isLocale(locale)) notFound()
   const d = t(locale)
   return (
-    <html lang={locale} dir={dir(locale)} className={fontVariables}>
+    // Browser extensions and the menu (data-menu-open) change attributes on <html> after load.
+    <html lang={locale} dir={dir(locale)} className={fontVariables} suppressHydrationWarning>
       <body>
         <a className="skip" href="#content">
           {d.skipToContent}

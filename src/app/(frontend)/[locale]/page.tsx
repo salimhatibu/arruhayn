@@ -2,6 +2,7 @@ import Link from 'next/link'
 import type { ReactNode } from 'react'
 
 import { Dateline, fatwaTopics, StoryActions } from '@/components/site/FatwaList'
+import { HeroArt } from '@/components/site/HeroArt'
 import { Icon, type IconName } from '@/components/site/Icon'
 import { SubscribeForm } from '@/components/site/SubscribeForm'
 import { Tabs } from '@/components/site/Tabs'
@@ -238,7 +239,7 @@ export default async function Home({ params }: { params: Promise<{ locale: Local
   return (
     <>
       <section className="hero">
-        <div className="hero-glow" aria-hidden="true" />
+        <HeroArt />
         <div className="wrap hero-inner">
           <h1>
             {d.hero.titleBefore}

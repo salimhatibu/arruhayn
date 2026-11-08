@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import type { ReactNode } from 'react'
 
 import '@/styles/site.css'
@@ -13,16 +14,16 @@ export default function StaffLayout({ children }: { children: ReactNode }) {
       <body>
         <header className="site-header" data-home="false" data-scrolled="false">
           <div className="wrap header-row">
-            <a className="wordmark" href="/admin">
+            <Link className="wordmark" href="/admin">
               <span className="wordmark-ar" lang="ar">
                 الرُّحَين
               </span>
               <span className="wordmark-en">Staff · Live room</span>
-            </a>
+            </Link>
             <div className="header-actions">
-              <a className="lang-switch" href="/admin/collections/classes">
+              <Link className="lang-switch" href="/admin/collections/classes">
                 Back to classes
-              </a>
+              </Link>
             </div>
           </div>
         </header>

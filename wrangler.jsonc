@@ -37,7 +37,8 @@
         "SITE_MODE": "public",
         "PUBLIC_URL": "https://arruhayn.salimhatibu786.workers.dev",
         "ADMIN_URL": "https://arruhayn-admin.salimhatibu786.workers.dev",
-        "TURNSTILE_SITE_KEY": "1x00000000000000000000AA",
+        // Turnstile widget "arruhayn"; its secret is the TURNSTILE_SECRET Worker secret.
+        "TURNSTILE_SITE_KEY": "0x4AAAAAAF4QeSLwQpZHd4oR",
         "RTK_HOST_PRESET": "webinar_presenter",
         "RTK_VIEWER_PRESET": "webinar_viewer",
       },

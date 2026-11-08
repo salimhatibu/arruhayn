@@ -146,6 +146,7 @@ export default buildConfig({
     fallback: true,
   },
   editor: lexicalEditor(),
+  auth: { passwordHashIterations: 100_000 },
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

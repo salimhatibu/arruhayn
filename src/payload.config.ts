@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import { sqliteD1Adapter } from '@payloadcms/db-d1-sqlite'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
-import { buildConfig } from 'payload'
+import { buildConfig, type CollectionConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import { CloudflareContext, getCloudflareContext } from '@opennextjs/cloudflare'
 import { GetPlatformProxyOptions } from 'wrangler'
@@ -23,6 +23,7 @@ import { Scholars } from './collections/Scholars'
 import { Subscribers } from './collections/Subscribers'
 import { Topics } from './collections/Topics'
 import { Users } from './collections/Users'
+import { LIST_DESCRIPTIONS } from './components/admin/listMeta'
 import { SiteSettings } from './globals/SiteSettings'
 
 const filename = fileURLToPath(import.meta.url)
@@ -64,6 +65,28 @@ const cloudflareLogger = {
   fatal: createLog('fatal', console.error),
   silent: () => {},
 } as any // Use PayloadLogger type when it's exported
+
+// Every collection's list page gets the same furniture: an icon and description above the title,
+// status tabs with counts and a CSV export above the table, a status pill in the status column,
+// and a choice of how many rows to show.
+const withListUI = (c: CollectionConfig): CollectionConfig => ({
+  ...c,
+  admin: {
+    ...c.admin,
+    description: c.admin?.description ?? LIST_DESCRIPTIONS[c.slug],
+    pagination: { defaultLimit: 25, limits: [10, 25, 50, 100, 200] },
+    components: {
+      ...c.admin?.components,
+      beforeList: ['@/components/admin/ListIntro#ListIntro'],
+      beforeListTable: ['@/components/admin/StatusTabs#StatusTabs'],
+    },
+  },
+  fields: c.fields.map((f) =>
+    'name' in f && f.name === 'status' && f.type === 'select'
+      ? { ...f, admin: { ...f.admin, components: { ...f.admin?.components, Cell: '@/components/admin/StatusCell#StatusCell' } } }
+      : f,
+  ),
+})
 
 const cloudflare =
   isCLI || !isProduction
@@ -112,7 +135,7 @@ export default buildConfig({
     Subscribers,
     Media,
     Users,
-  ],
+  ].map(withListUI),
   globals: [SiteSettings],
   localization: {
     locales: [

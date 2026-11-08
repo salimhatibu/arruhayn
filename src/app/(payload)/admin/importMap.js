@@ -21,6 +21,9 @@ import { StrikethroughFeatureClient as StrikethroughFeatureClient_e70f5e05f09f93
 import { UnderlineFeatureClient as UnderlineFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
+import { StatusCell as StatusCell_ff32efc137541c6552ed42594a323755 } from '@/components/admin/StatusCell'
+import { ListIntro as ListIntro_7d9d64421c51ce40e821d6cec2d06f3d } from '@/components/admin/ListIntro'
+import { StatusTabs as StatusTabs_5ee9cef6b97956eae958afe567e6630e } from '@/components/admin/StatusTabs'
 import { LiveRoomLink as LiveRoomLink_f5f3aec6ca572f0da4674aa795fcc3ce } from '@/components/admin/LiveRoomLink'
 import { AudioUpload as AudioUpload_277d6fd41e8d1febac87b7e86938523f } from '@/components/admin/AudioUpload'
 import { Icon as Icon_e60daefd9ca0ae7722c67ce9a39e1dd6 } from '@/components/admin/Graphics'
@@ -58,6 +61,9 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#UnderlineFeatureClient": UnderlineFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#BoldFeatureClient": BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
+  "@/components/admin/StatusCell#StatusCell": StatusCell_ff32efc137541c6552ed42594a323755,
+  "@/components/admin/ListIntro#ListIntro": ListIntro_7d9d64421c51ce40e821d6cec2d06f3d,
+  "@/components/admin/StatusTabs#StatusTabs": StatusTabs_5ee9cef6b97956eae958afe567e6630e,
   "@/components/admin/LiveRoomLink#LiveRoomLink": LiveRoomLink_f5f3aec6ca572f0da4674aa795fcc3ce,
   "@/components/admin/AudioUpload#AudioUpload": AudioUpload_277d6fd41e8d1febac87b7e86938523f,
   "@/components/admin/Graphics#Icon": Icon_e60daefd9ca0ae7722c67ce9a39e1dd6,

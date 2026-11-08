@@ -89,7 +89,7 @@ function Story({
 
 const TILE_ICONS: IconName[] = [
   'book',
-  'rings',
+  'heart',
   'scales',
   'scroll',
   'headphones',

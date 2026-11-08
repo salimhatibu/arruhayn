@@ -19,6 +19,7 @@ const PATHS = {
   menu: 'M4 7h16M4 12h16M4 17h16',
   close: 'M6 6l12 12M18 6 6 18',
   send: 'M21 3 10 14M21 3l-7 18-4-7-7-4 18-7Z',
+  heart: 'M12 20s-7.5-4.6-9.2-9.4C1.6 7.3 3.7 4 7 4c2 0 3.3 1 5 3 1.7-2 3-3 5-3 3.3 0 5.4 3.3 4.2 6.6C19.5 15.4 12 20 12 20Z',
 } as const
 
 export type IconName = keyof typeof PATHS

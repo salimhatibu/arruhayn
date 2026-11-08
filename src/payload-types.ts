@@ -148,6 +148,8 @@ export interface UserAuthOperations {
   };
 }
 /**
+ * Questions and answers on marriage. A fatwa needs at least one topic before it can be published.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "fatwas".
  */
@@ -201,6 +203,8 @@ export interface Fatwa {
   createdAt: string;
 }
 /**
+ * The marriage topics that fatwas, recordings, and newsletters are filed under.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "topics".
  */
@@ -219,6 +223,8 @@ export interface Topic {
   createdAt: string;
 }
 /**
+ * The people of knowledge whose answers appear on the site. Name and short bio only.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "scholars".
  */
@@ -230,6 +236,8 @@ export interface Scholar {
   createdAt: string;
 }
 /**
+ * Staff accounts and their roles: admin, reviewer, or teacher.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
@@ -319,6 +327,8 @@ export interface Newsletter {
   createdAt: string;
 }
 /**
+ * Images and files used on the site.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
@@ -337,6 +347,8 @@ export interface Media {
   height?: number | null;
 }
 /**
+ * Short announcements for the news page.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "news".
  */
@@ -365,6 +377,8 @@ export interface News {
   createdAt: string;
 }
 /**
+ * Step-by-step marriage guides, including the nikah checklist.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "guides".
  */
@@ -420,6 +434,8 @@ export interface Guide {
   createdAt: string;
 }
 /**
+ * Terms explained in pop-ups wherever they appear in fatwas and newsletters.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "glossary".
  */
@@ -516,6 +532,8 @@ export interface HijriMonth {
   createdAt: string;
 }
 /**
+ * People signed up for the newsletter.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "subscribers".
  */

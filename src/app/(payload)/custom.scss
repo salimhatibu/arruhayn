@@ -786,3 +786,426 @@ a.nav__link[aria-current='page'] {
   color: var(--desk-wine);
   white-space: nowrap;
 }
+
+/* ───── Legibility: larger text across the admin ───── */
+
+html[data-theme] {
+  font-size: 15px;
+}
+body,
+.field-label,
+.rich-text-lexical,
+.table table td,
+input,
+textarea,
+select,
+.react-select .rs__control {
+  font-size: 1rem;
+}
+.field-label {
+  font-weight: 600;
+  margin-bottom: 0.45rem;
+}
+.field-description {
+  font-size: 0.9rem;
+}
+.btn {
+  font-size: 0.95rem;
+}
+.nav__link-label {
+  font-size: 1.08rem;
+}
+
+/* ───── List pages ───── */
+
+.collection-list > .gutter {
+  display: flex;
+  flex-direction: column;
+}
+.collection-list .list-header { order: 1; }
+.collection-list .status-tabs { order: 3; }
+.collection-list .list-controls { order: 4; }
+.collection-list .collection-list__tables { order: 5; }
+.collection-list .page-controls { order: 6; }
+.collection-list .collection-list__no-results { order: 5; }
+
+// Title with an icon tile.
+.list-header {
+  padding-top: 1.5rem;
+}
+.list-header__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9rem;
+  font-family: var(--font-serif);
+  font-size: 2.4rem !important;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  &::before {
+    content: '';
+    flex: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background-color: color-mix(in srgb, var(--desk-gold) 24%, var(--color-base-0));
+    background-size: 26px;
+    background-position: center;
+    background-repeat: no-repeat;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--desk-gold) 50%, transparent), 0 10px 22px -14px rgb(23 13 10 / 0.6);
+  }
+}
+.list-header .view-description,
+.list-header__description {
+  margin: 0.35rem 0 1.4rem;
+  padding-inline-start: calc(48px + 0.9rem);
+  max-width: 78ch;
+  color: var(--color-base-600);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+// Create button: a filled, labelled action.
+.list-create-new-doc__create-new-button {
+  background: var(--desk-night-2) !important;
+  color: var(--desk-cream) !important;
+  border-radius: 8px !important;
+  padding: 0.55rem 1.1rem !important;
+  font-weight: 600;
+  box-shadow: 0 8px 20px -12px rgb(23 13 10 / 0.7);
+  .btn__label::before {
+    content: '+ ';
+  }
+  &:hover {
+    background: var(--desk-wine) !important;
+    color: #fff !important;
+  }
+}
+
+// One card for tabs, search, table, and pagination.
+.status-tabs,
+.list-controls,
+.collection-list__tables,
+.page-controls {
+  background: var(--color-base-0);
+  border: 1px solid var(--color-base-150);
+  border-block: 0;
+  padding-inline: 1.4rem;
+}
+.status-tabs {
+  border-top: 1px solid var(--color-base-150);
+  border-radius: 14px 14px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-top: 0.4rem;
+  border-bottom: 1px solid var(--color-base-150);
+}
+.status-tabs__list {
+  display: flex;
+  gap: 0.25rem;
+  overflow-x: auto;
+}
+.status-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.95rem 0.9rem;
+  color: var(--color-base-600);
+  text-decoration: none;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color 0.2s;
+  &:hover {
+    color: var(--color-base-900);
+  }
+  &[aria-current='page'] {
+    color: var(--color-base-900);
+    font-weight: 700;
+    &::after {
+      content: '';
+      position: absolute;
+      inset-inline: 0.6rem;
+      bottom: -1px;
+      height: 2px;
+      border-radius: 2px;
+      background: var(--desk-wine);
+    }
+  }
+}
+.status-tab__count {
+  font-family: var(--desk-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--color-base-500);
+  background: var(--color-base-100);
+  border-radius: 999px;
+  padding: 0.05rem 0.5rem;
+}
+.status-tab[aria-current='page'] .status-tab__count {
+  background: var(--desk-wine);
+  color: #fff;
+}
+.status-tabs__export {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--color-base-200);
+  border-radius: 8px;
+  color: var(--color-base-800);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.92rem;
+  transition: border-color 0.2s, background-color 0.2s;
+  &:hover {
+    border-color: var(--color-base-500);
+    background: var(--color-base-50);
+  }
+}
+.list-controls {
+  padding-top: 1rem;
+  padding-bottom: 0.6rem;
+  margin: 0 !important;
+}
+.search-bar {
+  background: var(--color-base-50) !important;
+  border: 1px solid var(--color-base-150);
+  border-radius: 10px !important;
+  min-height: 48px;
+}
+.search-filter__input {
+  font-size: 1rem !important;
+}
+.collection-list__tables {
+  padding-bottom: 0.4rem;
+}
+.page-controls {
+  border-bottom: 1px solid var(--color-base-150);
+  border-radius: 0 0 14px 14px;
+  padding-block: 0.9rem;
+  margin: 0 0 3rem !important;
+  box-shadow: 0 24px 40px -36px rgb(23 13 10 / 0.6);
+}
+
+// Table rows: roomier and easier to scan.
+.table table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.table table th {
+  padding-block: 0.9rem !important;
+  border-bottom: 1px solid var(--color-base-150);
+}
+.table table th,
+.table table th * {
+  font-family: var(--desk-mono) !important;
+  font-size: 0.74rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-base-600);
+}
+.table table td {
+  padding-block: 1rem !important;
+  border-bottom: 1px solid var(--color-base-100);
+  vertical-align: middle;
+}
+.table table tbody tr {
+  background: transparent !important;
+  transition: background-color 0.15s;
+}
+.table table tbody tr:hover td {
+  background: color-mix(in srgb, var(--desk-gold) 9%, var(--color-base-0));
+}
+.table table tbody tr:has(input:checked) td {
+  background: color-mix(in srgb, var(--desk-wine) 7%, var(--color-base-0));
+}
+.table .cell-title a,
+.table td:nth-child(2) a,
+.table td a {
+  font-weight: 500;
+  color: var(--color-base-900);
+}
+.checkbox-input__icon {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+// Selection bar: appears when rows are ticked, with the bulk actions.
+.list-header__actions:has(.list-selection) {
+  flex-basis: 100%;
+}
+.list-selection {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.9rem;
+  width: 100%;
+  margin-top: 0.75rem;
+  padding: 0.7rem 1rem;
+  border-radius: 12px;
+  background: var(--desk-night-2);
+  color: var(--desk-cream);
+  box-shadow: 0 14px 30px -18px rgb(23 13 10 / 0.8);
+  animation: desk-pop 0.25s ease-out;
+  > span:first-child {
+    font-weight: 700;
+  }
+  > span:not(:first-child) {
+    opacity: 0.35;
+  }
+  .btn {
+    margin: 0 !important;
+    padding: 0.4rem 0.85rem !important;
+    border-radius: 7px;
+    color: var(--desk-cream) !important;
+    background: rgb(243 228 212 / 0.08) !important;
+    box-shadow: none !important;
+    &:hover {
+      background: rgb(243 228 212 / 0.18) !important;
+    }
+  }
+  .delete-documents__toggle {
+    background: var(--desk-rust) !important;
+    color: #fff !important;
+    &:hover {
+      background: #d0483f !important;
+    }
+  }
+}
+.list-selection__actions {
+  display: flex;
+  gap: 0.5rem;
+}
+@keyframes desk-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+// Status pills.
+.status-pill {
+  --s: var(--color-base-500);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--s) 75%, #000);
+  background: color-mix(in srgb, var(--s) 14%, var(--color-base-0));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--s) 35%, transparent);
+  white-space: nowrap;
+}
+.status-pill__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--s);
+}
+.status-pill--published,
+.status-pill--active,
+.status-pill--answered,
+.status-pill--confirmed {
+  --s: #5f8157;
+}
+.status-pill--draft,
+.status-pill--pending,
+.status-pill--new,
+.status-pill--drafting {
+  --s: #c08a2e;
+}
+.status-pill--scheduled {
+  --s: #7a5aa8;
+}
+.status-pill--live {
+  --s: var(--desk-rust);
+  .status-pill__dot {
+    animation: desk-live 1.4s infinite;
+  }
+}
+@keyframes desk-live {
+  50% {
+    opacity: 0.3;
+  }
+}
+.status-pill--ended,
+.status-pill--cancelled,
+.status-pill--unsubscribed,
+.status-pill--declined {
+  --s: #8a7d74;
+}
+
+// Per-page and pagination.
+.paginator__page {
+  border-radius: 8px !important;
+  min-width: 34px;
+  height: 34px;
+  font-size: 0.95rem;
+}
+.paginator__page--is-current {
+  background: var(--desk-night-2) !important;
+  color: var(--desk-cream) !important;
+}
+.per-page__base-button {
+  font-size: 0.95rem;
+  padding: 0.35rem 0.8rem;
+  border: 1px solid var(--color-base-200);
+  border-radius: 8px;
+}
+.page-controls__page-info {
+  font-family: var(--desk-mono);
+  font-size: 0.85rem;
+  color: var(--color-base-600);
+}
+
+// Close the gaps Payload leaves between the list's parts, so they read as one card.
+.collection-list .status-tabs,
+.collection-list .list-controls,
+.collection-list .collection-list__tables,
+.collection-list .table-wrap,
+.collection-list .table {
+  margin-block: 0 !important;
+}
+.collection-list .page-controls {
+  margin-top: 0 !important;
+}
+.collection-list__tables {
+  padding-bottom: 0.8rem !important;
+}
+
+// Per-page menu.
+.per-page .popup__content,
+.per-page .popup__scroll-container {
+  padding: 0.35rem !important;
+  border-radius: 10px;
+}
+.per-page button,
+.per-page .popup-button-list__button {
+  display: flex !important;
+  width: 100%;
+  justify-content: flex-start;
+  padding: 0.4rem 0.9rem !important;
+  border-radius: 7px;
+  font-size: 0.95rem;
+  color: var(--color-base-800) !important;
+  &:hover {
+    background: var(--color-base-100) !important;
+  }
+}
+
+// The breadcrumb's home link holds the Arabic wordmark, which is wider than an icon.
+.step-nav__home,
+.step-nav__home > span {
+  width: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+.step-nav__home .admin-icon {
+  overflow: visible;
+}

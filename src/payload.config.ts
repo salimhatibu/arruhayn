@@ -8,9 +8,22 @@ import { CloudflareContext, getCloudflareContext } from '@opennextjs/cloudflare'
 import { GetPlatformProxyOptions } from 'wrangler'
 import { r2Storage } from '@payloadcms/storage-r2'
 
-import { Users } from './collections/Users'
+import { Classes } from './collections/Classes'
+import { Events } from './collections/Events'
+import { Fatwas } from './collections/Fatwas'
+import { Glossary } from './collections/Glossary'
+import { Guides } from './collections/Guides'
+import { HijriMonths } from './collections/HijriMonths'
 import { Media } from './collections/Media'
-import migrations from './db/migrations'
+import { News } from './collections/News'
+import { Newsletters } from './collections/Newsletters'
+import { Questions } from './collections/Questions'
+import { Recordings } from './collections/Recordings'
+import { Scholars } from './collections/Scholars'
+import { Subscribers } from './collections/Subscribers'
+import { Topics } from './collections/Topics'
+import { Users } from './collections/Users'
+import { SiteSettings } from './globals/SiteSettings'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -58,13 +71,50 @@ const cloudflare =
     : await getCloudflareContext({ async: true })
 
 export default buildConfig({
+  serverURL: process.env.SITE_MODE === 'admin' ? process.env.ADMIN_URL : process.env.PUBLIC_URL,
   admin: {
     user: Users.slug,
+    meta: {
+      titleSuffix: ' · Arruhayn staff',
+      icons: [{ rel: 'icon', type: 'image/png', url: '/brand/icon-192.png' }],
+    },
+    components: {
+      beforeLogin: ['@/components/admin/StaffNotice#StaffNotice'],
+      graphics: {
+        Logo: '@/components/admin/Graphics#Logo',
+        Icon: '@/components/admin/Graphics#Icon',
+      },
+    },
     importMap: {
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media],
+  collections: [
+    Fatwas,
+    Topics,
+    Scholars,
+    Questions,
+    Newsletters,
+    News,
+    Guides,
+    Glossary,
+    Classes,
+    Recordings,
+    Events,
+    HijriMonths,
+    Subscribers,
+    Media,
+    Users,
+  ],
+  globals: [SiteSettings],
+  localization: {
+    locales: [
+      { label: 'English', code: 'en' },
+      { label: 'العربية', code: 'ar', rtl: true },
+    ],
+    defaultLocale: 'en',
+    fallback: true,
+  },
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
@@ -72,11 +122,15 @@ export default buildConfig({
   },
   db: sqliteD1Adapter({
     binding: cloudflare.env.D1,
+    // Schema changes always go through migrations. Dev-mode push would try to drop the FTS5
+    // search tables, which Payload doesn't know about.
+    push: false,
   }),
   logger: isProduction ? cloudflareLogger : undefined,
   plugins: [
     r2Storage({
       bucket: cloudflare.env.R2,
+      // Images are stored by filename; class recordings live under recordings/.
       collections: { media: true },
     }),
   ],

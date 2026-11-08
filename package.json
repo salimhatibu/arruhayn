@@ -22,22 +22,28 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "test": "pnpm run test:int && pnpm run test:e2e",
     "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" playwright test --config=playwright.config.ts",
-    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
+    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts",
+    "seed": "cross-env NODE_OPTIONS=--no-deprecation payload run scripts/seed.ts",
+    "reindex": "cross-env NODE_OPTIONS=--no-deprecation payload run scripts/reindex.ts"
   },
   "dependencies": {
+    "@breezystack/lamejs": "^1.2.7",
+    "@cloudflare/realtimekit": "^2.0.4",
     "@opennextjs/cloudflare": "1.20.1",
+    "@payloadcms/db-d1-sqlite": "3.93.0",
     "@payloadcms/next": "3.93.0",
     "@payloadcms/richtext-lexical": "3.93.0",
     "@payloadcms/storage-r2": "3.93.0",
     "@payloadcms/ui": "3.93.0",
+    "aws4fetch": "^1.0.20",
     "cross-env": "^7.0.3",
     "dotenv": "16.4.7",
     "graphql": "^16.8.1",
+    "jose": "^6.2.15",
     "next": "16.3.3",
     "payload": "3.93.0",
     "react": "19.2.6",
-    "react-dom": "19.2.6",
-    "@payloadcms/db-d1-sqlite": "3.93.0"
+    "react-dom": "19.2.6"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

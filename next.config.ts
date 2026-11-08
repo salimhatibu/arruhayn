@@ -1,5 +1,9 @@
 import { withPayload } from '@payloadcms/next/withPayload'
 import type { NextConfig } from 'next'
+import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare'
+
+// Gives `next dev` access to the Cloudflare bindings and vars in wrangler.jsonc.
+initOpenNextCloudflareForDev()
 
 const nextConfig: NextConfig = {
   images: {

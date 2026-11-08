@@ -98,7 +98,11 @@ export function fastingDays(start: Date, end: Date, overrides: MonthStart[] = []
     if (h.day >= 13 && h.day <= 15) add('white', 'sunnah', T.white)
 
     const weekday = date.getUTCDay()
-    if (weekday === 1 || weekday === 4) add('mon-thu', 'sunnah', T.monThu)
+    if (weekday === 1 || weekday === 4) {
+      add('mon-thu', 'sunnah', T.monThu)
+      // The weekly fast doesn't depend on the moon.
+      out[out.length - 1].expected = false
+    }
   })
   return out
 }

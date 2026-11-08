@@ -67,8 +67,21 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    users: User;
+    fatwas: Fatwa;
+    topics: Topic;
+    scholars: Scholar;
+    questions: Question;
+    newsletters: Newsletter;
+    news: News;
+    guides: Guide;
+    glossary: Glossary;
+    classes: Class;
+    recordings: Recording;
+    events: Event;
+    'hijri-months': HijriMonth;
+    subscribers: Subscriber;
     media: Media;
+    users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -76,8 +89,21 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
+    fatwas: FatwasSelect<false> | FatwasSelect<true>;
+    topics: TopicsSelect<false> | TopicsSelect<true>;
+    scholars: ScholarsSelect<false> | ScholarsSelect<true>;
+    questions: QuestionsSelect<false> | QuestionsSelect<true>;
+    newsletters: NewslettersSelect<false> | NewslettersSelect<true>;
+    news: NewsSelect<false> | NewsSelect<true>;
+    guides: GuidesSelect<false> | GuidesSelect<true>;
+    glossary: GlossarySelect<false> | GlossarySelect<true>;
+    classes: ClassesSelect<false> | ClassesSelect<true>;
+    recordings: RecordingsSelect<false> | RecordingsSelect<true>;
+    events: EventsSelect<false> | EventsSelect<true>;
+    'hijri-months': HijriMonthsSelect<false> | HijriMonthsSelect<true>;
+    subscribers: SubscribersSelect<false> | SubscribersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -86,10 +112,14 @@ export interface Config {
   db: {
     defaultIDType: number;
   };
-  fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
-  locale: null;
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'ar') | ('en' | 'ar')[];
+  globals: {
+    'site-settings': SiteSetting;
+  };
+  globalsSelect: {
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+  };
+  locale: 'en' | 'ar';
   widgets: {
     collections: CollectionsWidget;
   };
@@ -119,29 +149,154 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fatwas".
+ */
+export interface Fatwa {
+  id: number;
+  /**
+   * Filled in automatically when left empty.
+   */
+  number?: number | null;
+  title: string;
+  question: string;
+  answer?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  topics?: (number | Topic)[] | null;
+  scholar?: (number | null) | Scholar;
+  sources?:
+    | {
+        reference: string;
+        url?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Link to the original fatwa, if it was published elsewhere.
+   */
+  originalUrl?: string | null;
+  related?: (number | Fatwa)[] | null;
+  status: 'draft' | 'published';
+  publishedAt?: string | null;
+  reviewedBy?: (number | null) | User;
+  fromQuestion?: (number | null) | Question;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "topics".
+ */
+export interface Topic {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string | null;
+  order?: number | null;
+  /**
+   * Other words that should find this topic, for example "dowry" for mahr.
+   */
+  searchWords?: string[] | null;
+  related?: (number | Topic)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "scholars".
+ */
+export interface Scholar {
+  id: number;
+  name: string;
+  bio?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: number;
+  /**
+   * Must match the email this person uses to sign in through Cloudflare Access.
+   */
+  email: string;
+  name: string;
+  roles: ('admin' | 'reviewer' | 'teacher')[];
   updatedAt: string;
   createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  resetPasswordRequestedAt?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
   collection: 'users';
+}
+/**
+ * Tick "Create a draft fatwa" and save to start an answer from a question.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "questions".
+ */
+export interface Question {
+  id: number;
+  question: string;
+  language: 'en' | 'ar';
+  /**
+   * Optional. Only used to tell the person their question was answered.
+   */
+  email?: string | null;
+  status: 'new' | 'drafting' | 'answered' | 'declined';
+  createDraft?: boolean | null;
+  linkedFatwa?: (number | null) | Fatwa;
+  answeredAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Scheduled issues are published on the site automatically. Email sending switches on with your own domain.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "newsletters".
+ */
+export interface Newsletter {
+  id: number;
+  issue: number;
+  title: string;
+  summary?: string | null;
+  body?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  cover?: (number | null) | Media;
+  topics?: (number | Topic)[] | null;
+  status: 'draft' | 'scheduled' | 'published';
+  /**
+   * For scheduled issues: when it goes live.
+   */
+  publishAt?: string | null;
+  emailedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -160,6 +315,200 @@ export interface Media {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "news".
+ */
+export interface News {
+  id: number;
+  title: string;
+  summary?: string | null;
+  body?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  date: string;
+  status: 'draft' | 'published';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "guides".
+ */
+export interface Guide {
+  id: number;
+  title: string;
+  slug: string;
+  type: 'article' | 'checklist' | 'path';
+  summary?: string | null;
+  intro?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  steps?:
+    | {
+        title: string;
+        body?: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        /**
+         * Optional: link this step to a fatwa.
+         */
+        fatwa?: (number | null) | Fatwa;
+        id?: string | null;
+      }[]
+    | null;
+  status: 'draft' | 'published';
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "glossary".
+ */
+export interface Glossary {
+  id: number;
+  term: string;
+  /**
+   * Other spellings that should show this definition, for example "walee".
+   */
+  spellings?: string[] | null;
+  definition: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * To teach a class, open it and choose "Open the live room".
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "classes".
+ */
+export interface Class {
+  id: number;
+  title: string;
+  description?: string | null;
+  teacher: number | User;
+  startsAt: string;
+  durationMinutes?: number | null;
+  status: 'scheduled' | 'live' | 'ended' | 'cancelled';
+  meetingId?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Upload a recording from your computer. Recordings only appear in the library once published.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "recordings".
+ */
+export interface Recording {
+  id: number;
+  title: string;
+  description?: string | null;
+  teacher: number | User;
+  class?: (number | null) | Class;
+  topics?: (number | Topic)[] | null;
+  language?: ('ar' | 'en' | 'both') | null;
+  /**
+   * Set by the upload above.
+   */
+  fileKey: string;
+  mimeType?: string | null;
+  sizeBytes?: number | null;
+  durationSeconds?: number | null;
+  status: 'draft' | 'published';
+  inFeed?: boolean | null;
+  publishedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Classes, Islamic dates, and Sunnah fasts are added to the calendar automatically.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events".
+ */
+export interface Event {
+  id: number;
+  title: string;
+  description?: string | null;
+  dateType: 'gregorian' | 'hijri';
+  gregorianDate?: string | null;
+  hijriMonth?: ('1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | '11' | '12') | null;
+  hijriDay?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Add a month here once the moon is sighted, if it starts on a different day from Umm al-Qura.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hijri-months".
+ */
+export interface HijriMonth {
+  id: number;
+  year: number;
+  month: '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | '11' | '12';
+  /**
+   * The Gregorian date of the 1st of the month.
+   */
+  start: string;
+  label?: string | null;
+  note?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subscribers".
+ */
+export interface Subscriber {
+  id: number;
+  email: string;
+  language?: ('en' | 'ar') | null;
+  status: 'pending' | 'confirmed' | 'unsubscribed';
+  confirmToken?: string | null;
+  unsubscribeToken?: string | null;
+  confirmedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -186,12 +535,64 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
-        relationTo: 'users';
-        value: number | User;
+        relationTo: 'fatwas';
+        value: number | Fatwa;
+      } | null)
+    | ({
+        relationTo: 'topics';
+        value: number | Topic;
+      } | null)
+    | ({
+        relationTo: 'scholars';
+        value: number | Scholar;
+      } | null)
+    | ({
+        relationTo: 'questions';
+        value: number | Question;
+      } | null)
+    | ({
+        relationTo: 'newsletters';
+        value: number | Newsletter;
+      } | null)
+    | ({
+        relationTo: 'news';
+        value: number | News;
+      } | null)
+    | ({
+        relationTo: 'guides';
+        value: number | Guide;
+      } | null)
+    | ({
+        relationTo: 'glossary';
+        value: number | Glossary;
+      } | null)
+    | ({
+        relationTo: 'classes';
+        value: number | Class;
+      } | null)
+    | ({
+        relationTo: 'recordings';
+        value: number | Recording;
+      } | null)
+    | ({
+        relationTo: 'events';
+        value: number | Event;
+      } | null)
+    | ({
+        relationTo: 'hijri-months';
+        value: number | HijriMonth;
+      } | null)
+    | ({
+        relationTo: 'subscribers';
+        value: number | Subscriber;
       } | null)
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -237,26 +638,210 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_select".
+ * via the `definition` "fatwas_select".
  */
-export interface UsersSelect<T extends boolean = true> {
-  updatedAt?: T;
-  createdAt?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  resetPasswordRequestedAt?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
-  sessions?:
+export interface FatwasSelect<T extends boolean = true> {
+  number?: T;
+  title?: T;
+  question?: T;
+  answer?: T;
+  topics?: T;
+  scholar?: T;
+  sources?:
     | T
     | {
+        reference?: T;
+        url?: T;
         id?: T;
-        createdAt?: T;
-        expiresAt?: T;
       };
+  originalUrl?: T;
+  related?: T;
+  status?: T;
+  publishedAt?: T;
+  reviewedBy?: T;
+  fromQuestion?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "topics_select".
+ */
+export interface TopicsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  description?: T;
+  order?: T;
+  searchWords?: T;
+  related?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "scholars_select".
+ */
+export interface ScholarsSelect<T extends boolean = true> {
+  name?: T;
+  bio?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "questions_select".
+ */
+export interface QuestionsSelect<T extends boolean = true> {
+  question?: T;
+  language?: T;
+  email?: T;
+  status?: T;
+  createDraft?: T;
+  linkedFatwa?: T;
+  answeredAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "newsletters_select".
+ */
+export interface NewslettersSelect<T extends boolean = true> {
+  issue?: T;
+  title?: T;
+  summary?: T;
+  body?: T;
+  cover?: T;
+  topics?: T;
+  status?: T;
+  publishAt?: T;
+  emailedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "news_select".
+ */
+export interface NewsSelect<T extends boolean = true> {
+  title?: T;
+  summary?: T;
+  body?: T;
+  date?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "guides_select".
+ */
+export interface GuidesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  type?: T;
+  summary?: T;
+  intro?: T;
+  steps?:
+    | T
+    | {
+        title?: T;
+        body?: T;
+        fatwa?: T;
+        id?: T;
+      };
+  status?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "glossary_select".
+ */
+export interface GlossarySelect<T extends boolean = true> {
+  term?: T;
+  spellings?: T;
+  definition?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "classes_select".
+ */
+export interface ClassesSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  teacher?: T;
+  startsAt?: T;
+  durationMinutes?: T;
+  status?: T;
+  meetingId?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "recordings_select".
+ */
+export interface RecordingsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  teacher?: T;
+  class?: T;
+  topics?: T;
+  language?: T;
+  fileKey?: T;
+  mimeType?: T;
+  sizeBytes?: T;
+  durationSeconds?: T;
+  status?: T;
+  inFeed?: T;
+  publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events_select".
+ */
+export interface EventsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  dateType?: T;
+  gregorianDate?: T;
+  hijriMonth?: T;
+  hijriDay?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hijri-months_select".
+ */
+export interface HijriMonthsSelect<T extends boolean = true> {
+  year?: T;
+  month?: T;
+  start?: T;
+  label?: T;
+  note?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subscribers_select".
+ */
+export interface SubscribersSelect<T extends boolean = true> {
+  email?: T;
+  language?: T;
+  status?: T;
+  confirmToken?: T;
+  unsubscribeToken?: T;
+  confirmedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -274,6 +859,17 @@ export interface MediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  email?: T;
+  name?: T;
+  roles?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -314,6 +910,65 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: number;
+  /**
+   * Leave off until your own domain and email sending are set up.
+   */
+  emailSending?: boolean | null;
+  contactEmail?: string | null;
+  disclaimer?: string | null;
+  about?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  privacy?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  emailSending?: T;
+  contactEmail?: T;
+  disclaimer?: T;
+  about?: T;
+  privacy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

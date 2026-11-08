@@ -6,6 +6,7 @@ import { cache } from 'react'
 import { BookmarkButton } from '@/components/site/BookmarkButton'
 import { Checklist } from '@/components/site/Checklist'
 import { RichText } from '@/components/site/RichText'
+import { ShareButton } from '@/components/site/ShareButton'
 import { t, type Locale } from '@/i18n/dictionary'
 import { getGlossary, getPayloadClient } from '@/lib/payload'
 
@@ -54,6 +55,7 @@ export default async function GuidePage({ params, searchParams }: Props) {
       <div className="byline">
         {guide.summary ? <span>{guide.summary}</span> : null}
         <BookmarkButton type="g" id={guide.slug} title={guide.title} href={`/guides/${guide.slug}`} labels={{ save: d.saved.save, saved: d.saved.savedLabel }} />
+        <ShareButton title={guide.title} path={`/${locale}/guides/${guide.slug}`} locale={locale} />
       </div>
       <RichText value={guide.intro} glossary={glossary} />
     </>

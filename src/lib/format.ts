@@ -35,3 +35,9 @@ export function formatDuration(seconds: number | null | undefined): string {
 }
 
 export const href = (locale: Locale, path = '') => `/${locale}${path}`
+
+// Content that has no Arabic translation yet comes back in English on Arabic pages. Marking it
+// as English left-to-right text keeps its punctuation and typography right.
+export function textDir(text: string | null | undefined, locale: Locale): { dir: 'ltr' | 'auto'; lang?: 'en' } {
+  return locale === 'ar' && text && !/[؀-ۿ]/.test(text) ? { dir: 'ltr', lang: 'en' } : { dir: 'auto' }
+}

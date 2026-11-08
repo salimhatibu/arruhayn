@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import { LiveRoom } from '@/components/live/LiveRoom'
+import { ShareButton } from '@/components/site/ShareButton'
 import { t, type Locale } from '@/i18n/dictionary'
 import { formatDateTime } from '@/lib/format'
 import { getPayloadClient } from '@/lib/payload'
@@ -33,6 +34,7 @@ export default async function ClassPage({ params }: Props) {
       <div className="byline">
         {teacher ? <span>{teacher.name}</span> : null}
         <span>{formatDateTime(cls.startsAt, locale)}</span>
+        <ShareButton title={cls.title} path={`/${locale}/live/${cls.id}`} locale={locale} />
       </div>
       {cls.description ? <p className="reading">{cls.description}</p> : null}
       {cls.status === 'live' ? (

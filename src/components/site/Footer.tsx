@@ -58,9 +58,6 @@ export async function Footer({ locale }: { locale: Locale }) {
           <Link href={`/${locale}/newsletters`} aria-label={d.nav.newsletters}>
             <Icon name="mail" size={20} />
           </Link>
-          <Link href={`/${locale}/search`} aria-label={d.nav.search}>
-            <Icon name="search" size={20} />
-          </Link>
         </div>
         <div className="footer-base">
           <span>

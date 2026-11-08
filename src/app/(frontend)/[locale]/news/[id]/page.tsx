@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { cache } from 'react'
 
 import { RichText } from '@/components/site/RichText'
+import { ShareButton } from '@/components/site/ShareButton'
 import { t, type Locale } from '@/i18n/dictionary'
 import { formatDate } from '@/lib/format'
 import { getGlossary, getPayloadClient } from '@/lib/payload'
@@ -39,7 +40,10 @@ export default async function NewsItemPage({ params }: Props) {
         ← {d.news.title}
       </Link>
       <h1 style={{ marginTop: '1rem' }}>{item.title}</h1>
-      <div className="byline">{formatDate(item.date, locale)}</div>
+      <div className="byline">
+        <span>{formatDate(item.date, locale)}</span>
+        <ShareButton title={item.title} path={`/${locale}/news/${item.id}`} locale={locale} />
+      </div>
       {item.summary ? <p className="prose">{item.summary}</p> : null}
       <RichText value={item.body} glossary={await getGlossary(locale)} />
     </article>

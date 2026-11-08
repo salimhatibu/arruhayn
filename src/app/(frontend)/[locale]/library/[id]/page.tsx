@@ -5,6 +5,7 @@ import { cache } from 'react'
 
 import { AudioPlayer } from '@/components/site/AudioPlayer'
 import { BookmarkButton } from '@/components/site/BookmarkButton'
+import { ShareButton } from '@/components/site/ShareButton'
 import { t, type Locale } from '@/i18n/dictionary'
 import { formatDate, formatDuration } from '@/lib/format'
 import { getPayloadClient } from '@/lib/payload'
@@ -50,6 +51,7 @@ export default async function RecordingPage({ params }: Props) {
           </span>
         ) : null}
         <BookmarkButton type="r" id={r.id} title={r.title} href={`/library/${r.id}`} labels={{ save: d.saved.save, saved: d.saved.savedLabel }} />
+        <ShareButton title={r.title} path={`/${locale}/library/${r.id}`} locale={locale} />
       </div>
       <AudioPlayer
         id={r.id}

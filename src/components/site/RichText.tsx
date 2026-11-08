@@ -41,10 +41,14 @@ export function RichText({
   value,
   glossary,
   className = 'prose',
+  dir = 'auto',
+  lang,
 }: {
   value: LexicalValue | unknown
   glossary?: Glossary[]
   className?: string
+  dir?: 'ltr' | 'rtl' | 'auto'
+  lang?: string
 }) {
   const root = (value as LexicalValue)?.root as Node | undefined
   if (!root?.children?.length) return null
@@ -123,5 +127,9 @@ export function RichText({
     }
   }
 
-  return <div className={className}>{root.children.map((c, i) => render(c, String(i)))}</div>
+  return (
+    <div className={className} dir={dir} lang={lang}>
+      {root.children.map((c, i) => render(c, String(i)))}
+    </div>
+  )
 }

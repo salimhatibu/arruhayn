@@ -1,4 +1,4 @@
-import { IBM_Plex_Sans, IBM_Plex_Sans_Arabic } from 'next/font/google'
+import { IBM_Plex_Mono, IBM_Plex_Sans, IBM_Plex_Sans_Arabic } from 'next/font/google'
 import localFont from 'next/font/local'
 
 // Amiri, Amiri Quran, and Crimson Pro are the OFL-licensed files from the brand fonts folder,
@@ -45,4 +45,12 @@ export const plexArabic = IBM_Plex_Sans_Arabic({
   preload: false,
 })
 
-export const fontVariables = [amiri, amiriQuran, crimson, plex, plexArabic].map((f) => f.variable).join(' ')
+// Datelines and bylines, set like newspaper type.
+export const plexMono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-mono',
+  display: 'swap',
+})
+
+export const fontVariables = [amiri, amiriQuran, crimson, plex, plexArabic, plexMono].map((f) => f.variable).join(' ')

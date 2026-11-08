@@ -18,6 +18,7 @@ const PATHS = {
   bookmark: 'M6 4h12v16l-6-4-6 4V4Z',
   menu: 'M4 7h16M4 12h16M4 17h16',
   close: 'M6 6l12 12M18 6 6 18',
+  send: 'M21 3 10 14M21 3l-7 18-4-7-7-4 18-7Z',
 } as const
 
 export type IconName = keyof typeof PATHS

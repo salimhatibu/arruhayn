@@ -6,11 +6,10 @@ import { cache } from 'react'
 import { BookmarkButton } from '@/components/site/BookmarkButton'
 import { FatwaList } from '@/components/site/FatwaList'
 import { RichText } from '@/components/site/RichText'
-import { FatwaCover } from '@/components/site/FatwaCover'
-import { Icon } from '@/components/site/Icon'
+import { ShareButton } from '@/components/site/ShareButton'
 import type { Fatwa, Topic } from '@/payload-types'
 import { t, type Locale } from '@/i18n/dictionary'
-import { formatDate, formatNumber } from '@/lib/format'
+import { formatDate, formatNumber, textDir } from '@/lib/format'
 import { excerpt, lexicalToText } from '@/lib/lexical'
 import { getGlossary, getPayloadClient } from '@/lib/payload'
 
@@ -101,6 +100,9 @@ export default async function FatwaPage({ params }: Props) {
       />
       <div className="article-grid">
         <div>
+          <p className="section-kicker">
+            {d.fatwaNumber} {formatNumber(fatwa.number ?? 0, locale)}
+          </p>
           <nav className="crumbs" aria-label={d.nav.fatwas}>
             <Link href={`/${locale}/fatwas`}>{d.nav.fatwas}</Link>
             {(fatwa.topics ?? []).map((tp) =>
@@ -111,11 +113,8 @@ export default async function FatwaPage({ params }: Props) {
               ) : null,
             )}
           </nav>
-          <h1>{fatwa.title}</h1>
+          <h1 {...textDir(fatwa.title, locale)}>{fatwa.title}</h1>
           <div className="byline">
-            <span>
-              {d.fatwaNumber} {formatNumber(fatwa.number ?? 0, locale)}
-            </span>
             {fatwa.publishedAt ? (
               <span>
                 {d.published} {formatDate(fatwa.publishedAt, locale)}
@@ -144,13 +143,14 @@ export default async function FatwaPage({ params }: Props) {
               href={`/fatwas/${fatwa.number}`}
               labels={{ save: d.saved.save, saved: d.saved.savedLabel }}
             />
+            <ShareButton title={fatwa.title} path={`/${locale}/fatwas/${fatwa.number}`} locale={locale} />
           </div>
 
           <section className="question-box" aria-labelledby="q-label">
             <div className="label" id="q-label">
               {d.question}
             </div>
-            <div className="prose">
+            <div className="prose" {...textDir(fatwa.question, locale)}>
               {fatwa.question.split(/\n{2,}/).map((p, i) => (
                 <p key={i}>{p}</p>
               ))}
@@ -161,7 +161,12 @@ export default async function FatwaPage({ params }: Props) {
             <div className="label" id="a-label">
               {d.answer}
             </div>
-            <RichText value={fatwa.answer} glossary={glossary} />
+            <RichText
+              value={fatwa.answer}
+              glossary={glossary}
+              className="prose dropcap-first"
+              {...textDir(lexicalToText(fatwa.answer as never), locale)}
+            />
           </section>
 
           {fatwa.sources?.length || fatwa.originalUrl ? (
@@ -184,32 +189,23 @@ export default async function FatwaPage({ params }: Props) {
           ) : null}
 
           {related.length ? (
-            <section>
-              <h2>{d.relatedFatwas}</h2>
-              <FatwaList fatwas={related} locale={locale} covers={false} />
+            <section className="paper-section">
+              <h2 className="rule-head">{d.relatedFatwas}</h2>
+              <FatwaList fatwas={related} locale={locale} />
             </section>
           ) : null}
 
           <p className="disclaimer-note">{d.ask.disclaimer}</p>
         </div>
         <aside className="article-aside">
-          <Link
-            className="aside-cover"
-            href={`/${locale}/fatwas?topic=${mainTopic?.slug ?? ''}`}
-            tabIndex={-1}
-            aria-hidden="true"
-          >
-            <FatwaCover slug={mainTopic?.slug} number={fatwa.number} />
-          </Link>
           {sameTopic.length ? (
             <div>
-              <h2 className="aside-title">
+              <h2 className="rule-head">
                 {d.moreOn} {mainTopic?.name}
               </h2>
-              <FatwaList fatwas={sameTopic} locale={locale} covers={false} />
-              <Link className="more-link" href={`/${locale}/fatwas?topic=${mainTopic?.slug}`}>
+              <FatwaList fatwas={sameTopic} locale={locale} />
+              <Link className="read-link" href={`/${locale}/fatwas?topic=${mainTopic?.slug}`}>
                 {d.viewAll}
-                <Icon name="arrow" size={16} />
               </Link>
             </div>
           ) : null}

@@ -1,16 +1,17 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 
-import { FatwaCover } from '@/components/site/FatwaCover'
-import { FatwaList, fatwaTopics, Kicker } from '@/components/site/FatwaList'
+import { Dateline, fatwaTopics, StoryActions } from '@/components/site/FatwaList'
 import { Icon, type IconName } from '@/components/site/Icon'
 import { SubscribeForm } from '@/components/site/SubscribeForm'
 import { Tabs } from '@/components/site/Tabs'
 import type { Fatwa } from '@/payload-types'
 import { t, type Locale } from '@/i18n/dictionary'
-import { formatDate, formatNumber } from '@/lib/format'
+import { fastNotice } from '@/lib/fasting'
+import { formatDate, formatNumber, textDir } from '@/lib/format'
+import { formatGregorian, formatHijri, toHijri, utcDay } from '@/lib/hijri'
 import { excerpt } from '@/lib/lexical'
-import { getPayloadClient, getTopics } from '@/lib/payload'
+import { getMonthOverrides, getPayloadClient, getTopics } from '@/lib/payload'
 import { turnstileSiteKey } from '@/lib/turnstile'
 
 const intl = (locale: Locale) => (locale === 'ar' ? 'ar-EG' : 'en-GB')
@@ -27,80 +28,131 @@ function Scribble({ children }: { children: ReactNode }) {
   )
 }
 
-function FeatureCard({ fatwa, locale, size }: { fatwa: Fatwa; locale: Locale; size: 'lg' | 'md' }) {
-  const topic = fatwaTopics(fatwa)[0]
+function Byline({ fatwa, locale }: { fatwa: Fatwa; locale: Locale }) {
+  const scholar = typeof fatwa.scholar === 'object' ? fatwa.scholar : null
   return (
-    <article className={`feature feature-${size}`} data-reveal>
-      <Link className="feature-cover" href={`/${locale}/fatwas/${fatwa.number}`} tabIndex={-1} aria-hidden="true">
-        <FatwaCover slug={topic?.slug} number={fatwa.number} size={size} />
-      </Link>
-      <Kicker topic={topic} locale={locale} />
-      <h3 className="feature-title">
-        <Link href={`/${locale}/fatwas/${fatwa.number}`}>{fatwa.title}</Link>
-      </h3>
-      {size === 'lg' ? <p className="entry-excerpt">{excerpt(fatwa.question, 220)}</p> : null}
-    </article>
+    <p className="byline-mono">
+      {scholar ? <span>{scholar.name}</span> : null}
+      {fatwa.publishedAt ? <span>{formatDate(fatwa.publishedAt, locale)}</span> : null}
+    </p>
   )
 }
 
-function GridCard({
+// A story in the "In this edition" grid or the tabs: numbered, boxed label, headline, deck.
+function Story({
+  no,
+  label,
+  labelHref,
   href,
-  kicker,
-  icon,
   title,
-  body,
-  cover,
-  date,
+  deck,
+  meta,
+  locale,
 }: {
+  no: number
+  label?: string
+  labelHref?: string
   href: string
-  kicker: string
-  icon: IconName
   title: string
-  body?: string | null
-  cover: ReactNode
-  date?: string
+  deck?: string | null
+  meta?: ReactNode
+  locale: Locale
 }) {
   return (
-    <article className="grid-card">
-      <Link className="grid-cover" href={href} tabIndex={-1} aria-hidden="true">
-        {cover}
-      </Link>
-      <span className="kicker">
-        <Icon name={icon} size={14} />
-        {kicker}
-      </span>
-      <h3 className="grid-title">
-        <Link href={href}>{title}</Link>
+    <article className="story" data-reveal>
+      <div className="dateline">
+        <span className="dateline-no">{String(no).padStart(2, '0')}</span>
+        {label ? (
+          labelHref ? (
+            <Link className="boxed" href={labelHref}>
+              {label}
+            </Link>
+          ) : (
+            <span className="boxed">{label}</span>
+          )
+        ) : null}
+      </div>
+      <h3 className="story-title" {...textDir(title, locale)}>
+        <Link href={`/${locale}${href}`}>{title}</Link>
       </h3>
-      {body ? <p className="entry-excerpt">{excerpt(body, 150)}</p> : null}
-      {date ? <span className="entry-meta">{date}</span> : null}
+      {deck ? (
+        <p className="story-deck" {...textDir(deck, locale)}>
+          {excerpt(deck, 170)}
+        </p>
+      ) : null}
+      {meta}
+      <StoryActions href={href} title={title} locale={locale} />
     </article>
   )
 }
 
-const TILE_ICONS: IconName[] = ['book', 'rings', 'scales', 'scroll', 'headphones', 'calendar', 'pen']
+const TILE_ICONS: IconName[] = [
+  'book',
+  'rings',
+  'scales',
+  'scroll',
+  'headphones',
+  'calendar',
+  'pen',
+]
 
 export default async function Home({ params }: { params: Promise<{ locale: Locale }> }) {
   const { locale } = await params
   const d = t(locale)
   const payload = await getPayloadClient()
   const published = { status: { equals: 'published' } } as const
-  const [news, newsletters, fatwas, allTopics, topics, classes] = await Promise.all([
-    payload.find({ collection: 'news', locale, where: published, sort: '-date', limit: 6, depth: 0 }),
-    payload.find({ collection: 'newsletters', locale, where: published, sort: '-issue', limit: 6, depth: 0 }),
-    payload.find({ collection: 'fatwas', locale, where: published, sort: '-publishedAt', limit: 15, depth: 1 }),
-    payload.find({ collection: 'fatwas', where: published, pagination: false, depth: 0, select: { topics: true } }),
+  const [news, newsletters, fatwas, allTopics, topics, classes, overrides] = await Promise.all([
+    payload.find({
+      collection: 'news',
+      locale,
+      where: published,
+      sort: '-date',
+      limit: 6,
+      depth: 0,
+    }),
+    payload.find({
+      collection: 'newsletters',
+      locale,
+      where: published,
+      sort: '-issue',
+      limit: 6,
+      depth: 0,
+    }),
+    payload.find({
+      collection: 'fatwas',
+      locale,
+      where: published,
+      sort: '-publishedAt',
+      limit: 15,
+      depth: 1,
+    }),
+    payload.find({
+      collection: 'fatwas',
+      where: published,
+      pagination: false,
+      depth: 0,
+      select: { topics: true },
+    }),
     getTopics(locale),
     payload.find({
       collection: 'classes',
       locale,
-      where: { and: [{ status: { equals: 'scheduled' } }, { startsAt: { greater_than: new Date().toISOString() } }] },
+      where: {
+        and: [
+          { status: { equals: 'scheduled' } },
+          { startsAt: { greater_than: new Date().toISOString() } },
+        ],
+      },
       sort: 'startsAt',
       limit: 3,
       depth: 0,
     }),
+    getMonthOverrides(),
   ])
 
+  const today = utcDay(new Date())
+  const hijri = toHijri(today, overrides)
+  const fast = fastNotice(today, overrides)
   const counts = new Map<number, number>()
   for (const f of allTopics.docs) {
     for (const tp of f.topics ?? []) {
@@ -110,61 +162,77 @@ export default async function Home({ params }: { params: Promise<{ locale: Local
   }
   const [lead, ...rest] = fatwas.docs
   const side = rest.slice(0, 2)
-  const latest = rest.slice(2, 8)
+  const edition = rest.slice(2, 8)
   const more = rest.slice(8, 14)
+  const total = allTopics.docs.length
 
-  const fatwaCards = more.map((f) => {
+  const fatwaStories = more.map((f, i) => {
     const topic = fatwaTopics(f)[0]
     return (
-      <GridCard
+      <Story
         key={`f${f.id}`}
-        href={`/${locale}/fatwas/${f.number}`}
-        kicker={topic?.name ?? d.fatwa}
-        icon="fatwa"
+        no={i + 1}
+        label={topic?.name}
+        labelHref={topic ? `/${locale}/fatwas?topic=${topic.slug}` : undefined}
+        href={`/fatwas/${f.number}`}
         title={f.title}
-        body={f.question}
-        cover={<FatwaCover slug={topic?.slug} number={f.number} />}
+        deck={f.question}
+        locale={locale}
       />
     )
   })
-  const issueCards = newsletters.docs.map((n) => (
-    <GridCard
+  const issueStories = newsletters.docs.map((n, i) => (
+    <Story
       key={`n${n.id}`}
-      href={`/${locale}/newsletters/${n.issue}`}
-      kicker={`${d.issue} ${formatNumber(n.issue, locale)}`}
-      icon="mail"
+      no={i + 1}
+      label={`${d.issue} ${formatNumber(n.issue, locale)}`}
+      href={`/newsletters/${n.issue}`}
       title={n.title}
-      body={n.summary}
-      cover={
-        <div className="cover cover-md tone-paper" aria-hidden="true">
-          <span className="cover-word">{formatNumber(n.issue, locale)}</span>
-        </div>
-      }
+      deck={n.summary}
+      locale={locale}
     />
   ))
-  const newsCards = news.docs.map((n) => (
-    <GridCard
+  const newsStories = news.docs.map((n, i) => (
+    <Story
       key={`w${n.id}`}
-      href={`/${locale}/news/${n.id}`}
-      kicker={d.news.title}
-      icon="news"
+      no={i + 1}
+      label={d.news.title}
+      href={`/news/${n.id}`}
       title={n.title}
-      body={n.summary}
-      date={formatDate(n.date, locale)}
-      cover={
-        <div className="cover cover-md tone-sage" aria-hidden="true">
-          <span className="cover-word" lang="ar">
-            خبر
-          </span>
-        </div>
-      }
+      deck={n.summary}
+      meta={<p className="byline-mono">{formatDate(n.date, locale)}</p>}
+      locale={locale}
     />
   ))
   const tabs = [
-    { key: 'all', label: d.home.all, panel: <div className="card-grid">{[...issueCards.slice(0, 3), ...newsCards.slice(0, 3), ...fatwaCards].slice(0, 6)}</div> },
-    { key: 'fatwas', label: d.nav.fatwas, panel: <div className="card-grid">{fatwaCards}</div> },
-    ...(issueCards.length ? [{ key: 'newsletters', label: d.nav.newsletters, panel: <div className="card-grid">{issueCards}</div> }] : []),
-    ...(newsCards.length ? [{ key: 'news', label: d.news.title, panel: <div className="card-grid">{newsCards}</div> }] : []),
+    {
+      key: 'all',
+      label: d.home.all,
+      panel: (
+        <div className="paper-grid">
+          {[...issueStories.slice(0, 3), ...newsStories.slice(0, 3), ...fatwaStories].slice(0, 6)}
+        </div>
+      ),
+    },
+    { key: 'fatwas', label: d.nav.fatwas, panel: <div className="paper-grid">{fatwaStories}</div> },
+    ...(issueStories.length
+      ? [
+          {
+            key: 'newsletters',
+            label: d.nav.newsletters,
+            panel: <div className="paper-grid">{issueStories}</div>,
+          },
+        ]
+      : []),
+    ...(newsStories.length
+      ? [
+          {
+            key: 'news',
+            label: d.news.title,
+            panel: <div className="paper-grid">{newsStories}</div>,
+          },
+        ]
+      : []),
   ]
 
   return (
@@ -178,7 +246,7 @@ export default async function Home({ params }: { params: Promise<{ locale: Local
             <Scribble>{d.hero.titleAccent}</Scribble>
           </h1>
           <p className="hero-lede">{d.hero.body}</p>
-          <form className="hero-search" action={`/${locale}/search`} role="search">
+          <form className="hero-search" action={`/${locale}/fatwas`} role="search">
             <label htmlFor="home-q" className="sr-only">
               {d.nav.search}
             </label>
@@ -202,125 +270,181 @@ export default async function Home({ params }: { params: Promise<{ locale: Local
         </div>
       </section>
 
-      {lead ? (
-        <section className="band">
-          <div className="wrap">
-            <h2 className="band-title">{d.home.featured}</h2>
-            <div className="featured">
-              <FeatureCard fatwa={lead} locale={locale} size="lg" />
-              <div className="featured-side">
+      <div className="paper">
+        <div className="wrap">
+          <div className="edition-bar">
+            <span>
+              {d.paper.edition} {formatNumber(total, locale)}
+            </span>
+            <span className="edition-motto">{d.paper.motto}</span>
+            <span>{formatHijri(hijri, locale)}</span>
+          </div>
+
+          {lead ? (
+            <section className="front" aria-label={d.paper.front}>
+              <article className="front-lead">
+                <p className="section-kicker">
+                  {d.paper.front} ·{' '}
+                  <span lang={locale === 'ar' ? 'en' : 'ar'}>{d.paper.frontAr}</span>
+                </p>
+                <Dateline fatwa={lead} locale={locale} />
+                <h2 className="front-title" {...textDir(lead.title, locale)}>
+                  <Link href={`/${locale}/fatwas/${lead.number}`}>{lead.title}</Link>
+                </h2>
+                <p className="front-deck dropcap" {...textDir(lead.question, locale)}>
+                  {excerpt(lead.question, 320)}
+                </p>
+                <Byline fatwa={lead} locale={locale} />
+                <StoryActions
+                  href={`/fatwas/${lead.number}`}
+                  title={lead.title}
+                  locale={locale}
+                  label={d.readFatwa}
+                />
+              </article>
+
+              <div className="front-side">
                 {side.map((f) => (
-                  <FeatureCard key={f.id} fatwa={f} locale={locale} size="md" />
+                  <article key={f.id} className="story">
+                    <Dateline fatwa={f} locale={locale} />
+                    <h3 className="story-title" {...textDir(f.title, locale)}>
+                      <Link href={`/${locale}/fatwas/${f.number}`}>{f.title}</Link>
+                    </h3>
+                    <p className="story-deck" {...textDir(f.question, locale)}>
+                      {excerpt(f.question, 140)}
+                    </p>
+                    <StoryActions href={`/fatwas/${f.number}`} title={f.title} locale={locale} />
+                  </article>
                 ))}
               </div>
-            </div>
-          </div>
-        </section>
-      ) : (
-        <section className="band">
-          <div className="wrap">
-            <p className="muted">{d.noFatwas}</p>
-          </div>
-        </section>
-      )}
 
-      {latest.length ? (
-        <section className="band band-white">
-          <div className="wrap">
-            <h2 className="band-title">{d.home.latest}</h2>
-            <div className="with-aside">
-              <div>
-                <FatwaList fatwas={latest} locale={locale} />
-                <Link className="more-link" href={`/${locale}/fatwas`}>
-                  {d.home.exploreMore}
-                  <Icon name="arrow" size={16} />
-                </Link>
-              </div>
-              <aside className="aside">
-                <h3 className="aside-title">{d.home.topicsTitle}</h3>
-                <ul className="topic-index">
-                  {topics.map((tp) => (
-                    <li key={tp.id}>
-                      <Link href={`/${locale}/fatwas?topic=${tp.slug}`}>
-                        <span>{tp.name}</span>
-                        <span className="count">{formatNumber(counts.get(tp.id) ?? 0, locale)}</span>
+              <aside className="front-aside">
+                <p className="section-kicker">
+                  {d.paper.almanac} ·{' '}
+                  <span lang={locale === 'ar' ? 'en' : 'ar'}>
+                    {locale === 'ar' ? 'Almanac' : 'تقويم'}
+                  </span>
+                </p>
+                <div className="almanac">
+                  <p className="almanac-label">{d.paper.today}</p>
+                  <p className="almanac-date">{formatHijri(hijri, locale)}</p>
+                  <p className="almanac-alt" lang={locale === 'ar' ? 'en' : 'ar'}>
+                    {formatHijri(hijri, locale === 'ar' ? 'en' : 'ar')}
+                  </p>
+                  {fast ? (
+                    <p>
+                      <Link href={`/${locale}/calendar`}>
+                        {fast.when === 'today' ? d.fastToday : d.fastTomorrow}:{' '}
+                        {fast.entry.title[locale]}
                       </Link>
-                    </li>
-                  ))}
-                </ul>
-                <div className="aside-cta">
-                  <h3 className="aside-title">{d.home.askTitle}</h3>
+                    </p>
+                  ) : null}
+                  <p className="byline-mono almanac-foot">
+                    <span>{formatGregorian(today, locale)}</span>
+                  </p>
+                </div>
+                <div className="almanac">
+                  <p className="almanac-label">{d.home.askTitle}</p>
                   <p>{d.home.askBody}</p>
-                  <Link className="btn" href={`/${locale}/ask`}>
+                  <Link className="read-link" href={`/${locale}/ask`}>
                     {d.home.askButton}
-                    <Icon name="arrow" size={16} />
                   </Link>
                 </div>
               </aside>
-            </div>
-          </div>
-        </section>
-      ) : null}
+            </section>
+          ) : (
+            <p className="story-deck">{d.noFatwas}</p>
+          )}
 
-      {fatwaCards.length ? (
-        <section className="band">
-          <div className="wrap" data-reveal>
-            <Tabs tabs={tabs} label={d.home.fromTheSite} />
-          </div>
-        </section>
-      ) : null}
-
-      {classes.docs.length ? (
-        <section className="band band-pattern">
-          <div className="wrap">
-            <div className="panel" data-reveal>
-              <div className="panel-text">
-                <span className="eyebrow">{d.home.upcoming}</span>
-                <h2>{d.home.upcomingTitle}</h2>
-                <p>{d.home.upcomingBody}</p>
-                <Link className="more-link" href={`/${locale}/live`}>
-                  {d.home.allClasses}
-                  <Icon name="arrow" size={16} />
-                </Link>
-              </div>
-              <div className="panel-side">
-                {classes.docs.map((c) => {
-                  const when = new Date(c.startsAt)
+          {edition.length ? (
+            <section className="paper-section">
+              <h2 className="rule-head">{d.paper.inThisEdition}</h2>
+              <div className="paper-grid">
+                {edition.map((f, i) => {
+                  const topic = fatwaTopics(f)[0]
                   return (
-                    <Link key={c.id} className="session" href={`/${locale}/live/${c.id}`}>
-                      <span className="date-tile">
-                        <span className="date-tile-month">
-                          {new Intl.DateTimeFormat(intl(locale), { month: 'short', timeZone: 'UTC' }).format(when)}
-                        </span>
-                        <span className="date-tile-day">
-                          {new Intl.DateTimeFormat(intl(locale), { day: 'numeric', timeZone: 'UTC' }).format(when)}
-                        </span>
-                        <span className="date-tile-week">
-                          {new Intl.DateTimeFormat(intl(locale), { weekday: 'short', timeZone: 'UTC' }).format(when)}
-                        </span>
-                      </span>
-                      <span className="session-text">
-                        <strong>{c.title}</strong>
-                        <span>
-                          {new Intl.DateTimeFormat(intl(locale), {
-                            hour: 'numeric',
-                            minute: '2-digit',
-                            timeZone: 'UTC',
-                            timeZoneName: 'short',
-                          }).format(when)}
-                        </span>
-                      </span>
-                      <span className="btn small pill-btn">{d.home.reserve}</span>
-                    </Link>
+                    <Story
+                      key={f.id}
+                      no={i + 1}
+                      label={topic?.name}
+                      labelHref={topic ? `/${locale}/fatwas?topic=${topic.slug}` : undefined}
+                      href={`/fatwas/${f.number}`}
+                      title={f.title}
+                      deck={f.question}
+                      meta={<Byline fatwa={f} locale={locale} />}
+                      locale={locale}
+                    />
                   )
                 })}
               </div>
-            </div>
-          </div>
-        </section>
-      ) : null}
+              <Link className="read-link more" href={`/${locale}/fatwas`}>
+                {d.home.exploreMore}
+              </Link>
+            </section>
+          ) : null}
 
-      <section className="band band-white newsletter-band">
+          <section className="paper-section">
+            <h2 className="rule-head">{d.home.topicsTitle}</h2>
+            <ul className="topic-columns">
+              {topics.map((tp) => (
+                <li key={tp.id}>
+                  <Link href={`/${locale}/fatwas?topic=${tp.slug}`}>
+                    <span>{tp.name}</span>
+                    <span className="count">{formatNumber(counts.get(tp.id) ?? 0, locale)}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          {fatwaStories.length ? (
+            <section className="paper-section" data-reveal>
+              <h2 className="rule-head">{d.home.fromTheSite}</h2>
+              <Tabs tabs={tabs} label={d.home.fromTheSite} />
+            </section>
+          ) : null}
+
+          {classes.docs.length ? (
+            <section className="paper-section">
+              <div className="panel" data-reveal>
+                <div className="panel-text">
+                  <span className="eyebrow">{d.home.upcoming}</span>
+                  <h2>{d.home.upcomingTitle}</h2>
+                  <p>{d.home.upcomingBody}</p>
+                  <Link className="read-link" href={`/${locale}/live`}>
+                    {d.home.allClasses}
+                  </Link>
+                </div>
+                <div className="panel-side">
+                  {classes.docs.map((c) => {
+                    const when = new Date(c.startsAt)
+                    const fmt = (o: Intl.DateTimeFormatOptions) =>
+                      new Intl.DateTimeFormat(intl(locale), { ...o, timeZone: 'UTC' }).format(when)
+                    return (
+                      <Link key={c.id} className="session" href={`/${locale}/live/${c.id}`}>
+                        <span className="date-tile">
+                          <span className="date-tile-month">{fmt({ month: 'short' })}</span>
+                          <span className="date-tile-day">{fmt({ day: 'numeric' })}</span>
+                          <span className="date-tile-week">{fmt({ weekday: 'short' })}</span>
+                        </span>
+                        <span className="session-text">
+                          <strong>{c.title}</strong>
+                          <span>
+                            {fmt({ hour: 'numeric', minute: '2-digit', timeZoneName: 'short' })}
+                          </span>
+                        </span>
+                        <span className="btn small pill-btn">{d.home.reserve}</span>
+                      </Link>
+                    )
+                  })}
+                </div>
+              </div>
+            </section>
+          ) : null}
+        </div>
+      </div>
+
+      <section className="newsletter-band">
         <div className="wrap" data-reveal>
           <div className="tiles" aria-hidden="true">
             {TILE_ICONS.map((name, i) => (

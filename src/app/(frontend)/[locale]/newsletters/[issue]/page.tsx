@@ -7,6 +7,7 @@ import { cache } from 'react'
 import { BookmarkButton } from '@/components/site/BookmarkButton'
 import { RichText } from '@/components/site/RichText'
 import { SubscribeForm } from '@/components/site/SubscribeForm'
+import { ShareButton } from '@/components/site/ShareButton'
 import { t, type Locale } from '@/i18n/dictionary'
 import { formatDate, formatNumber } from '@/lib/format'
 import { getGlossary, getPayloadClient } from '@/lib/payload'
@@ -58,6 +59,7 @@ export default async function IssuePage({ params }: Props) {
             href={`/newsletters/${doc.issue}`}
             labels={{ save: d.saved.save, saved: d.saved.savedLabel }}
           />
+          <ShareButton title={doc.title} path={`/${locale}/newsletters/${doc.issue}`} locale={locale} />
         </div>
         {cover?.url ? <img src={cover.url} alt={cover.alt ?? ''} style={{ borderRadius: 10, marginBottom: '1.5rem' }} /> : null}
         {doc.summary ? <p className="prose" style={{ fontStyle: 'italic' }}>{doc.summary}</p> : null}

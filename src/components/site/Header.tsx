@@ -6,6 +6,16 @@ import { DateStrip } from './DateStrip'
 import { LanguageSwitch, NavLinks, NavToggle } from './HeaderClient'
 import { Icon } from './Icon'
 
+// Searching shows matching fatwas on the fatwas page; there is no separate search page.
+function SearchForm({ locale, className, placeholder, label }: { locale: Locale; className: string; placeholder: string; label: string }) {
+  return (
+    <form className={className} action={`/${locale}/fatwas`} role="search">
+      <Icon name="search" size={16} />
+      <input type="search" name="q" placeholder={placeholder} aria-label={label} />
+    </form>
+  )
+}
+
 export function Header({ locale }: { locale: Locale }) {
   const d = t(locale)
   const links: [string, string][] = [
@@ -28,14 +38,12 @@ export function Header({ locale }: { locale: Locale }) {
           <span className="wordmark-en">Arruhayn</span>
         </Link>
         <nav className="site-nav" id="site-nav" aria-label={d.nav.menu}>
+          <SearchForm locale={locale} className="nav-search mobile-only" placeholder={d.hero.searchPlaceholder} label={d.nav.search} />
           <NavLinks locale={locale} links={links} />
           <LanguageSwitch locale={locale} label={d.switchLanguage} className="lang-switch mobile-only" />
         </nav>
         <div className="header-actions">
-          <Link className="search-pill" href={`/${locale}/search`}>
-            <Icon name="search" size={16} />
-            <span>{d.nav.search}…</span>
-          </Link>
+          <SearchForm locale={locale} className="search-pill desktop-only" placeholder={`${d.nav.search}…`} label={d.nav.search} />
           <LanguageSwitch locale={locale} label={d.switchLanguage} className="lang-switch desktop-only" />
           <NavToggle label={d.nav.menu} />
         </div>

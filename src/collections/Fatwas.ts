@@ -51,7 +51,13 @@ export const Fatwas: CollectionConfig = {
         { name: 'url', type: 'text' },
       ],
     },
+    { name: 'translatedBy', type: 'text', localized: true },
     { name: 'originalUrl', type: 'text', admin: { description: 'Link to the original fatwa, if it was published elsewhere.' } },
+    {
+      name: 'publishedBy',
+      type: 'text',
+      admin: { description: 'Name of the site that first published it, shown with the link above.' },
+    },
     { name: 'related', type: 'relationship', relationTo: 'fatwas', hasMany: true },
     {
       name: 'status',

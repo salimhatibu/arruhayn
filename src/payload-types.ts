@@ -183,10 +183,15 @@ export interface Fatwa {
         id?: string | null;
       }[]
     | null;
+  translatedBy?: string | null;
   /**
    * Link to the original fatwa, if it was published elsewhere.
    */
   originalUrl?: string | null;
+  /**
+   * Name of the site that first published it, shown with the link above.
+   */
+  publishedBy?: string | null;
   related?: (number | Fatwa)[] | null;
   status: 'draft' | 'published';
   publishedAt?: string | null;
@@ -654,7 +659,9 @@ export interface FatwasSelect<T extends boolean = true> {
         url?: T;
         id?: T;
       };
+  translatedBy?: T;
   originalUrl?: T;
+  publishedBy?: T;
   related?: T;
   status?: T;
   publishedAt?: T;

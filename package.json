@@ -21,7 +21,8 @@
     "seed": "cross-env NODE_OPTIONS=--no-deprecation payload run scripts/seed.ts",
     "reindex": "cross-env NODE_OPTIONS=--no-deprecation payload run scripts/reindex.ts",
     "deploy:all": "opennextjs-cloudflare build && wrangler deploy --env public && wrangler deploy --env admin",
-    "preview": "opennextjs-cloudflare build && wrangler dev --env admin"
+    "preview": "opennextjs-cloudflare build && wrangler dev --env admin",
+    "import:qab": "cross-env NODE_OPTIONS=--no-deprecation payload run scripts/import-qandabenefits.ts"
   },
   "dependencies": {
     "@breezystack/lamejs": "^1.2.7",
@@ -46,6 +47,7 @@
     "@eslint/eslintrc": "^3.2.0",
     "@playwright/test": "1.63.0",
     "@testing-library/react": "16.3.0",
+    "@types/jsdom": "28",
     "@types/node": "22.19.9",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",

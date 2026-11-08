@@ -12,9 +12,8 @@ export async function DateStrip({ locale }: { locale: Locale }) {
   return (
     <div className="date-strip">
       <div className="wrap">
-        <span>
-          <strong>{formatHijri(hijri, locale)}</strong>
-        </span>
+        <span className="date-hijri">{formatHijri(hijri, locale)}</span>
+        <span className="date-sep" aria-hidden="true" />
         <span>{formatGregorian(today, locale)}</span>
         {fast ? (
           <a className="fast-chip" href={`/${locale}/calendar`}>

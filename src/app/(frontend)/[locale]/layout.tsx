@@ -3,10 +3,10 @@ import { notFound } from 'next/navigation'
 import type { ReactNode } from 'react'
 
 import '@/styles/site.css'
-import { DateStrip } from '@/components/site/DateStrip'
 import { Footer } from '@/components/site/Footer'
 import { Header } from '@/components/site/Header'
 import { LiveBanner } from '@/components/site/LiveBanner'
+import { Motion } from '@/components/site/Motion'
 import { fontVariables } from '@/fonts'
 import { dir, isLocale, LOCALES, t } from '@/i18n/dictionary'
 
@@ -40,12 +40,11 @@ export default async function LocaleLayout({ children, params }: Props) {
         <a className="skip" href="#content">
           {d.skipToContent}
         </a>
-        <div className="topbar" />
-        <Header locale={locale} />
-        <DateStrip locale={locale} />
         <LiveBanner locale={locale} />
+        <Header locale={locale} />
         <main id="content">{children}</main>
         <Footer locale={locale} />
+        <Motion />
       </body>
     </html>
   )

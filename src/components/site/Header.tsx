@@ -1,9 +1,10 @@
-/* eslint-disable @next/next/no-img-element */
 import Link from 'next/link'
 
 import { t, type Locale } from '@/i18n/dictionary'
 
-import { LanguageSwitch, NavToggle } from './HeaderClient'
+import { DateStrip } from './DateStrip'
+import { LanguageSwitch, NavLinks, NavToggle } from './HeaderClient'
+import { Icon } from './Icon'
 
 export function Header({ locale }: { locale: Locale }) {
   const d = t(locale)
@@ -15,24 +16,29 @@ export function Header({ locale }: { locale: Locale }) {
     ['/calendar', d.nav.calendar],
     ['/guides', d.nav.guides],
     ['/saved', d.nav.saved],
-    ['/search', d.nav.search],
   ]
   return (
-    <header className="site-header" id="site-header">
-      <div className="wrap">
-        <Link className="brand" href={`/${locale}`} aria-label={d.nav.home}>
-          <img src="/brand/icon-192.png" alt="" width={46} height={46} />
-          <span>الرُّحَين</span>
+    <header className="site-header" id="site-header" data-home="false" data-scrolled="false">
+      <DateStrip locale={locale} />
+      <div className="wrap header-row">
+        <Link className="wordmark" href={`/${locale}`} aria-label={d.nav.home}>
+          <span className="wordmark-ar" lang="ar">
+            الرُّحَين
+          </span>
+          <span className="wordmark-en">Arruhayn</span>
         </Link>
-        <NavToggle label={d.nav.menu} />
-        <nav className="site-nav" aria-label={d.nav.menu}>
-          {links.map(([path, label]) => (
-            <Link key={path} href={`/${locale}${path}`}>
-              {label}
-            </Link>
-          ))}
-          <LanguageSwitch locale={locale} label={d.switchLanguage} />
+        <nav className="site-nav" id="site-nav" aria-label={d.nav.menu}>
+          <NavLinks locale={locale} links={links} />
+          <LanguageSwitch locale={locale} label={d.switchLanguage} className="lang-switch mobile-only" />
         </nav>
+        <div className="header-actions">
+          <Link className="search-pill" href={`/${locale}/search`}>
+            <Icon name="search" size={16} />
+            <span>{d.nav.search}…</span>
+          </Link>
+          <LanguageSwitch locale={locale} label={d.switchLanguage} className="lang-switch desktop-only" />
+          <NavToggle label={d.nav.menu} />
+        </div>
       </div>
     </header>
   )

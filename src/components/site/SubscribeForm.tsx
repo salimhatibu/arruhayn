@@ -33,7 +33,7 @@ export function SubscribeForm({ locale, siteKey }: { locale: Locale; siteKey: st
       <label htmlFor="subscribe-email" className="sr-only">
         {d.email}
       </label>
-      <div className="searchbox" style={{ marginTop: 0 }}>
+      <div className="subscribe-row">
         <input
           id="subscribe-email"
           type="email"

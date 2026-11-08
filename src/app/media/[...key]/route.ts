@@ -20,8 +20,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ key:
   const object = await env.R2.get(key, r2Range ? { range: r2Range } : undefined)
   if (!object) return new Response('Not found', { status: 404 })
 
+  // Set from the stored metadata directly: writeHttpMetadata can't cross the local dev proxy.
   const headers = new Headers()
-  object.writeHttpMetadata(headers)
+  const meta = object.httpMetadata
+  if (meta?.contentType) headers.set('content-type', meta.contentType)
+  if (meta?.contentDisposition) headers.set('content-disposition', meta.contentDisposition)
+  if (meta?.contentLanguage) headers.set('content-language', meta.contentLanguage)
   headers.set('etag', object.httpEtag)
   headers.set('accept-ranges', 'bytes')
   headers.set('cache-control', 'public, max-age=31536000, immutable')

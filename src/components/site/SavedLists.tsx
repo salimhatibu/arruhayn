@@ -3,9 +3,13 @@
 import { useEffect, useMemo, useState } from 'react'
 
 import { t, type Locale } from '@/i18n/dictionary'
+import { formatDate } from '@/lib/format'
 import { onBookmarksChange, readBookmarks, writeBookmarks, type Bookmark, type BookmarkState } from '@/lib/bookmarks'
 
-// The visitor's bookmarks, grouped into named lists. Everything stays in this browser.
+import { Icon } from './Icon'
+
+// The visitor's bookmarks, newest first, and the named lists they made. Lists are created first;
+// then each saved item can be added to one. Everything stays in this browser.
 export function SavedLists({ locale }: { locale: Locale }) {
   const d = t(locale).saved
   const [state, setState] = useState<BookmarkState>({ items: [], lists: [] })
@@ -18,14 +22,8 @@ export function SavedLists({ locale }: { locale: Locale }) {
     return onBookmarksChange(sync)
   }, [])
 
-  const groups = useMemo(() => {
-    const out = new Map<string, Bookmark[]>([['', []], ...state.lists.map((l) => [l, []] as [string, Bookmark[]])])
-    for (const b of state.items) {
-      const key = b.list && state.lists.includes(b.list) ? b.list : ''
-      out.get(key)!.push(b)
-    }
-    return out
-  }, [state])
+  const newest = useMemo(() => [...state.items].sort((a, b) => b.savedAt.localeCompare(a.savedAt)), [state.items])
+  const inList = (list: string) => newest.filter((b) => b.list === list)
 
   const save = (next: BookmarkState) => {
     setState(next)
@@ -40,7 +38,7 @@ export function SavedLists({ locale }: { locale: Locale }) {
   }
 
   async function share(list: string, items: Bookmark[]) {
-    const q = new URLSearchParams({ items: items.map((i) => i.id).join(','), name: list || d.unsorted })
+    const q = new URLSearchParams({ items: items.map((i) => i.id).join(','), name: list || d.allSaved })
     const url = `${location.origin}/${locale}/lists?${q}`
     try {
       await navigator.clipboard.writeText(url)
@@ -51,108 +49,138 @@ export function SavedLists({ locale }: { locale: Locale }) {
     }
   }
 
-  if (!state.items.length && !state.lists.length) return <p className="muted">{d.none}</p>
+  const shareButton = (list: string, items: Bookmark[]) =>
+    items.length ? (
+      <button className="btn secondary small" onClick={() => share(list, items)}>
+        <Icon name="send" size={14} />
+        {copied === list ? d.copied : d.share}
+      </button>
+    ) : null
 
   return (
-    <div className="stack">
-      {[...groups].map(([list, items]) =>
-        list === '' && !items.length ? null : (
-          <section key={list || 'unsorted'} className="card">
-            <div className="section-head">
-              <h2>{list || d.unsorted}</h2>
-              <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                {items.length ? (
-                  <button className="btn secondary small" onClick={() => share(list, items)}>
-                    {copied === list ? d.copied : d.share}
-                  </button>
-                ) : null}
-                {list ? (
-                  <>
-                    <button
-                      className="btn ghost small"
-                      onClick={() => {
-                        const name = window.prompt(d.listName, list)?.trim()
-                        if (!name || name === list || state.lists.includes(name)) return
-                        save({
-                          lists: state.lists.map((l) => (l === list ? name : l)),
-                          items: state.items.map((b) => (b.list === list ? { ...b, list: name } : b)),
-                        })
-                      }}
-                    >
-                      {d.rename}
-                    </button>
-                    <button
-                      className="btn ghost small"
-                      onClick={() =>
-                        save({ lists: state.lists.filter((l) => l !== list), items: state.items.map((b) => (b.list === list ? { ...b, list: undefined } : b)) })
-                      }
-                    >
-                      {d.delete}
-                    </button>
-                  </>
-                ) : null}
-              </div>
-            </div>
-            <ul className="list">
-              {items.map((b, index) => (
-                <li key={b.id} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                  <a className="title" style={{ flex: '1 1 14rem' }} href={`/${locale}${b.href}`}>
-                    {b.title}
-                  </a>
-                  <label className="sr-only" htmlFor={`move-${b.id}`}>
-                    {d.moveTo}
-                  </label>
-                  <select
-                    id={`move-${b.id}`}
-                    value={b.list ?? ''}
-                    style={{ width: 'auto' }}
-                    onChange={(e) => save({ ...state, items: state.items.map((x) => (x.id === b.id ? { ...x, list: e.target.value || undefined } : x)) })}
-                  >
-                    <option value="">{d.unsorted}</option>
-                    {state.lists.map((l) => (
-                      <option key={l} value={l}>
-                        {l}
-                      </option>
-                    ))}
-                  </select>
+    <div className="saved">
+      <section className="saved-lists">
+        <div className="section-head">
+          <h2>{d.yourLists}</h2>
+        </div>
+        <p className="help">{d.listsHint}</p>
+        <form
+          className="saved-new"
+          onSubmit={(e) => {
+            e.preventDefault()
+            createList()
+          }}
+        >
+          <label htmlFor="new-list" className="sr-only">
+            {d.listName}
+          </label>
+          <input id="new-list" type="text" placeholder={d.listName} value={newList} onChange={(e) => setNewList(e.target.value)} maxLength={60} />
+          <button className="btn" type="submit" disabled={!newList.trim()}>
+            {d.newList}
+          </button>
+        </form>
+
+        {state.lists.map((list) => {
+          const items = inList(list)
+          return (
+            <section key={list} className="card saved-list">
+              <div className="section-head">
+                <h3>{list}</h3>
+                <div className="saved-actions">
+                  {shareButton(list, items)}
                   <button
                     className="btn ghost small"
-                    aria-label="↑"
-                    disabled={index === 0}
                     onClick={() => {
-                      const all = [...state.items]
-                      const i = all.findIndex((x) => x.id === b.id)
-                      const j = all.findIndex((x) => x.id === items[index - 1].id)
-                      ;[all[i], all[j]] = [all[j], all[i]]
-                      save({ ...state, items: all })
+                      const name = window.prompt(d.listName, list)?.trim()
+                      if (!name || name === list || state.lists.includes(name)) return
+                      save({
+                        lists: state.lists.map((l) => (l === list ? name : l)),
+                        items: state.items.map((b) => (b.list === list ? { ...b, list: name } : b)),
+                      })
                     }}
                   >
-                    ↑
+                    {d.rename}
                   </button>
-                  <button className="btn ghost small" onClick={() => save({ ...state, items: state.items.filter((x) => x.id !== b.id) })}>
-                    {d.remove}
+                  <button
+                    className="btn ghost small"
+                    onClick={() =>
+                      save({ lists: state.lists.filter((l) => l !== list), items: state.items.map((b) => (b.list === list ? { ...b, list: undefined } : b)) })
+                    }
+                  >
+                    {d.delete}
                   </button>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ),
-      )}
-      <form
-        className="searchbox"
-        onSubmit={(e) => {
-          e.preventDefault()
-          createList()
-        }}
-      >
-        <label htmlFor="new-list" className="sr-only">
-          {d.listName}
-        </label>
-        <input id="new-list" type="text" placeholder={d.listName} value={newList} onChange={(e) => setNewList(e.target.value)} maxLength={60} />
-        <button className="btn secondary" type="submit">
-          {d.newList}
-        </button>
-      </form>
+                </div>
+              </div>
+              {items.length ? (
+                <ul className="list">
+                  {items.map((b) => (
+                    <li key={b.id} className="saved-item">
+                      <a className="title" href={`/${locale}${b.href}`} dir="auto">
+                        {b.title}
+                      </a>
+                      <button className="btn ghost small" onClick={() => save({ ...state, items: state.items.map((x) => (x.id === b.id ? { ...x, list: undefined } : x)) })}>
+                        {d.remove}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="muted small">{d.emptyList}</p>
+              )}
+            </section>
+          )
+        })}
+      </section>
+
+      <section className="saved-all">
+        <div className="section-head">
+          <h2>{d.allSaved}</h2>
+          <div className="saved-actions">
+            <span className="muted small">{d.newestFirst}</span>
+            {shareButton('', newest)}
+          </div>
+        </div>
+        {newest.length ? (
+          <ul className="list">
+            {newest.map((b) => (
+              <li key={b.id} className="saved-item">
+                <span className="saved-item-text">
+                  <a className="title" href={`/${locale}${b.href}`} dir="auto">
+                    {b.title}
+                  </a>
+                  <span className="meta">
+                    {d.savedOn} {formatDate(b.savedAt, locale)}
+                  </span>
+                </span>
+                {state.lists.length ? (
+                  <>
+                    <label className="sr-only" htmlFor={`list-${b.id}`}>
+                      {d.addToList}
+                    </label>
+                    <select
+                      id={`list-${b.id}`}
+                      value={b.list && state.lists.includes(b.list) ? b.list : ''}
+                      onChange={(e) => save({ ...state, items: state.items.map((x) => (x.id === b.id ? { ...x, list: e.target.value || undefined } : x)) })}
+                    >
+                      <option value="">{b.list ? d.notInList : d.addToList}</option>
+                      {state.lists.map((l) => (
+                        <option key={l} value={l}>
+                          {l}
+                        </option>
+                      ))}
+                    </select>
+                  </>
+                ) : null}
+                <button className="btn ghost small" onClick={() => save({ ...state, items: state.items.filter((x) => x.id !== b.id) })}>
+                  {d.remove}
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="muted">{d.none}</p>
+        )}
+      </section>
     </div>
   )
 }

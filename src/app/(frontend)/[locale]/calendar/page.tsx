@@ -138,7 +138,10 @@ export default async function CalendarPage({ params, searchParams }: Props) {
                     <td key={iso} className={cls}>
                       <div className="d">
                         <span>{day.getUTCDate()}</span>
-                        <span className="h">{h.day === 1 ? `${h.day} ${HIJRI_MONTHS[locale][h.month - 1]}` : h.day}</span>
+                        <span className="h">
+                          {h.day}
+                          {h.day === 1 ? <span className="h-month"> {HIJRI_MONTHS[locale][h.month - 1]}</span> : null}
+                        </span>
                       </div>
                       {items.map((it, i) =>
                         it.href ? (
@@ -159,6 +162,36 @@ export default async function CalendarPage({ params, searchParams }: Props) {
           </tbody>
         </table>
       </div>
+
+      {/* On phones the grid shows dots; this list spells out the month's dates underneath. */}
+      <ol className="cal-agenda" aria-label={d.calendar.agenda}>
+        {Array.from({ length: last.getUTCDate() }, (_, i) => addDays(first, i))
+          .filter((day) => byDay.has(isoDay(day)))
+          .map((day) => {
+            const iso = isoDay(day)
+            return (
+              <li key={iso} className={iso === isoDay(today) ? 'today' : undefined}>
+                <span className="cal-agenda-date">
+                  <strong>{new Intl.DateTimeFormat(locale === 'ar' ? 'ar-EG' : 'en-GB', { weekday: 'short', day: 'numeric', timeZone: 'UTC' }).format(day)}</strong>
+                  <span>{formatHijri(toHijri(day, overrides), locale).replace(/\s*[0-9٠-٩]{3,4}\s*(AH|هـ)?$/, '')}</span>
+                </span>
+                <span className="cal-agenda-items">
+                  {(byDay.get(iso) ?? []).map((it, i) =>
+                    it.href ? (
+                      <Link key={i} className={`e ${it.kind}`} href={it.href}>
+                        {it.label}
+                      </Link>
+                    ) : (
+                      <span key={i} className={`e ${it.kind}`}>
+                        {it.label}
+                      </span>
+                    ),
+                  )}
+                </span>
+              </li>
+            )
+          })}
+      </ol>
 
       <section className="card" style={{ marginTop: '2rem' }}>
         <h2 style={{ marginTop: 0 }}>{d.calendar.feeds}</h2>
@@ -181,8 +214,8 @@ export default async function CalendarPage({ params, searchParams }: Props) {
               <a className="btn secondary small" href={webcal(f)}>
                 {d.calendar.apple}
               </a>
-              <a className="btn ghost small" href={feedUrl(f)}>
-                .ics
+              <a className="btn secondary small" href={feedUrl(f)} download>
+                {d.calendar.icsFile}
               </a>
             </li>
           ))}

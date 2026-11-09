@@ -7,8 +7,10 @@ import { Footer } from '@/components/site/Footer'
 import { Header } from '@/components/site/Header'
 import { LiveBanner } from '@/components/site/LiveBanner'
 import { Motion } from '@/components/site/Motion'
+import { NewsletterPopup } from '@/components/site/NewsletterPopup'
 import { fontVariables } from '@/fonts'
 import { dir, isLocale, LOCALES, t } from '@/i18n/dictionary'
+import { turnstileSiteKey } from '@/lib/turnstile'
 
 // The phone's browser bar matches the dark masthead.
 export const viewport: Viewport = { themeColor: '#24130f', colorScheme: 'light' }
@@ -48,6 +50,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         <Header locale={locale} />
         <main id="content">{children}</main>
         <Footer locale={locale} />
+        <NewsletterPopup locale={locale} siteKey={turnstileSiteKey()} />
         <Motion />
       </body>
     </html>

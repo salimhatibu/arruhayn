@@ -6,7 +6,7 @@ import { t, type Locale } from '@/i18n/dictionary'
 
 import { Turnstile } from './Turnstile'
 
-export function SubscribeForm({ locale, siteKey }: { locale: Locale; siteKey: string }) {
+export function SubscribeForm({ locale, siteKey, onSuccess }: { locale: Locale; siteKey: string; onSuccess?: () => void }) {
   const d = t(locale).newsletter
   const [email, setEmail] = useState('')
   const [token, setToken] = useState('')
@@ -15,6 +15,7 @@ export function SubscribeForm({ locale, siteKey }: { locale: Locale; siteKey: st
   async function submit(e: FormEvent) {
     e.preventDefault()
     if (!/^\S+@\S+\.\S+$/.test(email)) return setState({ kind: 'error', message: d.invalidEmail })
+    if (!token) return setState({ kind: 'error', message: 'Please wait for the bot check to complete, then try again.' })
     setState({ kind: 'busy' })
     const res = await fetch('/svc/subscribe', {
       method: 'POST',
@@ -24,6 +25,8 @@ export function SubscribeForm({ locale, siteKey }: { locale: Locale; siteKey: st
     const data = (await res?.json().catch(() => ({}))) as { pending?: boolean; error?: string }
     if (!res?.ok) return setState({ kind: 'error', message: data?.error ?? d.invalidEmail })
     setState({ kind: 'done', message: data.pending ? d.subscribedPending : d.subscribed })
+    try { localStorage.setItem('arruhayn-subscribed', '1') } catch {}
+    onSuccess?.()
   }
 
   if (state.kind === 'done') return <p className="notice" role="status">{state.message}</p>

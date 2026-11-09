@@ -826,3 +826,13 @@ a.boxed:hover { background: var(--rust); color: #fff; }
 .saved-item-text { display: grid; }
 .saved-item select { width: auto; max-width: 14rem; padding-block: 0.4rem; }
 .saved .section-head { flex-wrap: wrap; }
+
+/* Newsletter popup */
+.nl-popup-overlay { position: fixed; inset: 0; z-index: 9999; background: rgb(0 0 0 / 0.5); display: grid; place-items: center; padding: 1rem; animation: nl-fade 0.3s ease-out; }
+.nl-popup { position: relative; background: var(--white); border-radius: 16px; padding: 2.5rem 2rem 2rem; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 24px 60px -12px rgb(0 0 0 / 0.4); animation: nl-up 0.35s ease-out; }
+.nl-popup h2 { margin: 0 0 0.5rem; font-weight: 800; font-size: 1.5rem; }
+.nl-popup p { color: var(--ink-2); font-family: var(--font-serif); font-size: 1.05rem; margin: 0 0 1.5rem; }
+.nl-popup-close { position: absolute; top: 0.75rem; inset-inline-end: 0.75rem; width: 36px; height: 36px; border: none; background: none; font-size: 1.5rem; color: var(--ink-3); cursor: pointer; border-radius: 50%; display: grid; place-items: center; transition: background 0.2s; }
+.nl-popup-close:hover { background: var(--bg-2); }
+@keyframes nl-fade { from { opacity: 0; } }
+@keyframes nl-up { from { opacity: 0; transform: translateY(16px) scale(0.97); } }

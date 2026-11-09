@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import { Dateline, fatwaTopics, StoryActions } from '@/components/site/FatwaList'
 import { HeroArt } from '@/components/site/HeroArt'
 import { Icon, type IconName } from '@/components/site/Icon'
+import { NewsletterBand } from '@/components/site/NewsletterBand'
 import { SubscribeForm } from '@/components/site/SubscribeForm'
 import { Tabs } from '@/components/site/Tabs'
 import type { Fatwa } from '@/payload-types'
@@ -449,20 +450,22 @@ export default async function Home({ params }: { params: Promise<{ locale: Local
         </div>
       </div>
 
-      <section className="newsletter-band">
-        <div className="wrap" data-reveal>
-          <div className="tiles" aria-hidden="true">
-            {TILE_ICONS.map((name, i) => (
-              <span key={name} className={`tile tile-${i % 3}`}>
-                <Icon name={name} size={26} />
-              </span>
-            ))}
+      <NewsletterBand>
+        <section className="newsletter-band">
+          <div className="wrap" data-reveal>
+            <div className="tiles" aria-hidden="true">
+              {TILE_ICONS.map((name, i) => (
+                <span key={name} className={`tile tile-${i % 3}`}>
+                  <Icon name={name} size={26} />
+                </span>
+              ))}
+            </div>
+            <h2>{d.home.newsletterTitle}</h2>
+            <p>{d.home.newsletterBody}</p>
+            <SubscribeForm locale={locale} siteKey={turnstileSiteKey()} />
           </div>
-          <h2>{d.home.newsletterTitle}</h2>
-          <p>{d.home.newsletterBody}</p>
-          <SubscribeForm locale={locale} siteKey={turnstileSiteKey()} />
-        </div>
-      </section>
+        </section>
+      </NewsletterBand>
     </>
   )
 }

@@ -46,7 +46,7 @@ export function Turnstile({ siteKey, onToken, locale }: { siteKey: string; onTok
         id = window.turnstile.render(ref.current, {
           sitekey: siteKey,
           language: locale,
-          appearance: 'interaction-only',
+          appearance: 'always',
           callback: (token: string) => cb.current(token),
           'expired-callback': () => cb.current(''),
         })

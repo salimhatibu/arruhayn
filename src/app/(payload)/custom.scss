@@ -107,33 +107,16 @@ a {
   padding-bottom: 0 !important;
 }
 
-.nav-brand {
-  display: grid;
-  gap: 0.15rem;
-  padding: 0.5rem 0 1.25rem;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid var(--desk-line);
-  text-decoration: none;
-  color: var(--desk-cream);
-}
-.nav-brand-ar {
-  font-family: var(--font-amiri), serif;
-  font-weight: 700;
-  font-size: 2.6rem;
-  line-height: 1.2;
-  color: var(--g1);
-}
-.nav-brand-title {
-  font-family: var(--font-serif);
-  font-weight: 700;
-  font-size: 1.15rem;
-}
+// nav-brand removed — sidebar starts directly with the welcome block.
 
 .nav-welcome {
   display: flex;
   align-items: center;
   gap: 0.8rem;
+  padding-top: 0.5rem;
   margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--desk-line);
 }
 .nav-welcome-avatar {
   flex: none;
@@ -153,10 +136,6 @@ a {
   display: grid;
   line-height: 1.25;
   min-width: 0;
-}
-.nav-welcome-label {
-  font-size: 0.75rem;
-  color: var(--desk-dim);
 }
 .nav-welcome-name {
   font-weight: 600;
@@ -304,9 +283,12 @@ a.nav__link[aria-current='page'] {
 /* ───── Top bar ───── */
 
 .app-header__bg {
-  background: rgb(255 253 248 / 0.92) !important;
-  backdrop-filter: blur(10px);
+  background: rgb(255 253 248 / 0.95) !important;
+  backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--color-base-150);
+}
+.app-header__wrapper {
+  min-height: 56px;
 }
 .step-nav {
   font-family: var(--desk-mono);
@@ -342,19 +324,50 @@ a.nav__link[aria-current='page'] {
   text-align: center;
   box-shadow: 0 0 0 2px var(--color-base-0);
 }
+// Account and localizer in the top bar: clean, rounded, consistent sizing.
 .gravatar-account {
   border-radius: 50%;
   box-shadow: 0 0 0 2px var(--color-base-150);
-  width: 34px !important;
-  height: 34px !important;
+  width: 32px !important;
+  height: 32px !important;
 }
-.app-header .localizer-button,
+.app-header .localizer-button {
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--color-base-200);
+  background: var(--color-base-0);
+  color: var(--color-base-700);
+  transition: border-color 0.2s, background-color 0.2s;
+  &:hover {
+    border-color: var(--color-base-400);
+    background: var(--color-base-50);
+  }
+}
 .app-header .account__button {
-  font-size: 0.92rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+  padding: 0.3rem 0.65rem;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+  &:hover {
+    background: var(--color-base-100);
+  }
+  svg {
+    width: 20px;
+    height: 20px;
+  }
 }
-.app-header .account__button svg {
-  width: 20px;
-  height: 20px;
+.app-header .localizer .popup__content {
+  border-radius: 10px;
+  border: 1px solid var(--color-base-150);
+  box-shadow: 0 8px 24px -8px rgb(0 0 0 / 0.12);
+}
+.app-header .actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 /* ───── Headings, buttons, tables ───── */
@@ -875,8 +888,8 @@ select,
   line-height: 1.6;
 }
 
-// Hide Payload's default "Create new" no-results button when the header already has one.
-.collection-list__no-results .list-create-new-doc {
+// Hide Payload's default "Create new" / no-results section — the list header already has a Create button.
+.collection-list__no-results {
   display: none;
 }
 
@@ -1224,4 +1237,57 @@ select,
 }
 .step-nav__home .admin-icon {
   overflow: visible;
+}
+
+/* ───── Globals (Site Settings) ───── */
+
+[class*="global-edit"] {
+  max-width: 860px;
+  .doc-header__title,
+  .render-title {
+    font-family: var(--font-serif);
+    font-size: 2rem !important;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .doc-controls {
+    margin-bottom: 1.5rem;
+  }
+  .render-fields {
+    background: var(--color-base-0);
+    border: 1px solid var(--color-base-150);
+    border-radius: 14px;
+    padding: 1.5rem 1.8rem;
+    box-shadow: 0 10px 30px -22px rgb(23 13 10 / 0.15);
+  }
+  .field-type {
+    padding-block: 0.8rem;
+    border-bottom: 1px solid var(--color-base-100);
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+  .field-type .field-label {
+    font-family: var(--desk-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-base-600);
+  }
+  .field-description {
+    color: var(--color-base-500);
+    font-size: 0.85rem;
+  }
+  textarea {
+    min-height: 80px;
+  }
+}
+
+/* ───── Doc edit views ───── */
+
+.doc-header {
+  padding-top: 1.5rem;
+}
+.doc-controls__dots {
+  border-radius: 8px;
 }

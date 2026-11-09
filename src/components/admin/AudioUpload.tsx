@@ -54,11 +54,11 @@ export function AudioUpload() {
   const duration = useField<number>({ path: 'durationSeconds' })
   const [status, setStatus] = useState<string>('')
   const [busy, setBusy] = useState(false)
-  const [file, setFile] = useState<File | null>(null)
+  const [fileName, setFileName] = useState<string>('')
 
-  async function upload() {
-    if (!file) return setStatus('Choose an audio file first.')
+  async function doUpload(file: File) {
     setBusy(true)
+    setFileName(file.name)
     try {
       let body: Blob = file
       let seconds = 0
@@ -104,22 +104,25 @@ export function AudioUpload() {
     }
   }
 
+  function pickAndUpload() {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'audio/*,.webm,.ogg,.opus,.mp3,.m4a'
+    input.onchange = () => { if (input.files?.[0]) doUpload(input.files[0]) }
+    input.click()
+  }
+
   return (
     <div style={{ marginBottom: 32, padding: 16, border: '1px solid var(--theme-elevation-150)', borderRadius: 8 }}>
       <h4 style={{ marginTop: 0 }}>Audio file</h4>
       {key.value ? <p>Current file: <code>{key.value}</code></p> : null}
-      <input
-        type="file"
-        accept="audio/*,.webm,.ogg,.opus,.mp3,.m4a"
-        onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-        disabled={busy}
-      />
-      <div style={{ marginTop: 12 }}>
-        <Button onClick={upload} disabled={busy || !file} buttonStyle="secondary" size="small">
-          {key.value ? 'Replace audio' : 'Upload audio'}
+      {fileName && !key.value ? <p style={{ fontSize: 14, color: 'var(--theme-elevation-500)' }}>{fileName}</p> : null}
+      <div>
+        <Button onClick={pickAndUpload} disabled={busy} buttonStyle="secondary" size="small">
+          {busy ? status : key.value ? 'Replace audio' : 'Upload audio'}
         </Button>
       </div>
-      {status ? <p role="status">{status}</p> : null}
+      {status && !busy ? <p role="status">{status}</p> : null}
       <p style={{ opacity: 0.7, fontSize: 13 }}>
         Recordings from the live room are converted to MP3 (about 20 MB an hour) before uploading.
       </p>

@@ -324,50 +324,96 @@ a.nav__link[aria-current='page'] {
   text-align: center;
   box-shadow: 0 0 0 2px var(--color-base-0);
 }
-// Account and localizer in the top bar: clean, rounded, consistent sizing.
-.gravatar-account {
-  border-radius: 50%;
-  box-shadow: 0 0 0 2px var(--color-base-150);
-  width: 32px !important;
-  height: 32px !important;
+// The controls at the end of the top bar read as one group: icon, locale, then the account.
+.app-header__controls-wrapper {
+  gap: 0.5rem;
 }
-.app-header .localizer-button {
-  font-size: 0.82rem;
-  font-weight: 500;
-  padding: 0.35rem 0.75rem;
-  border-radius: 8px;
+.app-header__actions-wrapper,
+.app-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.app-header__localizer-spacing {
+  margin: 0 !important;
+}
+.questions-bell {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  svg {
+    width: 19px;
+    height: 19px;
+  }
+}
+.localizer-button {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.3rem;
+  height: 34px;
+  padding: 0 0.6rem;
+  border-radius: 9px;
   border: 1px solid var(--color-base-200);
   background: var(--color-base-0);
   color: var(--color-base-700);
+  font-size: 0.82rem;
+  cursor: pointer;
   transition: border-color 0.2s, background-color 0.2s;
   &:hover {
-    border-color: var(--color-base-400);
+    border-color: var(--color-base-350);
     background: var(--color-base-50);
   }
 }
-.app-header .account__button {
-  font-size: 0.88rem;
-  font-weight: 500;
-  padding: 0.3rem 0.65rem;
-  border-radius: 8px;
-  transition: background-color 0.2s;
-  &:hover {
-    background: var(--color-base-100);
-  }
-  svg {
-    width: 20px;
-    height: 20px;
+.localizer-button__label {
+  color: var(--color-base-500);
+}
+.localizer-button__current {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+  font-weight: 600;
+}
+.localizer-button__chevron {
+  width: 15px;
+  height: 15px;
+  .stroke {
+    stroke: var(--color-base-500);
   }
 }
-.app-header .localizer .popup__content {
+// The account avatar closes the row, set off by a hairline.
+.app-header__account {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin-inline-start: 0.35rem;
+  border-radius: 50%;
+  &::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: -0.35rem;
+    width: 1px;
+    height: 22px;
+    background: var(--color-base-150);
+  }
+  position: relative;
+}
+.gravatar-account,
+.app-header__account svg {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 50%;
+  background: var(--color-base-100);
+  box-shadow: 0 0 0 1px var(--color-base-200);
+  transition: box-shadow 0.2s;
+}
+.app-header__account:hover .gravatar-account {
+  box-shadow: 0 0 0 2px var(--desk-gold);
+}
+.localizer .popup__content {
   border-radius: 10px;
   border: 1px solid var(--color-base-150);
   box-shadow: 0 8px 24px -8px rgb(0 0 0 / 0.12);
-}
-.app-header .actions {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
 }
 
 /* ───── Headings, buttons, tables ───── */
@@ -1239,55 +1285,144 @@ select,
   overflow: visible;
 }
 
-/* ───── Globals (Site Settings) ───── */
+/* ───── Doc edit views (collections and globals) ───── */
 
-[class*="global-edit"] {
-  max-width: 860px;
-  .doc-header__title,
-  .render-title {
-    font-family: var(--font-serif);
-    font-size: 2rem !important;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-  }
-  .doc-controls {
-    margin-bottom: 1.5rem;
-  }
-  .render-fields {
-    background: var(--color-base-0);
-    border: 1px solid var(--color-base-150);
-    border-radius: 14px;
-    padding: 1.5rem 1.8rem;
-    box-shadow: 0 10px 30px -22px rgb(23 13 10 / 0.15);
-  }
-  .field-type {
-    padding-block: 0.8rem;
-    border-bottom: 1px solid var(--color-base-100);
-    &:last-child {
-      border-bottom: none;
-    }
-  }
-  .field-type .field-label {
-    font-family: var(--desk-mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--color-base-600);
-  }
-  .field-description {
-    color: var(--color-base-500);
-    font-size: 0.85rem;
-  }
-  textarea {
-    min-height: 80px;
+// Without a sidebar (globals, simple collections) the page is one narrow column, so the title row
+// and the Save toolbar are capped to the same width as the fields card instead of running the
+// full window. Documents that do have a sidebar keep Payload's full width.
+.template-default__wrap:has(.document-fields--no-sidebar) {
+  .doc-header__header,
+  .doc-controls__wrapper,
+  .render-fields,
+  .auth-fields {
+    max-width: 820px;
   }
 }
 
-/* ───── Doc edit views ───── */
+.doc-header__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-top: 1.75rem;
+}
+.doc-header__title,
+.render-title {
+  font-family: var(--font-serif);
+  font-size: 2rem !important;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
 
-.doc-header {
-  padding-top: 1.5rem;
+// Edit / API as one segmented control instead of two loose buttons.
+.doc-tabs__tabs {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--color-base-100);
+  box-shadow: inset 0 0 0 1px var(--color-base-150);
+}
+.doc-tab {
+  border-radius: 7px !important;
+  padding: 0.35rem 0.95rem !important;
+  margin: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  .doc-tab__label {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--color-base-600);
+  }
+  &:hover .doc-tab__label {
+    color: var(--color-base-900);
+  }
+}
+.doc-tab--active {
+  background: var(--color-base-0) !important;
+  box-shadow: 0 1px 3px rgb(23 13 10 / 0.12) !important;
+  .doc-tab__label {
+    color: var(--color-base-900);
+    font-weight: 600;
+  }
+}
+
+// Save toolbar: a quiet bar with the actions at its end.
+.doc-controls {
+  margin-bottom: 1.75rem;
+}
+.doc-controls__wrapper {
+  align-items: center;
+  gap: 1rem;
+  padding-block: 0.75rem;
+}
+.doc-controls__controls-wrapper {
+  flex: none;
+  margin-inline-start: auto;
+}
+.doc-controls__controls {
+  gap: 0.5rem;
+}
+// Globals carry no status or timestamps, so the empty meta list adds a blank row.
+.doc-controls__meta:empty {
+  display: none;
+}
+.doc-controls__divider {
+  background: var(--color-base-150);
 }
 .doc-controls__dots {
   border-radius: 8px;
+}
+.doc-controls__popup .popup-button--background {
+  border-radius: 8px;
+  border: 1px solid var(--color-base-200);
+  background: var(--color-base-0);
+  &:hover {
+    background: var(--color-base-100);
+  }
+}
+
+// Fields sit on a card, with mono labels and a rule between each one.
+.render-fields,
+.auth-fields {
+  background: var(--color-base-0);
+  border: 1px solid var(--color-base-150);
+  border-radius: 14px;
+  padding: 0.6rem 1.8rem 1.2rem;
+  box-shadow: 0 10px 30px -22px rgb(23 13 10 / 0.15);
+}
+// The account page stacks the sign-in card above the profile card.
+.auth-fields {
+  margin-bottom: 1.25rem;
+  padding-block: 1.4rem;
+}
+.auth-fields .field-label {
+  font-family: var(--desk-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-base-600);
+}
+.render-fields > .field-type {
+  padding-block: 1.1rem;
+  border-bottom: 1px solid var(--color-base-100);
+  &:last-child {
+    border-bottom: none;
+  }
+}
+.render-fields > .field-type > .field-label,
+.render-fields > .field-type .field-label {
+  font-family: var(--desk-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-base-600);
+}
+.render-fields .field-description {
+  color: var(--color-base-500);
+  font-size: 0.85rem;
+}
+.render-fields textarea {
+  min-height: 90px;
 }

@@ -1,0 +1,122 @@
+[
+  {
+    "slug": "engagement-proposal",
+    "order": 1,
+    "name": { "en": "Engagement and proposal", "ar": "الخِطبة" },
+    "description": {
+      "en": "Seeking a spouse, the proposal, and what is allowed between the two before the contract.",
+      "ar": "طلب الزواج والخطبة وما يجوز بين الخاطبين قبل العقد."
+    },
+    "searchWords": ["proposal", "engagement", "khitbah", "خطبة", "الخاطب"]
+  },
+  {
+    "slug": "wali",
+    "order": 2,
+    "name": { "en": "Wali", "ar": "الولي" },
+    "description": {
+      "en": "The woman's guardian in marriage, who may act as wali, and the order of guardianship.",
+      "ar": "ولي المرأة في النكاح، ومن يصح أن يكون وليًا، وترتيب الأولياء."
+    },
+    "searchWords": ["guardian", "wali", "walee", "ولي", "الولاية"]
+  },
+  {
+    "slug": "mahr",
+    "order": 3,
+    "name": { "en": "Mahr (dowry)", "ar": "المهر (الصَّداق)" },
+    "description": {
+      "en": "The bridal gift owed to the wife: its amount, when it is due, and deferring it.",
+      "ar": "المهر الواجب للزوجة: مقداره ووقت وجوبه وتأجيله."
+    },
+    "searchWords": ["dowry", "mahr", "sadaq", "bride gift", "مهر", "الصداق", "صداق"]
+  },
+  {
+    "slug": "contract",
+    "order": 4,
+    "name": { "en": "Contract", "ar": "عقد النكاح" },
+    "description": {
+      "en": "The marriage contract: offer and acceptance, witnesses, conditions, and how it is concluded.",
+      "ar": "عقد النكاح: الإيجاب والقبول والشهود والشروط وكيفية إتمامه."
+    },
+    "searchWords": ["nikah", "contract", "witnesses", "offer and acceptance", "عقد", "الإيجاب", "القبول", "الشهود"]
+  },
+  {
+    "slug": "invalid-marriages",
+    "order": 5,
+    "name": { "en": "Invalid marriages", "ar": "الأنكحة الفاسدة والباطلة" },
+    "description": {
+      "en": "Marriages that are void or defective, such as shighar, tahlil, and temporary marriage.",
+      "ar": "الأنكحة الباطلة والفاسدة كنكاح الشغار والتحليل والمتعة."
+    },
+    "searchWords": ["invalid", "void", "shighar", "tahlil", "mutah", "باطل", "فاسد", "الشغار", "التحليل", "المتعة"]
+  },
+  {
+    "slug": "rights-of-spouses",
+    "order": 6,
+    "name": { "en": "Rights of spouses", "ar": "الحقوق الزوجية" },
+    "description": {
+      "en": "What husband and wife owe each other, including maintenance, housing, and kind treatment.",
+      "ar": "حقوق كل من الزوجين على الآخر من النفقة والسكنى والمعاشرة بالمعروف."
+    },
+    "searchWords": ["rights", "nafaqah", "maintenance", "obedience", "حقوق", "النفقة", "السكنى"]
+  },
+  {
+    "slug": "polygyny",
+    "order": 7,
+    "name": { "en": "Polygyny", "ar": "تعدد الزوجات" },
+    "description": {
+      "en": "Marrying more than one wife, its conditions, and justice between wives.",
+      "ar": "التعدد وشروطه والعدل بين الزوجات."
+    },
+    "searchWords": ["polygyny", "polygamy", "second wife", "taaddud", "تعدد", "الضرة", "العدل بين الزوجات"]
+  },
+  {
+    "slug": "talaq",
+    "order": 8,
+    "name": { "en": "Talaq (divorce)", "ar": "الطلاق" },
+    "description": {
+      "en": "Divorce pronounced by the husband: its forms, its number, and taking the wife back.",
+      "ar": "الطلاق من الزوج: أنواعه وعدده والرجعة."
+    },
+    "searchWords": ["divorce", "talaq", "talaaq", "raji", "bain", "طلاق", "الرجعة", "طلقة"]
+  },
+  {
+    "slug": "khul",
+    "order": 9,
+    "name": { "en": "Khul'", "ar": "الخُلع" },
+    "description": {
+      "en": "Separation at the wife's request in return for compensation.",
+      "ar": "الفرقة بطلب الزوجة مقابل عوض."
+    },
+    "searchWords": ["khul", "khula", "khulu", "خلع", "المخالعة"]
+  },
+  {
+    "slug": "annulment",
+    "order": 10,
+    "name": { "en": "Annulment", "ar": "الفسخ" },
+    "description": {
+      "en": "Dissolving the marriage by a judge or for a defect, without a talaq.",
+      "ar": "فسخ النكاح بحكم القاضي أو لعيب من غير طلاق."
+    },
+    "searchWords": ["annulment", "faskh", "judicial separation", "فسخ", "التفريق", "القاضي"]
+  },
+  {
+    "slug": "iddah",
+    "order": 11,
+    "name": { "en": "Iddah", "ar": "العِدّة" },
+    "description": {
+      "en": "The waiting period after divorce or the husband's death, and what applies during it.",
+      "ar": "العدة بعد الطلاق أو الوفاة وأحكامها."
+    },
+    "searchWords": ["iddah", "iddat", "waiting period", "mourning", "عدة", "الإحداد"]
+  },
+  {
+    "slug": "custody",
+    "order": 12,
+    "name": { "en": "Custody", "ar": "الحضانة" },
+    "description": {
+      "en": "Who raises the children after separation, and the rights of each parent.",
+      "ar": "حضانة الأولاد بعد الفرقة وحقوق كل من الأبوين."
+    },
+    "searchWords": ["custody", "hadanah", "hadana", "children", "حضانة", "الأولاد"]
+  }
+]

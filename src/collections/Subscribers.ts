@@ -6,12 +6,13 @@ export const Subscribers: CollectionConfig = {
   slug: 'subscribers',
   admin: {
     useAsTitle: 'email',
-    defaultColumns: ['email', 'language', 'status', 'createdAt'],
+    defaultColumns: ['name', 'email', 'language', 'status', 'createdAt'],
     hidden: hiddenUnless('admin'),
     group: 'Publishing',
   },
   access: { read: adminOnly, create: adminOnly, update: adminOnly, delete: adminOnly },
   fields: [
+    { name: 'name', type: 'text', maxLength: 120 },
     { name: 'email', type: 'email', required: true, unique: true, index: true },
     {
       name: 'language',

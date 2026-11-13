@@ -83,7 +83,16 @@ const withListUI = (c: CollectionConfig): CollectionConfig => ({
   },
   fields: c.fields.map((f) =>
     'name' in f && f.name === 'status' && f.type === 'select'
-      ? { ...f, admin: { ...f.admin, components: { ...f.admin?.components, Cell: '@/components/admin/StatusCell#StatusCell' } } }
+      ? {
+          ...f,
+          admin: {
+            ...f.admin,
+            components: {
+              ...f.admin?.components,
+              Cell: '@/components/admin/StatusCell#StatusCell',
+            },
+          },
+        }
       : f,
   ),
 })
@@ -107,7 +116,6 @@ export default buildConfig({
     components: {
       beforeLogin: ['@/components/admin/StaffNotice#StaffNotice'],
       beforeNavLinks: ['@/components/admin/NavWelcome#NavWelcome'],
-      afterNavLinks: ['@/components/admin/NavFooter#NavFooter'],
       beforeDashboard: ['@/components/admin/DashboardIntro#DashboardIntro'],
       actions: ['@/components/admin/QuestionsBell#QuestionsBell'],
       graphics: {

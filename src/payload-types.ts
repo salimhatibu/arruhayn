@@ -539,6 +539,7 @@ export interface HijriMonth {
  */
 export interface Subscriber {
   id: number;
+  name?: string | null;
   email: string;
   language?: ('en' | 'ar') | null;
   status: 'pending' | 'confirmed' | 'unsubscribed';
@@ -874,6 +875,7 @@ export interface HijriMonthsSelect<T extends boolean = true> {
  * via the `definition` "subscribers_select".
  */
 export interface SubscribersSelect<T extends boolean = true> {
+  name?: T;
   email?: T;
   language?: T;
   status?: T;

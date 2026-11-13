@@ -4,7 +4,8 @@
 export const LOCALES = ['en', 'ar'] as const
 export type Locale = (typeof LOCALES)[number]
 
-export const isLocale = (value: string): value is Locale => (LOCALES as readonly string[]).includes(value)
+export const isLocale = (value: string): value is Locale =>
+  (LOCALES as readonly string[]).includes(value)
 export const dir = (locale: Locale) => (locale === 'ar' ? 'rtl' : 'ltr')
 
 const en = {
@@ -48,7 +49,8 @@ const en = {
     all: 'All',
     upcoming: 'Upcoming classes',
     upcomingTitle: 'Live classes on marriage',
-    upcomingBody: 'Join from your browser and listen live. Recordings are added to the library afterwards.',
+    upcomingBody:
+      'Join from your browser and listen live. Recordings are added to the library afterwards.',
     reserve: 'Join',
     allClasses: 'All classes',
     newsletterTitle: 'Benefits on marriage, in your inbox',
@@ -110,12 +112,13 @@ const en = {
     placeholder: 'Search fatwas and newsletters',
     results: (n: number) => (n === 1 ? '1 result' : `${n} results`),
     none: 'Nothing matched. Try a shorter word, or ask your question.',
-    hint: 'Search in Arabic or English. Diacritics don\'t matter.',
+    hint: "Search in Arabic or English. Diacritics don't matter.",
     all: 'Everything',
   },
   ask: {
     title: 'Ask a question',
-    intro: 'Send your question to our reviewers. Questions are private, and your name is never published. If your question is answered, it may appear on the site without any details that identify you.',
+    intro:
+      'Send your question to our reviewers. Questions are private, and your name is never published. If your question is answered, it may appear on the site without any details that identify you.',
     question: 'Your question',
     language: 'Language of your question',
     email: 'Email (optional)',
@@ -125,20 +128,24 @@ const en = {
     sent: 'Your question was sent. JazakAllahu khayran.',
     tooShort: 'Write your question in at least 20 characters.',
     failed: 'Your question could not be sent. Try again in a few minutes.',
-    disclaimer: 'Personal disputes over talaq, khul\', or custody should be taken to a qualified local scholar or qadi.',
+    disclaimer:
+      "Personal disputes over talaq, khul', or custody should be taken to a qualified local scholar or qadi.",
   },
   newsletter: {
     title: 'Newsletters',
     intro: 'Articles on marriage and family life, published regularly.',
     subscribeTitle: 'Get the newsletter',
     subscribeBody: 'New issues by email, in English or Arabic.',
+    name: 'Your name',
+    nameRequired: 'Enter your name.',
     email: 'Your email',
     subscribe: 'Subscribe',
-    subscribed: 'You\'re on the list. We\'ll email you to confirm.',
-    subscribedPending: 'You\'re on the list. We\'ll email you to confirm when our newsletter launches.',
+    subscribed: "You're on the list. We'll email you to confirm.",
+    subscribedPending:
+      "You're on the list. We'll email you to confirm when our newsletter launches.",
     invalidEmail: 'Enter a valid email address.',
     confirmed: 'Your subscription is confirmed.',
-    unsubscribed: 'You\'ve been unsubscribed.',
+    unsubscribed: "You've been unsubscribed.",
     archive: 'Archive',
     none: 'The first issue is on its way.',
   },
@@ -155,7 +162,11 @@ const en = {
     savedOnDevice: 'Your ticks are saved on this device only.',
     readFatwa: 'Read the fatwa',
   },
-  glossary: { title: 'Glossary', intro: 'Short definitions of the terms used across the site.', more: 'More in the glossary' },
+  glossary: {
+    title: 'Glossary',
+    intro: 'Short definitions of the terms used across the site.',
+    more: 'More in the glossary',
+  },
   live: {
     title: 'Live classes',
     intro: 'Join classes live from your browser. You can listen without an account.',
@@ -175,13 +186,13 @@ const en = {
     shareScreen: 'Share screen',
     stopSharing: 'Stop sharing',
     listeners: (n: number) => (n === 1 ? '1 listening' : `${n} listening`),
-    notLive: 'This class isn\'t live yet. It starts at',
+    notLive: "This class isn't live yet. It starts at",
     ended: 'This class has ended.',
-    notConfigured: 'Live classes aren\'t set up yet.',
+    notConfigured: "Live classes aren't set up yet.",
     tapToListen: 'Tap to start listening',
     speaking: 'Speaking',
     presenting: 'is sharing their screen',
-    joinFailed: 'You couldn\'t join the class. Reload the page and try again.',
+    joinFailed: "You couldn't join the class. Reload the page and try again.",
   },
   library: {
     title: 'Library',
@@ -218,7 +229,8 @@ const en = {
   },
   calendar: {
     title: 'Calendar',
-    intro: 'Classes, Islamic dates, and Sunnah fasting days. Dates that depend on moon sighting are marked expected until confirmed.',
+    intro:
+      'Classes, Islamic dates, and Sunnah fasting days. Dates that depend on moon sighting are marked expected until confirmed.',
     classes: 'Classes',
     islamic: 'Islamic dates',
     fasts: 'Sunnah fasts',
@@ -230,7 +242,8 @@ const en = {
     agenda: 'Dates this month',
     addToCalendar: 'Add to calendar',
     feeds: 'Calendar feeds',
-    feedsIntro: 'Subscribe once and new dates appear in your calendar app automatically. Each feed covers the next 12 months.',
+    feedsIntro:
+      'Subscribe once and new dates appear in your calendar app automatically. Each feed covers the next 12 months.',
     reminder: 'Fasts include a reminder the evening before.',
     prev: 'Previous month',
     next: 'Next month',
@@ -272,7 +285,7 @@ const en = {
     ask: 'Ask a question',
     rights: 'Arruhayn',
   },
-  notFound: 'This page doesn\'t exist.',
+  notFound: "This page doesn't exist.",
   goHome: 'Go to the home page',
   minutes: 'min',
 }
@@ -325,7 +338,8 @@ const ar: Dictionary = {
     allClasses: 'جميع الدروس',
     newsletterTitle: 'فوائد في النكاح تصل إلى بريدك',
     newsletterBody: 'تصلك أعداد النشرة الجديدة بالبريد بالعربية أو الإنجليزية.',
-    fatwaCount: (n: number) => (n === 1 ? 'فتوى واحدة' : n === 2 ? 'فتويان' : n <= 10 ? `${n} فتاوى` : `${n} فتوى`),
+    fatwaCount: (n: number) =>
+      n === 1 ? 'فتوى واحدة' : n === 2 ? 'فتويان' : n <= 10 ? `${n} فتاوى` : `${n} فتوى`,
   },
   translatedBy: 'ترجمة',
   firstPublishedOn: 'نُشرت أولًا في',
@@ -387,7 +401,8 @@ const ar: Dictionary = {
   },
   ask: {
     title: 'أرسل سؤالًا',
-    intro: 'أرسل سؤالك إلى المراجعين. الأسئلة خاصة، ولا يُنشر اسمك أبدًا. وإن أُجيب عن سؤالك فقد يُنشر في الموقع دون ما يدل عليك.',
+    intro:
+      'أرسل سؤالك إلى المراجعين. الأسئلة خاصة، ولا يُنشر اسمك أبدًا. وإن أُجيب عن سؤالك فقد يُنشر في الموقع دون ما يدل عليك.',
     question: 'سؤالك',
     language: 'لغة السؤال',
     email: 'البريد الإلكتروني (اختياري)',
@@ -404,6 +419,8 @@ const ar: Dictionary = {
     intro: 'مقالات في النكاح وشؤون الأسرة تصدر بانتظام.',
     subscribeTitle: 'اشترك في النشرة',
     subscribeBody: 'تصلك الأعداد الجديدة بالبريد بالعربية أو الإنجليزية.',
+    name: 'اسمك',
+    nameRequired: 'أدخل اسمك.',
     email: 'بريدك الإلكتروني',
     subscribe: 'اشترك',
     subscribed: 'تم تسجيلك. سنرسل إليك رسالة للتأكيد.',
@@ -422,12 +439,18 @@ const ar: Dictionary = {
     checklist: 'قائمة',
     path: 'مسار قراءة',
     step: 'الخطوة',
-    stepOf: (a: number, b: number) => `الخطوة ${a.toLocaleString('ar-EG')} من ${b.toLocaleString('ar-EG')}`,
-    progress: (a: number, b: number) => `أُنجز ${a.toLocaleString('ar-EG')} من ${b.toLocaleString('ar-EG')}`,
+    stepOf: (a: number, b: number) =>
+      `الخطوة ${a.toLocaleString('ar-EG')} من ${b.toLocaleString('ar-EG')}`,
+    progress: (a: number, b: number) =>
+      `أُنجز ${a.toLocaleString('ar-EG')} من ${b.toLocaleString('ar-EG')}`,
     savedOnDevice: 'تُحفظ اختياراتك على هذا الجهاز فقط.',
     readFatwa: 'اقرأ الفتوى',
   },
-  glossary: { title: 'المصطلحات', intro: 'تعريفات موجزة للمصطلحات المستعملة في الموقع.', more: 'المزيد في المصطلحات' },
+  glossary: {
+    title: 'المصطلحات',
+    intro: 'تعريفات موجزة للمصطلحات المستعملة في الموقع.',
+    more: 'المزيد في المصطلحات',
+  },
   live: {
     title: 'الدروس المباشرة',
     intro: 'احضر الدروس مباشرة من متصفحك، ويمكنك الاستماع دون حساب.',
@@ -490,7 +513,8 @@ const ar: Dictionary = {
   },
   calendar: {
     title: 'التقويم',
-    intro: 'الدروس والمناسبات الشرعية وأيام صيام التطوع. التواريخ المتعلقة برؤية الهلال تبقى متوقعة حتى تثبت.',
+    intro:
+      'الدروس والمناسبات الشرعية وأيام صيام التطوع. التواريخ المتعلقة برؤية الهلال تبقى متوقعة حتى تثبت.',
     classes: 'الدروس',
     islamic: 'المناسبات الشرعية',
     fasts: 'صيام التطوع',
@@ -502,7 +526,8 @@ const ar: Dictionary = {
     agenda: 'تواريخ هذا الشهر',
     addToCalendar: 'أضف إلى التقويم',
     feeds: 'اشتراكات التقويم',
-    feedsIntro: 'اشترك مرة واحدة فتظهر التواريخ الجديدة في تقويمك تلقائيًا، ويغطي كل اشتراك الأشهر الاثني عشر القادمة.',
+    feedsIntro:
+      'اشترك مرة واحدة فتظهر التواريخ الجديدة في تقويمك تلقائيًا، ويغطي كل اشتراك الأشهر الاثني عشر القادمة.',
     reminder: 'يتضمن الصيام تذكيرًا في المساء السابق.',
     prev: 'الشهر السابق',
     next: 'الشهر التالي',

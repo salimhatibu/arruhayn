@@ -1,0 +1,9 @@
+diff --git a/index.js b/index.js
+index 77968aed5d456cccc294f60912ef381fa1e52a7b..89f2203bea933d1ba3ed0383ce720cc4d19b94c1 100644
+--- a/index.js
++++ b/index.js
+@@ -36 +36,3 @@
+-	return Object.keys(target).concat(getEnumerableOwnPropertySymbols(target))
++	return Object.keys(target).filter(function(key) {
++		return key !== '__proto__'
++	}).concat(getEnumerableOwnPropertySymbols(target))

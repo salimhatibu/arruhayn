@@ -309,44 +309,6 @@ a.nav__link[aria-current='page'] {
   text-transform: uppercase;
   color: var(--color-base-600);
 }
-.questions-bell {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  border: 1px solid color-mix(in srgb, var(--desk-wine) 16%, transparent);
-  border-radius: 12px;
-  background: linear-gradient(145deg, #fffdf8, #f8eee4);
-  color: var(--desk-wine);
-  box-shadow: 0 2px 6px rgb(23 13 10 / 0.04);
-  transition:
-    background-color 0.2s,
-    color 0.2s,
-    border-color 0.2s,
-    transform 0.2s,
-    box-shadow 0.2s;
-  &:hover {
-    transform: translateY(-1px);
-    border-color: color-mix(in srgb, var(--desk-wine) 34%, transparent);
-    background: #fffaf1;
-    box-shadow: 0 6px 14px -8px rgb(23 13 10 / 0.3);
-  }
-}
-.questions-bell-count {
-  position: absolute;
-  top: 2px;
-  inset-inline-end: 0;
-  min-width: 17px;
-  height: 17px;
-  padding: 0 4px;
-  border-radius: 999px;
-  background: var(--desk-rust);
-  color: #fff;
-  font: 600 0.62rem/17px var(--font-body);
-  text-align: center;
-  box-shadow: 0 0 0 2px var(--color-base-0);
-}
 // The account control is the only utility action at the end of the top bar.
 .app-header__controls-wrapper {
   gap: 0.9rem;
@@ -360,12 +322,6 @@ a.nav__link[aria-current='page'] {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-}
-.questions-bell {
-  svg {
-    width: 20px;
-    height: 20px;
-  }
 }
 .localizer-button {
   display: inline-flex !important;
@@ -1418,6 +1374,9 @@ select,
   }
 }
 @media (max-width: 720px) {
+  #nav-toggler.template-default__nav-toggler-wrapper {
+    display: none !important;
+  }
   .app-header__wrapper {
     min-height: 60px;
     padding-inline: 0.75rem;

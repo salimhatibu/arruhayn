@@ -98,6 +98,21 @@ a {
   color: var(--desk-cream);
   border-inline-end: 1px solid var(--desk-line);
 }
+@media (min-width: 721px) {
+  .template-default {
+    grid-template-columns: var(--nav-width) minmax(0, 1fr) !important;
+  }
+  .template-default .nav {
+    display: flex !important;
+    opacity: 1;
+  }
+  .nav {
+    position: sticky;
+    inset-block-start: 0;
+    align-self: flex-start;
+    height: 100vh;
+  }
+}
 .nav__wrap {
   counter-reset: desk-group;
   display: flex;
@@ -917,28 +932,8 @@ a.nav__link[aria-current='page'] {
 .admin-icon {
   display: inline-flex;
   align-items: center;
-  gap: 0.65rem;
   color: var(--desk-wine);
   white-space: nowrap;
-}
-.admin-icon-mark {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border: 1px solid color-mix(in srgb, var(--desk-wine) 14%, transparent);
-  border-radius: 11px;
-  background: linear-gradient(145deg, #fffaf1, #f4e7d8);
-  box-shadow: 0 3px 8px -4px rgb(23 13 10 / 0.35);
-  svg {
-    width: 23px;
-    height: 23px;
-    stroke: var(--desk-wine);
-    stroke-width: 1.55;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
 }
 .admin-icon-ar {
   font-family: var(--font-amiri), serif;
@@ -1422,7 +1417,6 @@ select,
     height: 20px;
   }
 }
-
 @media (max-width: 720px) {
   .app-header__wrapper {
     min-height: 60px;
@@ -1435,14 +1429,6 @@ select,
   }
   .step-nav__home {
     padding-inline: 0.2rem !important;
-  }
-  .admin-icon {
-    gap: 0.4rem;
-  }
-  .admin-icon-mark {
-    width: 30px;
-    height: 30px;
-    border-radius: 9px;
   }
   .admin-icon-ar {
     font-size: 1.08rem;
@@ -1466,6 +1452,13 @@ select,
   #nav-toggler .template-default__nav-toggler {
     width: 36px;
     height: 36px;
+  }
+}
+
+@media (min-width: 721px) {
+  #nav-toggler.template-default__nav-toggler-wrapper,
+  #nav-toggler.template-default__nav-toggler-container {
+    display: none !important;
   }
 }
 

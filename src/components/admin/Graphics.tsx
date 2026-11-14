@@ -30,9 +30,6 @@ export function Logo() {
 export function Icon() {
   return (
     <span className="admin-icon">
-      <span className="admin-icon-mark">
-        <BrandMark />
-      </span>
       <span className="admin-icon-ar" lang="ar">
         الرُّحَين
       </span>

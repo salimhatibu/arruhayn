@@ -5,6 +5,7 @@ import { fastingDays, islamicDates, mondayThursdayExceptions } from '@/lib/fasti
 import { addDays, isoDay, toGregorian, toHijri, umalqura, umalquraMonthStart, utcDay } from '@/lib/hijri'
 import { buildCalendar, foldLine } from '@/lib/ics'
 import { safeHref, textDir } from '@/lib/format'
+import { audioContentType, normalizeAudioMimeType, shouldConvertAudioToMp3 } from '@/lib/audio-upload'
 
 describe('hijri', () => {
   it('matches the Umm al-Qura start of 1447', () => {
@@ -114,5 +115,26 @@ describe('links and text direction from stored content', () => {
     expect(textDir('Conditions of the Nikkah', 'ar')).toEqual({ dir: 'ltr', lang: 'en' })
     expect(textDir('شروط النكاح', 'ar')).toEqual({ dir: 'auto' })
     expect(textDir('Conditions of the Nikkah', 'en')).toEqual({ dir: 'auto' })
+  })
+})
+
+describe('audio uploads', () => {
+  it('accepts supported audio MIME types and extension-only files', () => {
+    expect(audioContentType({ name: 'lesson.webm', type: 'audio/webm' })).toBe('audio/webm')
+    expect(audioContentType({ name: 'lesson.wav', type: 'application/octet-stream' })).toBe('audio/wav')
+    expect(normalizeAudioMimeType('audio/x-m4a')).toBe('audio/mp4')
+    expect(normalizeAudioMimeType(42)).toBeUndefined()
+  })
+
+  it('keeps videos out of the recordings uploader', () => {
+    expect(audioContentType({ name: 'lesson.webm', type: 'video/webm' })).toBeUndefined()
+    expect(audioContentType({ name: 'lesson.mp4', type: 'application/octet-stream' })).toBeUndefined()
+    expect(audioContentType({ name: 'lesson.flac', type: 'audio/flac' })).toBeUndefined()
+  })
+
+  it('converts browser-friendly recording formats but leaves MP3 untouched', () => {
+    expect(shouldConvertAudioToMp3('audio/webm')).toBe(true)
+    expect(shouldConvertAudioToMp3('audio/ogg')).toBe(true)
+    expect(shouldConvertAudioToMp3('audio/mpeg')).toBe(false)
   })
 })

@@ -117,7 +117,6 @@ export default buildConfig({
       beforeLogin: ['@/components/admin/StaffNotice#StaffNotice'],
       beforeNavLinks: ['@/components/admin/NavWelcome#NavWelcome'],
       beforeDashboard: ['@/components/admin/DashboardIntro#DashboardIntro'],
-      actions: ['@/components/admin/QuestionsBell#QuestionsBell'],
       graphics: {
         Logo: '@/components/admin/Graphics#Logo',
         Icon: '@/components/admin/Graphics#Icon',

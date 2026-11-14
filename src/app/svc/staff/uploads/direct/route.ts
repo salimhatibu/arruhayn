@@ -4,7 +4,7 @@ import { hasRole } from '@/access/roles'
 import { errorJson, staffUser } from '@/lib/staff'
 
 // Upload through the Worker, for local development or when R2 API keys aren't configured.
-// Limited by the Worker request size (100 MB), so production uses presigned URLs instead.
+// The start route caps this fallback below the Worker request-size limit.
 export async function PUT(request: Request) {
   try {
     const user = await staffUser(request)

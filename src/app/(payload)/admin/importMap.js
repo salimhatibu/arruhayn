@@ -32,8 +32,8 @@ import { QuestionsBell as QuestionsBell_71c434fe501fecb901a918a1084e7e69 } from 
 import { DashboardIntro as DashboardIntro_18d6cb17d810cbc0153a098c2eb10507 } from '@/components/admin/DashboardIntro'
 import { StaffNotice as StaffNotice_8598d700ac923b4bb7f260ec2c4771b1 } from '@/components/admin/StaffNotice'
 import { NavWelcome as NavWelcome_cc45a1a22ca15ae897d8d84629aa7fcb } from '@/components/admin/NavWelcome'
-import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 import { R2ClientUploadHandler as R2ClientUploadHandler_85cc02ed84006fcc91d3aff39dda669d } from '@payloadcms/storage-r2/client'
+import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
 export const importMap = {
@@ -71,6 +71,6 @@ export const importMap = {
   "@/components/admin/DashboardIntro#DashboardIntro": DashboardIntro_18d6cb17d810cbc0153a098c2eb10507,
   "@/components/admin/StaffNotice#StaffNotice": StaffNotice_8598d700ac923b4bb7f260ec2c4771b1,
   "@/components/admin/NavWelcome#NavWelcome": NavWelcome_cc45a1a22ca15ae897d8d84629aa7fcb,
-  "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1,
-  "@payloadcms/storage-r2/client#R2ClientUploadHandler": R2ClientUploadHandler_85cc02ed84006fcc91d3aff39dda669d
+  "@payloadcms/storage-r2/client#R2ClientUploadHandler": R2ClientUploadHandler_85cc02ed84006fcc91d3aff39dda669d,
+  "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

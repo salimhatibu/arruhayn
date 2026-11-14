@@ -171,6 +171,7 @@ export default buildConfig({
       bucket: cloudflare.env.R2,
       // Images are stored by filename; class recordings live under recordings/.
       collections: { media: true },
+      clientUploads: true,
     }),
   ],
 })

@@ -77,7 +77,9 @@ Recordings upload straight from the teacher's browser to R2, which needs an R2 A
    npx wrangler r2 bucket cors set arruhayn-media --file docs/r2-cors.json
    ```
 
-Without these secrets, uploads go through the Worker instead and are limited to 100 MB.
+Without these secrets, uploads use multipart requests through the Worker. This supports recordings
+up to the application's 2 GB upload limit, but browser-to-R2 uploads with the token are more
+efficient for large files.
 
 ## 4. Turnstile (bot checks on public forms)
 

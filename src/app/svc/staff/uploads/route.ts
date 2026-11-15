@@ -4,10 +4,9 @@ import { presignConfigured, presignPut } from '@/lib/r2'
 import { errorJson, json, staffUser } from '@/lib/staff'
 
 const MAX_BYTES = 2 * 1024 * 1024 * 1024
-const MAX_DIRECT_BYTES = 90 * 1024 * 1024
 
 // Starts a recording upload. Returns a URL the teacher's browser PUTs the file to: a presigned R2
-// URL in production, or the direct route below when R2 API keys aren't set (local development).
+// URL in production, or a multipart Worker upload when R2 API keys aren't set.
 export async function POST(request: Request) {
   const user = await staffUser(request)
   if (!user || !hasRole(user, 'admin', 'teacher')) return errorJson('Sign in as a teacher to upload.', 401)
@@ -18,14 +17,11 @@ export async function POST(request: Request) {
     return errorJson('The file is too large (2 GB at most).', 400)
   }
   const usePresignedUpload = presignConfigured()
-  if (!usePresignedUpload && body.size > MAX_DIRECT_BYTES) {
-    return errorJson('Uploads without R2 credentials are limited to 90 MB. Configure R2 credentials for larger files.', 413)
-  }
   const ext = audioFileExtension(contentType)
   if (!ext) return errorJson('The audio file type is not supported.', 400)
   const key = `recordings/${new Date().toISOString().slice(0, 10)}-${crypto.randomUUID()}.${ext}`
   const uploadUrl = usePresignedUpload
     ? await presignPut(key, contentType)
     : `/svc/staff/uploads/direct?key=${encodeURIComponent(key)}`
-  return json({ key, uploadUrl })
+  return json({ key, uploadUrl, uploadType: usePresignedUpload ? 'presigned' : 'multipart' })
 }

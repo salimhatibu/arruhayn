@@ -13,6 +13,7 @@ const SAMPLE_RATE = 16000
 const KBPS = 48
 const MAX_CONVERT_BYTES = 100 * 1024 * 1024
 const MAX_CONVERT_SECONDS = 2 * 60 * 60
+const UPLOAD_PART_BYTES = 8 * 1024 * 1024
 
 async function convertToMp3(file: File, onProgress: (p: number) => void): Promise<{ blob: Blob; seconds: number }> {
   const ctx = new AudioContext({ sampleRate: SAMPLE_RATE })
@@ -67,6 +68,92 @@ function mediaDuration(file: Blob): Promise<number> {
   })
 }
 
+function uploadError(status: number, responseText: string) {
+  try {
+    const body = JSON.parse(responseText) as { error?: string }
+    if (body.error) return body.error
+  } catch {
+    if (responseText.trim()) return responseText.trim()
+  }
+  return `Upload failed (${status}).`
+}
+
+async function checkedRequest(url: string, method: string, body?: BodyInit) {
+  const response = await fetch(url, {
+    method,
+    headers: body !== undefined ? { 'content-type': 'application/json' } : undefined,
+    body,
+  })
+  if (!response.ok) throw new Error(uploadError(response.status, await response.text()))
+  return response
+}
+
+function directUploadUrl(uploadUrl: string, action: string, params: Record<string, string> = {}) {
+  const url = new URL(uploadUrl, window.location.origin)
+  url.searchParams.set('action', action)
+  for (const [name, value] of Object.entries(params)) url.searchParams.set(name, value)
+  return url.toString()
+}
+
+async function uploadMultipart(
+  uploadUrl: string,
+  contentType: string,
+  body: Blob,
+  onProgress: (progress: number) => void,
+) {
+  const createResponse = await checkedRequest(
+    directUploadUrl(uploadUrl, 'create'),
+    'POST',
+    JSON.stringify({ contentType }),
+  )
+  const { uploadId } = (await createResponse.json()) as { uploadId: string }
+  const parts: R2UploadedPart[] = []
+  let uploadedBytes = 0
+
+  try {
+    for (let start = 0, partNumber = 1; start < body.size; start += UPLOAD_PART_BYTES, partNumber++) {
+      const partBody = body.slice(start, Math.min(start + UPLOAD_PART_BYTES, body.size))
+      const partUrl = directUploadUrl(uploadUrl, 'part', { uploadId, partNumber: String(partNumber) })
+      const part = await new Promise<R2UploadedPart>((resolve, reject) => {
+        const xhr = new XMLHttpRequest()
+        xhr.open('PUT', partUrl)
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            onProgress((uploadedBytes + event.loaded) / body.size)
+          }
+        }
+        xhr.onload = () => {
+          if (xhr.status < 300) {
+            try {
+              resolve(JSON.parse(xhr.responseText) as R2UploadedPart)
+            } catch {
+              reject(new Error('The server returned an invalid upload-part response.'))
+            }
+          } else {
+            reject(new Error(uploadError(xhr.status, xhr.responseText)))
+          }
+        }
+        xhr.onerror = () => reject(new Error('Upload failed. Check your connection and try again.'))
+        xhr.send(partBody)
+      })
+      parts.push(part)
+      uploadedBytes += partBody.size
+      onProgress(uploadedBytes / body.size)
+    }
+
+    await checkedRequest(
+      directUploadUrl(uploadUrl, 'complete', { uploadId }),
+      'POST',
+      JSON.stringify({ parts }),
+    )
+  } catch (error) {
+    await fetch(directUploadUrl(uploadUrl, 'abort', { uploadId }), { method: 'DELETE' }).catch((abortError: unknown) =>
+      console.error('Multipart abort failed:', abortError),
+    )
+    throw error
+  }
+}
+
 export function AudioUpload() {
   const key = useField<string>({ path: 'fileKey' })
   const mime = useField<string>({ path: 'mimeType' })
@@ -111,18 +198,27 @@ export function AudioUpload() {
         body: JSON.stringify({ contentType, size: body.size }),
       })
       if (!res.ok) throw new Error(((await res.json().catch(() => ({}))) as { error?: string }).error ?? 'The upload could not start.')
-      const { uploadUrl, key: fileKey } = (await res.json()) as { uploadUrl: string; key: string }
+      const { uploadUrl, key: fileKey, uploadType } = (await res.json()) as {
+        uploadUrl: string
+        key: string
+        uploadType: 'presigned' | 'multipart'
+      }
 
       setStatus('Uploading… 0%')
-      await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest()
-        xhr.open('PUT', uploadUrl)
-        xhr.setRequestHeader('content-type', contentType)
-        xhr.upload.onprogress = (e) => e.lengthComputable && setStatus(`Uploading… ${Math.round((e.loaded / e.total) * 100)}%`)
-        xhr.onload = () => (xhr.status < 300 ? resolve() : reject(new Error(`Upload failed (${xhr.status}).`)))
-        xhr.onerror = () => reject(new Error('Upload failed. Check your connection and try again.'))
-        xhr.send(body)
-      })
+      const onProgress = (progress: number) => setStatus(`Uploading… ${Math.round(progress * 100)}%`)
+      if (uploadType === 'multipart') {
+        await uploadMultipart(uploadUrl, contentType, body, onProgress)
+      } else {
+        await new Promise<void>((resolve, reject) => {
+          const xhr = new XMLHttpRequest()
+          xhr.open('PUT', uploadUrl)
+          xhr.setRequestHeader('content-type', contentType)
+          xhr.upload.onprogress = (e) => e.lengthComputable && onProgress(e.loaded / e.total)
+          xhr.onload = () => (xhr.status < 300 ? resolve() : reject(new Error(uploadError(xhr.status, xhr.responseText))))
+          xhr.onerror = () => reject(new Error('Upload failed. Check your connection and try again.'))
+          xhr.send(body)
+        })
+      }
       key.setValue(fileKey)
       mime.setValue(contentType)
       size.setValue(body.size)
@@ -159,7 +255,7 @@ export function AudioUpload() {
       </div>
       {status && !busy ? <p role="status">{status}</p> : null}
       <p style={{ opacity: 0.7, fontSize: 13 }}>
-        Audio up to 100 MB is converted to MP3 when supported. Larger files keep their original audio format; upload videos from Media.
+        Audio up to 100 MB is converted to MP3 when supported. Larger files keep their original audio format; uploads can be up to 2 GB. Upload videos from Media.
       </p>
     </div>
   )

@@ -47,20 +47,72 @@ add it once the site has its own domain (see section 7).
 
 ## 2. Live classes (RealtimeKit)
 
-1. Dashboard → **Realtime → RealtimeKit** → create an app. It comes with the `webinar_presenter`
-   and `webinar_viewer` presets the site uses. Note the **App ID**.
-2. Dashboard → **My Profile → API Tokens** → create a token with **Account → Realtime → Edit**
-   (or Realtime Admin) for this account.
-3. Set on **both** Workers:
+Live classes stay switched off until all three secrets below are set: the join endpoints answer
+`Live classes are not set up yet.` until then.
 
-   | Secret | Value |
-   | --- | --- |
-   | `RTK_ACCOUNT_ID` | `94e09a58e9e025aa99f33049b3bd184a` |
-   | `RTK_APP_ID` | the app ID |
-   | `RTK_API_TOKEN` | the API token |
+### 2.1 Create the app
 
-Teachers start a class from the admin: **Classes → (class) → Open the live room**. Use desktop
-Chrome or Edge for screen sharing and recording. Run a two-hour test class before the first real one.
+Open [Realtime → RealtimeKit](https://dash.cloudflare.com/?to=/:account/realtime/kit) and click
+**Create App**. Creating it in the dashboard also sets up the default presets, which is why the
+dashboard is the way to do it rather than the API.
+
+The app's identifier is the long id Cloudflare shows for it (it is the `<app_id>` in the API URLs).
+That is `RTK_APP_ID`.
+
+### 2.2 Create an API token
+
+**My Profile → API Tokens → Create Token → Create Custom Token**, and give it **Realtime** (or
+**Realtime Admin**) permissions on this account. Copy the token once — Cloudflare does not show it
+again. That is `RTK_API_TOKEN`.
+
+### 2.3 Put the values in .env
+
+```
+RTK_ACCOUNT_ID=94e09a58e9e025aa99f33049b3bd184a
+RTK_APP_ID=the app's identifier
+RTK_API_TOKEN=the API token
+```
+
+`.env` is never committed. The rest of this section is two commands that read from it.
+
+### 2.4 Check that it works
+
+```bash
+pnpm rtk:check
+```
+
+This lists the app's presets, then creates a throwaway meeting and joins it as both a teacher and
+a listener — the same calls a real class makes. It tells you what is wrong if anything is.
+
+The one thing that often needs attention: the site asks for presets by name, `webinar_presenter`
+for the teacher and `webinar_viewer` for everyone listening. Cloudflare does not document what its
+default presets are called, so if the check reports them missing, either rename the presets in the
+RealtimeKit dashboard, or set `RTK_HOST_PRESET` and `RTK_VIEWER_PRESET` — in `.env` here, and in
+`wrangler.jsonc` under both environments' `vars`. The host preset needs permission to present,
+share a screen, and admit raised hands; the viewer preset needs to listen and ask to speak.
+
+### 2.5 Put them on the Workers
+
+```bash
+pnpm rtk:secrets
+```
+
+This sets all three on **both** Workers — the teacher's room is on the admin Worker and students
+join through the public one, so both need them. It asks for confirmation first, and pipes each
+value to `wrangler`, so nothing ends up in your shell history. Secrets take effect without a
+redeploy.
+
+To do it by hand instead: `npx wrangler secret put RTK_ACCOUNT_ID --env admin`, then again with
+`--env public`, and the same for the other two.
+
+### 2.6 Try a real class
+
+Make a class under **Classes** with a start time in the next few minutes, open it, and use
+**Open the live room**. Then open the class on the public site in another browser and join. If the
+room refuses, the admin Worker's logs carry Cloudflare's own error.
+
+Use desktop Chrome or Edge for screen sharing and recording. Run a full-length test class before
+the first real one.
 
 ## 3. Uploading recordings (R2 API token)
 

@@ -141,9 +141,12 @@ the command above).
 | `DRY_RUN=1 pnpm import:qab` | Lists what the import would do without changing anything |
 | `pnpm reindex` | Rebuilds the search index |
 | `pnpm set-password you@example.com` | Sets a staff password (see above) |
+| `pnpm rtk:check` | Checks that live classes will work (presets, token, a test meeting) |
+| `pnpm rtk:secrets` | Copies the RealtimeKit values from `.env` onto both Workers |
 
-Each runs against your local database. Put `CLOUDFLARE_ENV=admin NODE_ENV=production` in front to
-run it against production.
+The first five run against your local database; put `CLOUDFLARE_ENV=admin NODE_ENV=production` in
+front to run one against production. The two `rtk:` commands touch no database — `rtk:check` only
+talks to Cloudflare, and `rtk:secrets` writes to the live Workers and asks first.
 
 ## Deploying
 

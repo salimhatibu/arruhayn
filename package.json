@@ -23,7 +23,9 @@
     "deploy:all": "opennextjs-cloudflare build && wrangler deploy --env public && wrangler deploy --env admin",
     "preview": "opennextjs-cloudflare build && wrangler dev --env admin",
     "import:qab": "cross-env NODE_OPTIONS=--no-deprecation payload run scripts/import-qandabenefits.ts",
-    "set-password": "cross-env NODE_OPTIONS=--no-deprecation payload run scripts/set-password.ts"
+    "set-password": "cross-env NODE_OPTIONS=--no-deprecation payload run scripts/set-password.ts",
+    "rtk:check": "cross-env NODE_OPTIONS=--no-deprecation payload run scripts/check-realtimekit.ts",
+    "rtk:secrets": "cross-env NODE_OPTIONS=--no-deprecation payload run scripts/push-realtimekit-secrets.ts"
   },
   "dependencies": {
     "@breezystack/lamejs": "^1.2.7",

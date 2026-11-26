@@ -1,8 +1,10 @@
-import { IBM_Plex_Mono, IBM_Plex_Sans, IBM_Plex_Sans_Arabic } from 'next/font/google'
 import localFont from 'next/font/local'
 
 // Amiri, Amiri Quran, and Crimson Pro are the OFL-licensed files from the brand fonts folder,
 // subset to Arabic and Latin. IBM Plex is used for small interface text.
+//
+// Every family is served from this folder. Nothing is fetched at build time: next/font/google
+// downloads from Google while the site builds, and one bad reply there fails the whole build.
 
 export const amiri = localFont({
   src: [
@@ -30,25 +32,31 @@ export const crimson = localFont({
   display: 'swap',
 })
 
-export const plex = IBM_Plex_Sans({
-  subsets: ['latin'],
-  weight: ['400', '500', '600'],
+// Google serves Plex Sans as one variable file covering the whole weight range, so 400, 500,
+// and 600 all come out of this one.
+export const plex = localFont({
+  src: [{ path: './plex-sans-var.woff2', weight: '400 600', style: 'normal' }],
   variable: '--font-plex',
   display: 'swap',
 })
 
-export const plexArabic = IBM_Plex_Sans_Arabic({
-  subsets: ['arabic'],
-  weight: ['400', '500', '600'],
+export const plexArabic = localFont({
+  src: [
+    { path: './plex-sans-ar-400.woff2', weight: '400', style: 'normal' },
+    { path: './plex-sans-ar-500.woff2', weight: '500', style: 'normal' },
+    { path: './plex-sans-ar-600.woff2', weight: '600', style: 'normal' },
+  ],
   variable: '--font-plex-ar',
   display: 'swap',
   preload: false,
 })
 
 // Datelines and bylines, set like newspaper type.
-export const plexMono = IBM_Plex_Mono({
-  subsets: ['latin'],
-  weight: ['400', '500'],
+export const plexMono = localFont({
+  src: [
+    { path: './plex-mono-400.woff2', weight: '400', style: 'normal' },
+    { path: './plex-mono-500.woff2', weight: '500', style: 'normal' },
+  ],
   variable: '--font-mono',
   display: 'swap',
 })

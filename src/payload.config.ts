@@ -25,6 +25,7 @@ import { Topics } from './collections/Topics'
 import { Users } from './collections/Users'
 import { LIST_DESCRIPTIONS } from './components/admin/listMeta'
 import { SiteSettings } from './globals/SiteSettings'
+import { emailConfigured, resendAdapter } from './lib/email'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -154,6 +155,9 @@ export default buildConfig({
   },
   editor: lexicalEditor(),
   auth: { passwordHashIterations: 100_000 },
+  // Password-reset mail. Without an API key Payload writes emails to the log instead, which is
+  // what local development wants.
+  ...(emailConfigured() ? { email: resendAdapter } : {}),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

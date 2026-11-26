@@ -48,8 +48,12 @@ The dashboard steps (live classes, recording uploads, your own domain, email) ar
 - Questions become draft fatwas with one tick; publishing marks the question answered.
 - Teachers run live classes with screen sharing and record to their own computer, then upload
   the recording (converted to MP3 in the browser).
-- Every 15 minutes the admin Worker publishes scheduled newsletters, deletes questions 90 days
-  after they are answered, and ends classes left live by mistake.
+- Newsletter issues are emailed to confirmed subscribers in the language each chose, with an
+  unsubscribe link in every one. Sign-ups confirm by email first, and staff can reset their own
+  password from the sign-in screen. Sending needs a Resend key and a switch in Site settings.
+- Every 15 minutes the admin Worker publishes scheduled newsletters, emails the issues that have
+  gone live, deletes questions 90 days after they are answered, and ends classes left live by
+  mistake.
 
 ## Running it on your computer
 
@@ -137,9 +141,12 @@ the command above).
 | `DRY_RUN=1 pnpm import:qab` | Lists what the import would do without changing anything |
 | `pnpm reindex` | Rebuilds the search index |
 | `pnpm set-password you@example.com` | Sets a staff password (see above) |
+| `pnpm rtk:check` | Checks that live classes will work (presets, token, a test meeting) |
+| `pnpm rtk:secrets` | Copies the RealtimeKit values from `.env` onto both Workers |
 
-Each runs against your local database. Put `CLOUDFLARE_ENV=admin NODE_ENV=production` in front to
-run it against production.
+The first five run against your local database; put `CLOUDFLARE_ENV=admin NODE_ENV=production` in
+front to run one against production. The two `rtk:` commands touch no database — `rtk:check` only
+talks to Cloudflare, and `rtk:secrets` writes to the live Workers and asks first.
 
 ## Deploying
 

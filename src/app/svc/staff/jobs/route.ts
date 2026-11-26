@@ -1,3 +1,4 @@
+import { sendDueIssues, sendPendingConfirmations, sendingEnabled } from '@/lib/newsletter-send'
 import { getPayloadClient } from '@/lib/payload'
 import { errorJson, json } from '@/lib/staff'
 
@@ -45,6 +46,15 @@ export async function POST(request: Request) {
     }
   }
   done.classesEnded = ended
+
+  // Email the issues that have gone live, and catch up anyone who signed up while sending was off.
+  if (await sendingEnabled(payload)) {
+    const issues = await sendDueIssues(payload)
+    done.issuesEmailed = issues.issues
+    done.emailsSent = issues.sent
+    done.emailsFailed = issues.failed
+    done.confirmationsSent = await sendPendingConfirmations(payload)
+  }
 
   return json({ ok: true, ...done })
 }

@@ -10,7 +10,8 @@ export const Newsletters: CollectionConfig = {
     defaultColumns: ['issue', 'title', 'status', 'publishAt'],
     hidden: hiddenUnless('admin', 'reviewer'),
     group: 'Publishing',
-    description: 'Scheduled issues are published on the site automatically. Email sending switches on with your own domain.',
+    description:
+      'Scheduled issues go up on the site by themselves. Once an issue is published it is emailed to confirmed subscribers within 15 minutes, and "Emailed at" records that it went.',
   },
   versions: { maxPerDoc: 25 },
   defaultSort: '-issue',

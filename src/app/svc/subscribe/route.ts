@@ -1,11 +1,13 @@
+import type { Subscriber } from '@/payload-types'
+import { sendConfirmation, sendingEnabled } from '@/lib/newsletter-send'
 import { getPayloadClient } from '@/lib/payload'
 import { errorJson, json } from '@/lib/staff'
 import { verifyTurnstile } from '@/lib/turnstile'
 
 const token = () => crypto.randomUUID().replace(/-/g, '')
 
-// Saves a newsletter sign-up as pending. A confirmation email goes out once email sending is on
-// (see the scheduled jobs in worker.ts); until then sign-ups wait as pending.
+// Saves a newsletter sign-up as pending and asks the person to confirm. While email sending is
+// off the sign-up simply waits; the scheduled job asks them once it is switched on.
 export async function POST(request: Request) {
   const body = (await request.json().catch((): null => null)) as {
     name?: string
@@ -22,7 +24,7 @@ export async function POST(request: Request) {
     return errorJson('The bot check failed. Reload the page and try again.', 403)
   }
   const payload = await getPayloadClient()
-  const settings = await payload.findGlobal({ slug: 'site-settings', depth: 0 })
+  const canSend = await sendingEnabled(payload)
   const language = body?.locale === 'ar' ? 'ar' : 'en'
   const existing = await payload.find({
     collection: 'subscribers',
@@ -31,8 +33,10 @@ export async function POST(request: Request) {
     overrideAccess: true,
   })
   const current = existing.docs[0]
+  // Whoever still needs to confirm gets asked below; a confirmed subscriber is left alone.
+  let toConfirm: Subscriber | null = null
   if (!current) {
-    await payload.create({
+    toConfirm = await payload.create({
       collection: 'subscribers',
       overrideAccess: true,
       data: {
@@ -44,12 +48,19 @@ export async function POST(request: Request) {
         unsubscribeToken: token(),
       },
     })
-  } else if (current.status === 'unsubscribed') {
-    await payload.update({
+  } else if (current.status === 'unsubscribed' || current.status === 'pending') {
+    toConfirm = await payload.update({
       collection: 'subscribers',
       id: current.id,
       overrideAccess: true,
-      data: { ...(name ? { name } : {}), status: 'pending', language, confirmToken: token() },
+      data: {
+        ...(name ? { name } : {}),
+        status: 'pending',
+        language,
+        confirmToken: current.confirmToken || token(),
+        unsubscribeToken: current.unsubscribeToken || token(),
+        confirmSentAt: null,
+      },
     })
   } else if (name && name !== current.name) {
     await payload.update({
@@ -59,7 +70,8 @@ export async function POST(request: Request) {
       data: { name },
     })
   }
+  if (canSend && toConfirm) await sendConfirmation(payload, toConfirm)
   // The same answer whether or not the email was already on the list, so the form can't be used
   // to find out who subscribes.
-  return json({ ok: true, pending: !settings.emailSending }, 200)
+  return json({ ok: true, pending: !canSend }, 200)
 }

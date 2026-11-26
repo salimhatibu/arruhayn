@@ -37,6 +37,15 @@ export const Subscribers: CollectionConfig = {
     },
     { name: 'confirmToken', type: 'text', index: true, admin: { readOnly: true } },
     { name: 'unsubscribeToken', type: 'text', index: true, admin: { readOnly: true } },
+    {
+      name: 'confirmSentAt',
+      type: 'date',
+      index: true,
+      admin: {
+        readOnly: true,
+        description: 'When the confirmation email went out. Empty means it is still waiting to be sent.',
+      },
+    },
     { name: 'confirmedAt', type: 'date', admin: { readOnly: true } },
   ],
 }

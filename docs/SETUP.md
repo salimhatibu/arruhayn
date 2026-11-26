@@ -23,7 +23,7 @@ and again with `--env public` where the table says both.
 
 Staff sign in at https://arruhayn-admin.salimhatibu786.workers.dev/admin with an email and password.
 After five wrong attempts an account locks for 15 minutes. Cloudflare Access is optional for now;
-add it once the site has its own domain (see section 6).
+add it once the site has its own domain (see section 7).
 
 1. Apply the database change that adds passwords (once):
 
@@ -81,12 +81,57 @@ Without these secrets, uploads use multipart requests through the Worker. This s
 up to the application's 2 GB upload limit, but browser-to-R2 uploads with the token are more
 efficient for large files.
 
-## 4. Turnstile (bot checks on public forms)
+## 4. Email (Resend)
+
+Confirmation emails, newsletter issues, and staff password resets all go out through
+[Resend](https://resend.com). Cloudflare's own Email Service is for transactional mail only, so it
+may not carry a newsletter.
+
+Nothing is sent until **both** the API key is set and **Site settings → Send newsletter emails** is
+switched on. Until then sign-ups wait as pending, and the scheduled job asks them to confirm as
+soon as you switch it on.
+
+1. Create a Resend account and verify the domain you send from (Resend walks you through the SPF,
+   DKIM, and DMARC records). This needs your own domain — see section 7.
+2. Create an API key with **Sending access**.
+3. Set on **both** Workers:
+
+   | Secret | Value |
+   | --- | --- |
+   | `RESEND_API_KEY` | the API key |
+
+4. Set the from address in `wrangler.jsonc` under both environments' `vars`, using a mailbox on
+   the verified domain:
+
+   ```jsonc
+   "EMAIL_FROM": "Arruhayn <salam@yourdomain.com>",
+   ```
+
+   `EMAIL_REPLY_TO` is optional, for replies going somewhere else.
+5. Deploy, then switch on **Site settings → Send newsletter emails**.
+
+**Before you switch it on,** check **Publishing → Newsletters**: any issue that is published and has
+an empty **Emailed at** will go out at the next quarter hour. Issues published before email existed
+were stamped as already sent by the database change, so only new ones go out.
+
+What goes out, and when:
+
+| Email | When |
+| --- | --- |
+| Confirm your subscription | As soon as someone signs up. People who signed up earlier are caught up by the scheduled job. |
+| A newsletter issue | Within 15 minutes of the issue being published, to confirmed subscribers, in the language each chose. **Emailed at** then records that it went. |
+| Staff password reset | When a staff member asks for one from the sign-in screen. |
+
+Every newsletter carries an unsubscribe link and the `List-Unsubscribe` headers mail apps use for
+their own unsubscribe button. To send an issue again, clear its **Emailed at** and wait a quarter
+hour.
+
+## 5. Turnstile (bot checks on public forms)
 
 A Turnstile widget for the workers.dev hostnames has already been created and its keys set. If you
 add a domain, add it to the widget under **Turnstile → arruhayn → Hostname management**.
 
-## 5. Deploying
+## 6. Deploying
 
 ```bash
 pnpm run deploy:all
@@ -108,7 +153,7 @@ Dashboard → **Workers & Pages → arruhayn → Settings → Builds → Connect
 
 Repeat for `arruhayn-admin` with `--env admin`.
 
-## 6. Moving to your own domain (phase 15)
+## 7. Moving to your own domain
 
 1. Add the domain to Cloudflare (or buy it through Cloudflare Registrar).
 2. **arruhayn → Settings → Domains & Routes → Add custom domain**: `yourdomain.com`.
@@ -120,10 +165,9 @@ Repeat for `arruhayn-admin` with `--env admin`.
    by Access. Turn off the admin Worker's `workers.dev` route.
 4. Update `PUBLIC_URL` and `ADMIN_URL` in `wrangler.jsonc`, the Turnstile hostnames, and
    `docs/r2-cors.json`. Redeploy.
-5. Email: set up Cloudflare Email Service for the domain (SPF, DKIM, DMARC). Check that its terms
-   allow newsletters; otherwise use Resend. Then switch on **Site settings → Send newsletter emails**.
-   Pending subscribers get their confirmation email at that point. The email sending code is the
-   remaining piece of phase 15.
+5. Verify the domain with Resend and set `RESEND_API_KEY` and `EMAIL_FROM` (section 4), then switch
+   on **Site settings → Send newsletter emails**. Everyone waiting as pending is asked to confirm
+   at that point.
 
 ## Everyday operations
 

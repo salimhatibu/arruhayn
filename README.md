@@ -48,8 +48,12 @@ The dashboard steps (live classes, recording uploads, your own domain, email) ar
 - Questions become draft fatwas with one tick; publishing marks the question answered.
 - Teachers run live classes with screen sharing and record to their own computer, then upload
   the recording (converted to MP3 in the browser).
-- Every 15 minutes the admin Worker publishes scheduled newsletters, deletes questions 90 days
-  after they are answered, and ends classes left live by mistake.
+- Newsletter issues are emailed to confirmed subscribers in the language each chose, with an
+  unsubscribe link in every one. Sign-ups confirm by email first, and staff can reset their own
+  password from the sign-in screen. Sending needs a Resend key and a switch in Site settings.
+- Every 15 minutes the admin Worker publishes scheduled newsletters, emails the issues that have
+  gone live, deletes questions 90 days after they are answered, and ends classes left live by
+  mistake.
 
 ## Running it on your computer
 

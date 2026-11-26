@@ -1,8 +1,9 @@
-import * as migration_20261108_001643_initial from './20261108_001643_initial'
-import * as migration_20261108_001700_search_index from './20261108_001700_search_index'
-import * as migration_20261108_064756_fatwa_credits from './20261108_064756_fatwa_credits'
-import * as migration_20261108_092718_staff_passwords from './20261108_092718_staff_passwords'
-import * as migration_20261113_151800_subscriber_names from './20261113_151800_subscriber_names'
+import * as migration_20261108_001643_initial from './20261108_001643_initial';
+import * as migration_20261108_001700_search_index from './20261108_001700_search_index';
+import * as migration_20261108_064756_fatwa_credits from './20261108_064756_fatwa_credits';
+import * as migration_20261108_092718_staff_passwords from './20261108_092718_staff_passwords';
+import * as migration_20261113_151800_subscriber_names from './20261113_151800_subscriber_names';
+import * as migration_20261126_145643_add_confirm_sent_at from './20261126_145643_add_confirm_sent_at';
 
 export const migrations = [
   {
@@ -30,4 +31,9 @@ export const migrations = [
     down: migration_20261113_151800_subscriber_names.down,
     name: '20261113_151800_subscriber_names',
   },
-]
+  {
+    up: migration_20261126_145643_add_confirm_sent_at.up,
+    down: migration_20261126_145643_add_confirm_sent_at.down,
+    name: '20261126_145643_add_confirm_sent_at'
+  },
+];

@@ -545,6 +545,10 @@ export interface Subscriber {
   status: 'pending' | 'confirmed' | 'unsubscribed';
   confirmToken?: string | null;
   unsubscribeToken?: string | null;
+  /**
+   * When the confirmation email went out. Empty means it is still waiting to be sent.
+   */
+  confirmSentAt?: string | null;
   confirmedAt?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -881,6 +885,7 @@ export interface SubscribersSelect<T extends boolean = true> {
   status?: T;
   confirmToken?: T;
   unsubscribeToken?: T;
+  confirmSentAt?: T;
   confirmedAt?: T;
   updatedAt?: T;
   createdAt?: T;

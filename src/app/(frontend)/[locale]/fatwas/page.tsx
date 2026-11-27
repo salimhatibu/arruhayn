@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import type { Where } from 'payload'
 
 import { FatwaList } from '@/components/site/FatwaList'
@@ -71,6 +72,14 @@ export default async function FatwasPage({ params, searchParams }: Props) {
     if (topic) where.topics = { contains: topic.id }
     if (scholar) where.scholar = { equals: scholar.id }
     const result = await payload.find({ collection: 'fatwas', locale, where, sort: '-number', limit: 20, page, depth: 1 })
+    // A page past the end (an old link, a typed URL) goes to the last page rather than claiming
+    // there are no fatwas.
+    if (result.totalPages && page > result.totalPages) {
+      const q = new URLSearchParams()
+      for (const key of ['topic', 'scholar'] as const) if (sp[key]) q.set(key, sp[key])
+      if (result.totalPages > 1) q.set('page', String(result.totalPages))
+      redirect(`/${locale}/fatwas${q.size ? `?${q}` : ''}`)
+    }
     fatwas = result.docs
     pager = { page: result.page ?? 1, totalPages: result.totalPages }
   }
@@ -97,7 +106,7 @@ export default async function FatwasPage({ params, searchParams }: Props) {
           <label htmlFor="archive-q" className="sr-only">
             {d.nav.search}
           </label>
-          <input id="archive-q" type="search" name="q" defaultValue={query} placeholder={d.hero.searchPlaceholder} />
+          <input id="archive-q" type="search" name="q" maxLength={200} defaultValue={query} placeholder={d.hero.searchPlaceholder} />
           <button className="read-link" type="submit">
             {d.hero.searchButton}
           </button>

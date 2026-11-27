@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
 import { Pager } from '@/components/site/Pager'
 import { SubscribeForm } from '@/components/site/SubscribeForm'
@@ -30,6 +31,7 @@ export default async function NewslettersPage({ params, searchParams }: Props) {
     page,
     depth: 1,
   })
+  if (issues.totalPages && page > issues.totalPages) redirect(`/${locale}/newsletters${issues.totalPages > 1 ? `?page=${issues.totalPages}` : ''}`)
   const notice =
     sp.status === 'confirmed' ? d.newsletter.confirmed : sp.status === 'unsubscribed' ? d.newsletter.unsubscribed : null
 

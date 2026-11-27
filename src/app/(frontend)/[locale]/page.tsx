@@ -252,7 +252,7 @@ export default async function Home({ params }: { params: Promise<{ locale: Local
               {d.nav.search}
             </label>
             <Icon name="search" size={20} />
-            <input id="home-q" type="search" name="q" placeholder={d.hero.searchPlaceholder} />
+            <input id="home-q" type="search" name="q" maxLength={200} placeholder={d.hero.searchPlaceholder} />
             <button type="submit" aria-label={d.hero.searchButton}>
               <Icon name="arrow" size={20} />
             </button>

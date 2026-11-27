@@ -899,3 +899,8 @@ a.boxed:hover { background: var(--rust); color: #fff; }
 .nl-popup-close:hover { background: var(--bg-2); }
 @keyframes nl-fade { from { opacity: 0; } }
 @keyframes nl-up { from { opacity: 0; transform: translateY(16px) scale(0.97); } }
+
+/* The 404 page: a search box and a few places to go. */
+.search-row { display: flex; gap: 0.5rem; margin: 1.25rem 0; max-width: 520px; }
+.search-row input { flex: 1; min-width: 0; }
+.not-found-links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; padding: 0; list-style: none; }

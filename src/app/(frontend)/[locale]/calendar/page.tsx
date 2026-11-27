@@ -24,8 +24,13 @@ export default async function CalendarPage({ params, searchParams }: Props) {
   const d = t(locale)
   const overrides = await getMonthOverrides()
   const today = utcDay(new Date())
-  const [y, m] = (sp.month ?? isoDay(today).slice(0, 7)).split('-').map(Number)
-  const first = new Date(Date.UTC(y || today.getUTCFullYear(), (m || today.getUTCMonth() + 1) - 1, 1))
+  // Only a real month in a range the Hijri tables cover; anything else (a typo, "2026-13",
+  // "99999-01") shows this month.
+  const asked = /^(\d{4})-(\d{2})$/.exec(sp.month ?? '')
+  const [y, m] = asked && Number(asked[2]) >= 1 && Number(asked[2]) <= 12 && Number(asked[1]) >= 1900 && Number(asked[1]) <= 2200
+    ? [Number(asked[1]), Number(asked[2])]
+    : [today.getUTCFullYear(), today.getUTCMonth() + 1]
+  const first = new Date(Date.UTC(y, m - 1, 1))
   const last = new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth() + 1, 0))
   const gridStart = addDays(first, -first.getUTCDay())
   const gridEnd = addDays(last, 6 - last.getUTCDay())

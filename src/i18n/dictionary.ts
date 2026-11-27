@@ -370,6 +370,10 @@ const en = {
     rights: 'Arruhayn',
   },
   notFound: "This page doesn't exist.",
+  notFoundBody: 'The link may be old, or the address may have a typo. These might help:',
+  errorTitle: 'Something went wrong on our side.',
+  errorBody: 'It may be a passing problem. Try again, and if it keeps happening, come back a little later.',
+  tryAgain: 'Try again',
   goHome: 'Go to the home page',
   minutes: 'min',
 }
@@ -736,6 +740,10 @@ const ar: Dictionary = {
     rights: 'الرُّحَين',
   },
   notFound: 'هذه الصفحة غير موجودة.',
+  notFoundBody: 'لعلّ الرابط قديم أو في العنوان خطأ. قد يفيدك ما يلي:',
+  errorTitle: 'حدث خلل من جهتنا.',
+  errorBody: 'قد يكون عارضًا. حاول مرة أخرى، وإن تكرّر فعُد بعد قليل.',
+  tryAgain: 'حاول مرة أخرى',
   goHome: 'إلى الصفحة الرئيسية',
   minutes: 'دقيقة',
 }

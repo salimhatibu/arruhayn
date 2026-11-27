@@ -15,7 +15,13 @@ function text(value: unknown): string {
   return String(value)
 }
 
-const cell = (value: string) => (/[",\n\r]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value)
+// Visitors write some of these values themselves (a subscriber's name, a question), and a cell that
+// starts with = + - or @ is run as a formula when the file is opened in Excel or Sheets. A leading
+// apostrophe makes the spreadsheet show it as plain text instead.
+const cell = (raw: string) => {
+  const value = /^[=+\-@\t\r]/.test(raw) ? `'${raw}` : raw
+  return /[",\n\r]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value
+}
 
 export async function GET(request: Request) {
   const user = await staffUser(request)

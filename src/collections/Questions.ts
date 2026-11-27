@@ -2,13 +2,15 @@ import type { CollectionConfig } from 'payload'
 
 import { contentStaff, hiddenUnless } from '@/access/roles'
 
-// Questions sent through the public "ask a question" form. They are private: only admins and
-// reviewers can read them, and they are deleted 90 days after being answered.
+// Questions sent through the public "ask a question" form, or asked during a live class. They are
+// private: only admins and reviewers can read them (a class's teacher sees that class's questions
+// through the live room), and they are deleted 90 days after being answered. A live question the
+// teacher didn't get to stays here as New, so it can still become a fatwa.
 export const Questions: CollectionConfig = {
   slug: 'questions',
   admin: {
     useAsTitle: 'question',
-    defaultColumns: ['question', 'language', 'status', 'createdAt'],
+    defaultColumns: ['question', 'class', 'language', 'status', 'createdAt'],
     hidden: hiddenUnless('admin', 'reviewer'),
     group: 'Fatwas',
     description: 'Tick "Create a draft fatwa" and save to start an answer from a question.',
@@ -34,6 +36,17 @@ export const Questions: CollectionConfig = {
       ],
     },
     { name: 'email', type: 'email', admin: { description: 'Optional. Only used to tell the person their question was answered.' } },
+    {
+      name: 'class',
+      label: 'Asked during',
+      type: 'relationship',
+      relationTo: 'classes',
+      index: true,
+      admin: { position: 'sidebar', readOnly: true, description: 'The live class it was asked in, if any.' },
+    },
+    { name: 'askedBy', type: 'text', admin: { position: 'sidebar', readOnly: true, description: 'The name they joined the class with.' } },
+    // The listener's random browser id, used only to stop one person flooding the teacher.
+    { name: 'visitor', type: 'text', index: true, admin: { hidden: true } },
     {
       name: 'status',
       type: 'select',

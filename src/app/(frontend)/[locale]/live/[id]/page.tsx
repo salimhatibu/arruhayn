@@ -54,7 +54,9 @@ export default async function ClassPage({ params }: Props) {
       ) : cls.status === 'ended' ? (
         <p className="notice">{d.live.ended}</p>
       ) : (
-        <WaitForLive classId={cls.id} startsAt={cls.startsAt} locale={locale} />
+        <WaitForLive classId={cls.id} startsAt={cls.startsAt} locale={locale} title={cls.title} durationMinutes={cls.durationMinutes ?? 90}
+          pageUrl={`${process.env.PUBLIC_URL ?? ''}/${locale}/live/${cls.id}`}
+        />
       )}
     </div>
   )

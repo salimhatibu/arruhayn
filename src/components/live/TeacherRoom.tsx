@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 import { ControlButton } from './icons'
+import { LiveQuestions, useLiveQuestions } from './LiveQuestions'
 import { AudioSink, RoomNotices, Stage } from './Media'
 import { canWriteToFolder, LocalRecorder, type RecorderMode } from './recorder'
 import { UnsavedRecordings } from './UnsavedRecordings'
@@ -66,6 +67,7 @@ export function TeacherRoom({
   const [, setTick] = useState(0)
   const [now, setNow] = useState(0)
   const [allowRecording, setAllowRecording] = useState(initialAllowRecording)
+  const { questions, mark, waiting } = useLiveQuestions(classId, Boolean(meeting))
   const recRef = useRef<LocalRecorder | null>(null)
   useEffect(() => {
     recRef.current = recorder
@@ -232,6 +234,7 @@ export function TeacherRoom({
               }}
             />
             {error ? <p className="notice warn">{error}</p> : null}
+            {waiting.length ? <p className="notice">{waiting.length === 1 ? '1 question waiting' : `${waiting.length} questions waiting`}</p> : null}
           </>
         }
         controls={
@@ -253,6 +256,8 @@ export function TeacherRoom({
           </div>
         }
       />
+
+      <LiveQuestions questions={questions} mark={mark} />
 
       <div className="card">
         <h2 style={{ marginTop: 0, fontSize: '1.2rem' }}>Recording</h2>

@@ -284,10 +284,64 @@ export interface Question {
    * Optional. Only used to tell the person their question was answered.
    */
   email?: string | null;
+  /**
+   * The live class it was asked in, if any.
+   */
+  class?: (number | null) | Class;
+  /**
+   * The name they joined the class with.
+   */
+  askedBy?: string | null;
+  visitor?: string | null;
   status: 'new' | 'drafting' | 'answered' | 'declined';
   createDraft?: boolean | null;
   linkedFatwa?: (number | null) | Fatwa;
   answeredAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * To teach a class, open it and choose "Open the live room".
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "classes".
+ */
+export interface Class {
+  id: number;
+  title: string;
+  description?: string | null;
+  /**
+   * The name shown on the site, such as a guest scholar. They need no account. Left empty, the teacher's name is used.
+   */
+  speaker?: string | null;
+  /**
+   * The staff member who hosts the live room.
+   */
+  teacher: number | User;
+  startsAt: string;
+  durationMinutes?: number | null;
+  status: 'scheduled' | 'live' | 'ended' | 'cancelled';
+  /**
+   * Shows listeners a Record button that saves the class to their own device. The teacher can also change this when starting the class, or during it.
+   */
+  allowRecording?: boolean | null;
+  meetingId?: string | null;
+  /**
+   * When the teacher started the class.
+   */
+  startedAt?: string | null;
+  /**
+   * When it was ended.
+   */
+  endedAt?: string | null;
+  /**
+   * How long it ran, from start to end.
+   */
+  liveMinutes?: number | null;
+  /**
+   * Everyone who joined from the site, each counted once however often they reconnected. The teacher is not counted.
+   */
+  attendance?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -449,51 +503,6 @@ export interface Glossary {
    */
   spellings?: string[] | null;
   definition: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * To teach a class, open it and choose "Open the live room".
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "classes".
- */
-export interface Class {
-  id: number;
-  title: string;
-  description?: string | null;
-  /**
-   * The name shown on the site, such as a guest scholar. They need no account. Left empty, the teacher's name is used.
-   */
-  speaker?: string | null;
-  /**
-   * The staff member who hosts the live room.
-   */
-  teacher: number | User;
-  startsAt: string;
-  durationMinutes?: number | null;
-  status: 'scheduled' | 'live' | 'ended' | 'cancelled';
-  /**
-   * Shows listeners a Record button that saves the class to their own device. The teacher can also change this when starting the class, or during it.
-   */
-  allowRecording?: boolean | null;
-  meetingId?: string | null;
-  /**
-   * When the teacher started the class.
-   */
-  startedAt?: string | null;
-  /**
-   * When it was ended.
-   */
-  endedAt?: string | null;
-  /**
-   * How long it ran, from start to end.
-   */
-  liveMinutes?: number | null;
-  /**
-   * Everyone who joined from the site, each counted once however often they reconnected. The teacher is not counted.
-   */
-  attendance?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -790,6 +799,9 @@ export interface QuestionsSelect<T extends boolean = true> {
   question?: T;
   language?: T;
   email?: T;
+  class?: T;
+  askedBy?: T;
+  visitor?: T;
   status?: T;
   createDraft?: T;
   linkedFatwa?: T;

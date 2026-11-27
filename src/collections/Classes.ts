@@ -123,11 +123,12 @@ export const Classes: CollectionConfig = {
     },
   ],
   hooks: {
-    // Attendance rows must go first: they can't be left pointing at a class that no longer exists,
-    // and the database refuses to delete a class they still point at.
+    // The database refuses to delete a class anything still points at. Attendance rows go with the
+    // class; questions asked in it are kept, since they can still be answered, and only unlinked.
     beforeDelete: [
       async ({ id, req }) => {
         await req.payload.delete({ collection: 'class-joins', where: { class: { equals: id } }, overrideAccess: true, req })
+        await req.payload.update({ collection: 'questions', where: { class: { equals: id } }, data: { class: null }, overrideAccess: true, req })
       },
     ],
     beforeChange: [

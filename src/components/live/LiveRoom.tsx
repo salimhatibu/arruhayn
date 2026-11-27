@@ -8,6 +8,7 @@ import { serverError, t, type Locale } from '@/i18n/dictionary'
 
 import { ControlButton } from './icons'
 import { AudioSink, RoomNotices, Stage } from './Media'
+import { QuestionBox } from './QuestionBox'
 import { canWriteToFolder, LocalRecorder, type RecorderMode } from './recorder'
 import { screenSharer, useRoom, weakSpeakers } from './useRoom'
 
@@ -74,6 +75,7 @@ export function LiveRoom({
   const [recorder, setRecorder] = useState<LocalRecorder | null>(null)
   const [recordNote, setRecordNote] = useState('')
   const [stageFailed, setStageFailed] = useState(false)
+  const [asking, setAsking] = useState(false)
   const [now, setNow] = useState(0)
   const [, setTick] = useState(0)
   const recRef = useRef<LocalRecorder | null>(null)
@@ -294,6 +296,8 @@ export function LiveRoom({
   }
 
   const controls = (
+    <div className="ctl-wrap">
+      {asking ? <QuestionBox classId={classId} visitor={visitorId()} name={name.trim()} locale={locale} onClose={() => setAsking(false)} /> : null}
     <div className="ctl-bar">
       {onStage ? (
         <>
@@ -318,7 +322,9 @@ export function LiveRoom({
           onClick={recorder ? stopRecording : startRecording}
         />
       ) : null}
+      <ControlButton icon="chat" on={asking} pressed={asking} label={d.ask} onClick={() => setAsking((open) => !open)} />
       <ControlButton icon="leave" danger label={d.leave} onClick={leave} />
+    </div>
     </div>
   )
 

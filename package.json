@@ -4,6 +4,7 @@
   "description": "Arruhayn: marriage fatwas, newsletters, and live classes",
   "license": "UNLICENSED",
   "type": "module",
+  "packageManager": "pnpm@9.15.9",
   "scripts": {
     "build": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" next build --webpack",
     "deploy:database": "cross-env NODE_ENV=production PAYLOAD_SECRET=ignore payload migrate && wrangler d1 execute D1 --command 'PRAGMA optimize' --env=${CLOUDFLARE_ENV:-admin} --remote",

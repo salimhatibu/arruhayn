@@ -104,9 +104,29 @@ try {
     }
   }
 } catch (err) {
-  // A token without the Realtime permission fails here, before anything is created.
+  // A token without the Realtime permission fails here, before anything is created. Asking for
+  // the account's apps separates the two causes: that call names no app, so if it fails too the
+  // token is the problem, and if it succeeds the app id is.
   console.log(`  could not read them: ${err instanceof Error ? err.message : String(err)}`)
-  console.log(`  Check that RTK_APP_ID is right and the API token has the Realtime permission.`)
+  let res: Response | null = null
+  try {
+    res = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${process.env.RTK_ACCOUNT_ID}/realtime/kit/apps`,
+      { headers: { authorization: `Bearer ${process.env.RTK_API_TOKEN}` } },
+    )
+  } catch {
+    res = null
+  }
+  if (!res) {
+    console.log(`  Could not reach Cloudflare at all. Check the connection and try again.`)
+  } else if (res.ok) {
+    console.log(`  The token works, so RTK_APP_ID is wrong: it is not an app on this account.`)
+    console.log(`  Copy it from the RealtimeKit dashboard.`)
+  } else {
+    console.log(`  The token reaches Cloudflare but not RealtimeKit (${res.status}), so it is`)
+    console.log(`  missing the Realtime permission. Edit it under My Profile -> API Tokens and`)
+    console.log(`  add Account -> Realtime (or Realtime Admin), or make a new token with it.`)
+  }
   process.exit(1)
 }
 

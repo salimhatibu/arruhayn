@@ -34,7 +34,7 @@ export default async function TeachPage({ params }: { params: Promise<{ id: stri
     )
   }
   return (
-    <div className="wrap" style={{ maxWidth: 960 }}>
+    <div className="wrap live-wrap">
       <p className="small">
         <Link href={`/admin/collections/classes/${cls.id}`}>← Back to the class</Link>
       </p>

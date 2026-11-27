@@ -210,7 +210,7 @@ export function TeacherRoom({
   const onStage = remote.filter((p) => p.stageStatus === 'ON_STAGE' || p.audioEnabled)
 
   return (
-    <section className="room">
+    <section className="room room-teacher">
       {remote.map((p) => (
         <AudioSink key={p.id} track={p.audioEnabled ? p.audioTrack : undefined} />
       ))}
@@ -257,6 +257,7 @@ export function TeacherRoom({
         }
       />
 
+      <div className="room-side">
       <LiveQuestions questions={questions} mark={mark} />
 
       <div className="card">
@@ -329,6 +330,7 @@ export function TeacherRoom({
           <p className="muted small">Only you.</p>
         )}
         <p className="muted small">{remote.length} people in the room.</p>
+      </div>
       </div>
     </section>
   )

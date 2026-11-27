@@ -32,7 +32,7 @@ export default async function ClassPage({ params }: Props) {
   const d = t(locale)
   const speaker = speakerName(cls)
   return (
-    <div className="wrap" style={{ maxWidth: 960 }}>
+    <div className="wrap live-wrap">
       <h1>{cls.title}</h1>
       <div className="byline">
         {speaker ? <span>{speaker}</span> : null}

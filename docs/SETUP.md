@@ -205,6 +205,25 @@ Dashboard → **Workers & Pages → arruhayn → Settings → Builds → Connect
 
 Repeat for `arruhayn-admin` with `--env admin`.
 
+Both commands matter. `pnpm run build` is **not** enough on its own: it runs `next build`,
+which never writes `.open-next/`, so the deploy step finds nothing to upload.
+
+Cloudflare runs the deploy command only for the branch set as production, and a separate
+non-production command for every other branch. That one defaults to `npx wrangler preview`,
+which wants a `previews` block in `wrangler.jsonc` naming preview-safe D1 and R2 resources.
+This project has none, so a push to any other branch fails with:
+
+```
+✘ [ERROR] Your Wrangler configuration is missing a `previews` block
+```
+
+The build itself has already succeeded at that point; only the deploy fails. If you work on a
+branch and merge through pull requests, either make that branch the production branch, or turn
+builds off for non-production branches — otherwise every push to it reports a failed build.
+
+Nothing here is required: `pnpm run deploy:all` builds once and deploys both Workers, which is
+one command against two separate build pipelines doing the same work twice.
+
 ## 7. Moving to your own domain
 
 1. Add the domain to Cloudflare (or buy it through Cloudflare Registrar).

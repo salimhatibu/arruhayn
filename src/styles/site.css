@@ -439,6 +439,26 @@ label { display: block; font-weight: 500; margin-bottom: 0.35rem; color: var(--i
 .controls { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .rec { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--rust); font-weight: 600; }
 .rec::before { content: ''; width: 10px; height: 10px; background: var(--rust); border-radius: 50%; animation: pulse-red 1.6s infinite; }
+
+/* The live stage. Its button enlarges it to full screen, or to cover the page where full screen
+   isn't offered; the controls and warnings passed in stay with it. */
+.live-stage { display: grid; gap: 1rem; }
+.live-stage-frame { position: relative; min-height: 0; }
+.live-stage-toggle { position: absolute; top: 0.6rem; inset-inline-end: 0.6rem; background: rgb(0 0 0 / 0.55); color: #fff; border: 1px solid rgb(255 255 255 / 0.35); border-radius: 999px; padding: 0.35rem 0.85rem; font: inherit; font-size: 0.85rem; cursor: pointer; }
+.live-stage-toggle:hover, .live-stage-toggle:focus-visible { background: rgb(0 0 0 / 0.8); }
+.live-stage.is-big { position: fixed; inset: 0; z-index: 1000; background: var(--night); color: #fff; padding: clamp(0.5rem, 2vw, 1rem); grid-template-rows: minmax(0, 1fr) auto; overflow: auto; }
+.live-stage.is-big .stage-screen { aspect-ratio: auto; height: 100%; border-radius: 0; }
+.live-stage.is-big .controls { justify-content: center; }
+.live-stage.is-big .btn.ghost { color: #fff; }
+.live-stage.is-big .btn.ghost:hover { background: rgb(255 255 255 / 0.12); }
+.live-stage.is-big .muted { color: rgb(255 255 255 / 0.75); }
+.live-stage.is-big .person { color: var(--ink); }
+.live-notices:empty { display: none; }
+.live-notices { display: grid; gap: 0.5rem; }
+.notice.warn { background: var(--cream); color: var(--ink); border-inline-start: 3px solid var(--rust); }
+.session-summary { display: grid; grid-template-columns: max-content 1fr; gap: 0.35rem 1.25rem; margin: 0 0 1rem; }
+.session-summary dt { color: var(--muted); font-size: 0.9rem; }
+.session-summary dd { margin: 0; font-weight: 600; }
 @keyframes pulse-red { 50% { opacity: 0.35; } }
 
 /* Footer */

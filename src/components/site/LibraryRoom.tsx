@@ -2,7 +2,7 @@ import Link from 'next/link'
 import type { Where } from 'payload'
 
 import { t, type Locale } from '@/i18n/dictionary'
-import { formatDate } from '@/lib/format'
+import { formatDate, speakerName } from '@/lib/format'
 import { getPayloadClient, getTopics } from '@/lib/payload'
 
 import { ListeningRoom, type RoomRecording } from './ListeningRoom'
@@ -26,7 +26,7 @@ export async function LibraryRoom({ locale, selectedId, topic: topicSlug }: { lo
   const recordings: RoomRecording[] = found.docs.map((r) => ({
     id: r.id,
     title: r.title,
-    teacher: typeof r.teacher === 'object' && r.teacher ? r.teacher.name : undefined,
+    teacher: speakerName(r),
     date: formatDate(r.publishedAt, locale),
     duration: r.durationSeconds,
     src: `/media/${r.fileKey.split('/').map(encodeURIComponent).join('/')}`,
@@ -47,7 +47,7 @@ export async function LibraryRoom({ locale, selectedId, topic: topicSlug }: { lo
       recordings.unshift({
         id: r.id,
         title: r.title,
-        teacher: typeof r.teacher === 'object' && r.teacher ? r.teacher.name : undefined,
+        teacher: speakerName(r),
         date: formatDate(r.publishedAt, locale),
         duration: r.durationSeconds,
         src: `/media/${r.fileKey.split('/').map(encodeURIComponent).join('/')}`,

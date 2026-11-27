@@ -8,6 +8,7 @@ import { CloudflareContext, getCloudflareContext } from '@opennextjs/cloudflare'
 import { GetPlatformProxyOptions } from 'wrangler'
 import { r2Storage } from '@payloadcms/storage-r2'
 
+import { ClassJoins } from './collections/ClassJoins'
 import { Classes } from './collections/Classes'
 import { Events } from './collections/Events'
 import { Fatwas } from './collections/Fatwas'
@@ -137,6 +138,7 @@ export default buildConfig({
     Guides,
     Glossary,
     Classes,
+    ClassJoins,
     Recordings,
     Events,
     HijriMonths,

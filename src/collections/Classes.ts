@@ -6,7 +6,7 @@ export const Classes: CollectionConfig = {
   slug: 'classes',
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'teacher', 'startsAt', 'status'],
+    defaultColumns: ['title', 'speaker', 'startsAt', 'status', 'attendance'],
     hidden: hiddenUnless('admin', 'teacher'),
     group: 'Classes',
     description: 'To teach a class, open it and choose "Open the live room".',
@@ -23,6 +23,14 @@ export const Classes: CollectionConfig = {
     { name: 'title', type: 'text', required: true, localized: true },
     { name: 'description', type: 'textarea', localized: true },
     {
+      name: 'speaker',
+      type: 'text',
+      localized: true,
+      admin: {
+        description: 'The name shown on the site, such as a guest scholar. They need no account. Left empty, the teacher\'s name is used.',
+      },
+    },
+    {
       name: 'teacher',
       type: 'relationship',
       relationTo: 'users',
@@ -31,6 +39,7 @@ export const Classes: CollectionConfig = {
       filterOptions: { roles: { contains: 'teacher' } },
       defaultValue: ({ user }) => user?.id,
       access: { update: ({ req }) => hasRole(req.user, 'admin') },
+      admin: { description: 'The staff member who hosts the live room.' },
     },
     {
       name: 'startsAt',
@@ -65,8 +74,52 @@ export const Classes: CollectionConfig = {
       type: 'ui',
       admin: { position: 'sidebar', components: { Field: '@/components/admin/LiveRoomLink#LiveRoomLink' } },
     },
+    // Filled in by the live room: when the class actually ran, and how many came.
+    {
+      name: 'startedAt',
+      type: 'date',
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+        date: { pickerAppearance: 'dayAndTime', displayFormat: 'd MMM yyyy, HH:mm' },
+        description: 'When the teacher started the class.',
+      },
+    },
+    {
+      name: 'endedAt',
+      type: 'date',
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+        date: { pickerAppearance: 'dayAndTime', displayFormat: 'd MMM yyyy, HH:mm' },
+        description: 'When it was ended.',
+      },
+    },
+    {
+      name: 'liveMinutes',
+      label: 'Minutes live',
+      type: 'number',
+      admin: { position: 'sidebar', readOnly: true, description: 'How long it ran, from start to end.' },
+    },
+    {
+      name: 'attendance',
+      label: 'People who joined',
+      type: 'number',
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+        description: 'Everyone who joined from the site, each counted once however often they reconnected. The teacher is not counted.',
+      },
+    },
   ],
   hooks: {
+    // Attendance rows must go first: they can't be left pointing at a class that no longer exists,
+    // and the database refuses to delete a class they still point at.
+    beforeDelete: [
+      async ({ id, req }) => {
+        await req.payload.delete({ collection: 'class-joins', where: { class: { equals: id } }, overrideAccess: true, req })
+      },
+    ],
     beforeChange: [
       ({ data, req, operation }) => {
         // A teacher can only schedule classes for themselves.

@@ -76,6 +76,7 @@ export interface Config {
     guides: Guide;
     glossary: Glossary;
     classes: Class;
+    'class-joins': ClassJoin;
     recordings: Recording;
     events: Event;
     'hijri-months': HijriMonth;
@@ -98,6 +99,7 @@ export interface Config {
     guides: GuidesSelect<false> | GuidesSelect<true>;
     glossary: GlossarySelect<false> | GlossarySelect<true>;
     classes: ClassesSelect<false> | ClassesSelect<true>;
+    'class-joins': ClassJoinsSelect<false> | ClassJoinsSelect<true>;
     recordings: RecordingsSelect<false> | RecordingsSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
     'hijri-months': HijriMonthsSelect<false> | HijriMonthsSelect<true>;
@@ -460,11 +462,45 @@ export interface Class {
   id: number;
   title: string;
   description?: string | null;
+  /**
+   * The name shown on the site, such as a guest scholar. They need no account. Left empty, the teacher's name is used.
+   */
+  speaker?: string | null;
+  /**
+   * The staff member who hosts the live room.
+   */
   teacher: number | User;
   startsAt: string;
   durationMinutes?: number | null;
   status: 'scheduled' | 'live' | 'ended' | 'cancelled';
   meetingId?: string | null;
+  /**
+   * When the teacher started the class.
+   */
+  startedAt?: string | null;
+  /**
+   * When it was ended.
+   */
+  endedAt?: string | null;
+  /**
+   * How long it ran, from start to end.
+   */
+  liveMinutes?: number | null;
+  /**
+   * Everyone who joined from the site, each counted once however often they reconnected. The teacher is not counted.
+   */
+  attendance?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "class-joins".
+ */
+export interface ClassJoin {
+  id: number;
+  class: number | Class;
+  visitor: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -478,6 +514,13 @@ export interface Recording {
   id: number;
   title: string;
   description?: string | null;
+  /**
+   * The name shown in the library. Anyone can be named here; they need no account. Left empty, the uploader's name is used.
+   */
+  speaker?: string | null;
+  /**
+   * The staff member who can edit this recording.
+   */
   teacher: number | User;
   class?: (number | null) | Class;
   topics?: (number | Topic)[] | null;
@@ -490,6 +533,9 @@ export interface Recording {
   sizeBytes?: number | null;
   durationSeconds?: number | null;
   status: 'draft' | 'published';
+  /**
+   * Lists it in the library's podcast feed, so people who follow the feed in a podcast app get it automatically.
+   */
   inFeed?: boolean | null;
   publishedAt?: string | null;
   updatedAt: string;
@@ -612,6 +658,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'classes';
         value: number | Class;
+      } | null)
+    | ({
+        relationTo: 'class-joins';
+        value: number | ClassJoin;
       } | null)
     | ({
         relationTo: 'recordings';
@@ -818,11 +868,26 @@ export interface GlossarySelect<T extends boolean = true> {
 export interface ClassesSelect<T extends boolean = true> {
   title?: T;
   description?: T;
+  speaker?: T;
   teacher?: T;
   startsAt?: T;
   durationMinutes?: T;
   status?: T;
   meetingId?: T;
+  startedAt?: T;
+  endedAt?: T;
+  liveMinutes?: T;
+  attendance?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "class-joins_select".
+ */
+export interface ClassJoinsSelect<T extends boolean = true> {
+  class?: T;
+  visitor?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -833,6 +898,7 @@ export interface ClassesSelect<T extends boolean = true> {
 export interface RecordingsSelect<T extends boolean = true> {
   title?: T;
   description?: T;
+  speaker?: T;
   teacher?: T;
   class?: T;
   topics?: T;

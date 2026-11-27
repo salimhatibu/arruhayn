@@ -1,12 +1,14 @@
 'use client'
 
-// Records a live class on the teacher's own computer. Nothing is uploaded.
+// Records a live class on the device of whoever presses Record: the teacher, or a listener keeping
+// their own copy. Nothing is uploaded.
 //
-// - The audio file mixes the teacher's microphone with every speaker and any shared-screen sound.
+// - The audio file mixes every speaker (and this person's own microphone, when they are speaking)
+//   with any shared-screen sound.
 // - In "audio and screen" mode, each screen share is also saved as its own video file
 //   (screen-1, screen-2, …), so changing presenter never breaks a recording.
 // - Chunks are written to disk every 10 seconds. In Chrome and Edge they go straight into a folder
-//   the teacher picks; in other browsers they are kept in IndexedDB and saved when recording stops,
+//   the person picks; in other browsers they are kept in IndexedDB and saved when recording stops,
 //   or recovered after a crash.
 
 const CHUNK_MS = 10_000
@@ -115,7 +117,7 @@ export class LocalRecorder {
     this.base = `${stamp}-${title.replace(/[^\p{L}\p{N}]+/gu, '-').slice(0, 40)}`
   }
 
-  // Must be called from a click, because it may ask the teacher where to save.
+  // Must be called from a click, because it may ask where to save.
   async start() {
     if (canWriteToFolder()) {
       this.dir = await (window as unknown as { showDirectoryPicker: (o: object) => Promise<FileSystemDirectoryHandle> }).showDirectoryPicker({

@@ -1,4 +1,5 @@
 import { isLocale, t } from '@/i18n/dictionary'
+import { speakerName } from '@/lib/format'
 import { getPayloadClient } from '@/lib/payload'
 
 // RSS feed of published recordings, for listeners who want to add it to a podcast app.
@@ -23,7 +24,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ loca
   const items = recordings.docs
     .map((r) => {
       const url = `${base}/media/${r.fileKey.split('/').map(encodeURIComponent).join('/')}`
-      const teacher = typeof r.teacher === 'object' && r.teacher ? r.teacher.name : ''
+      const teacher = speakerName(r) ?? ''
       return `<item>
   <title>${esc(r.title)}</title>
   <link>${base}/${locale}/library/${r.id}</link>

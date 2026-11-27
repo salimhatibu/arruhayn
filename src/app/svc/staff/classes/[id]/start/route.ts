@@ -1,4 +1,5 @@
 import { hasRole } from '@/access/roles'
+import { startClass } from '@/lib/classes'
 import { getPayloadClient } from '@/lib/payload'
 import { addParticipant, createMeeting, realtimeConfigured } from '@/lib/realtimekit'
 import { errorJson, json, staffUser } from '@/lib/staff'
@@ -17,7 +18,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!hasRole(user, 'admin') && teacherId !== user.id) return errorJson('Only this class\'s teacher can start it.', 403)
 
   const meetingId = cls.meetingId || (await createMeeting(cls.title))
-  await payload.update({ collection: 'classes', id: cls.id, overrideAccess: true, data: { meetingId, status: 'live' } })
+  await startClass(payload, cls, meetingId)
   const authToken = await addParticipant(meetingId, user.name, 'host', `staff-${user.id}`)
   return json({ authToken })
 }

@@ -1,4 +1,5 @@
 import { hasRole } from '@/access/roles'
+import { endClass } from '@/lib/classes'
 import { getPayloadClient } from '@/lib/payload'
 import { errorJson, json, staffUser } from '@/lib/staff'
 
@@ -11,6 +12,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!cls) return errorJson('Class not found.', 404)
   const teacherId = typeof cls.teacher === 'object' ? cls.teacher?.id : cls.teacher
   if (!hasRole(user, 'admin') && teacherId !== user.id) return errorJson('Only this class\'s teacher can end it.', 403)
-  await payload.update({ collection: 'classes', id: cls.id, overrideAccess: true, data: { status: 'ended' } })
-  return json({ ok: true })
+  const ended = await endClass(payload, cls)
+  return json({ startedAt: ended.startedAt, endedAt: ended.endedAt, liveMinutes: ended.liveMinutes, attendance: ended.attendance })
 }

@@ -6,7 +6,7 @@ export const Recordings: CollectionConfig = {
   slug: 'recordings',
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'teacher', 'status', 'publishedAt'],
+    defaultColumns: ['title', 'speaker', 'status', 'publishedAt'],
     hidden: hiddenUnless('admin', 'teacher'),
     group: 'Classes',
     description: 'Upload a recording from your computer. Recordings only appear in the library once published.',
@@ -28,7 +28,16 @@ export const Recordings: CollectionConfig = {
     { name: 'title', type: 'text', required: true, localized: true },
     { name: 'description', type: 'textarea', localized: true },
     {
+      name: 'speaker',
+      type: 'text',
+      localized: true,
+      admin: {
+        description: 'The name shown in the library. Anyone can be named here; they need no account. Left empty, the uploader\'s name is used.',
+      },
+    },
+    {
       name: 'teacher',
+      label: 'Uploaded by',
       type: 'relationship',
       relationTo: 'users',
       required: true,
@@ -36,6 +45,7 @@ export const Recordings: CollectionConfig = {
       filterOptions: { roles: { contains: 'teacher' } },
       defaultValue: ({ user }) => user?.id,
       access: { update: ({ req }) => hasRole(req.user, 'admin') },
+      admin: { position: 'sidebar', description: 'The staff member who can edit this recording.' },
     },
     { name: 'class', type: 'relationship', relationTo: 'classes' },
     { name: 'topics', type: 'relationship', relationTo: 'topics', hasMany: true },
@@ -70,7 +80,16 @@ export const Recordings: CollectionConfig = {
       ],
       admin: { position: 'sidebar' },
     },
-    { name: 'inFeed', label: 'Include in the RSS feed', type: 'checkbox', defaultValue: true, admin: { position: 'sidebar' } },
+    {
+      name: 'inFeed',
+      label: 'Include in the RSS feed',
+      type: 'checkbox',
+      defaultValue: true,
+      admin: {
+        position: 'sidebar',
+        description: 'Lists it in the library\'s podcast feed, so people who follow the feed in a podcast app get it automatically.',
+      },
+    },
     { name: 'publishedAt', type: 'date', index: true, admin: { position: 'sidebar', readOnly: true } },
   ],
   hooks: {

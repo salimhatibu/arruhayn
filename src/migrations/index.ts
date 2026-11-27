@@ -4,6 +4,7 @@ import * as migration_20261108_064756_fatwa_credits from './20261108_064756_fatw
 import * as migration_20261108_092718_staff_passwords from './20261108_092718_staff_passwords';
 import * as migration_20261113_151800_subscriber_names from './20261113_151800_subscriber_names';
 import * as migration_20261126_145643_add_confirm_sent_at from './20261126_145643_add_confirm_sent_at';
+import * as migration_20261127_181356_live_class_details from './20261127_181356_live_class_details';
 
 export const migrations = [
   {
@@ -34,6 +35,11 @@ export const migrations = [
   {
     up: migration_20261126_145643_add_confirm_sent_at.up,
     down: migration_20261126_145643_add_confirm_sent_at.down,
-    name: '20261126_145643_add_confirm_sent_at'
+    name: '20261126_145643_add_confirm_sent_at',
+  },
+  {
+    up: migration_20261127_181356_live_class_details.up,
+    down: migration_20261127_181356_live_class_details.down,
+    name: '20261127_181356_live_class_details'
   },
 ];

@@ -1,3 +1,4 @@
+import { endClass } from '@/lib/classes'
 import { sendDueIssues, sendPendingConfirmations, sendingEnabled } from '@/lib/newsletter-send'
 import { getPayloadClient } from '@/lib/payload'
 import { errorJson, json } from '@/lib/staff'
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
   for (const c of live.docs) {
     const finish = new Date(c.startsAt).getTime() + ((c.durationMinutes ?? 90) + 180) * 60_000
     if (finish < now.getTime()) {
-      await payload.update({ collection: 'classes', id: c.id, data: { status: 'ended' }, overrideAccess: true })
+      await endClass(payload, c)
       ended++
     }
   }

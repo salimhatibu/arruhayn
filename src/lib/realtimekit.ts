@@ -12,14 +12,18 @@ function config(): Rtk | null {
 
 export const realtimeConfigured = () => config() !== null
 
-async function call<T>(path: string, body?: unknown): Promise<T> {
-  const c = config()
-  if (!c) throw new Error('Live classes are not configured.')
-  const res = await fetch(`https://api.cloudflare.com/client/v4/accounts/${c.accountId}/realtime/kit/${c.appId}${path}`, {
-    method: body === undefined ? 'GET' : 'POST',
+function request(c: Rtk, path: string, method: string, body?: unknown) {
+  return fetch(`https://api.cloudflare.com/client/v4/accounts/${c.accountId}/realtime/kit/${c.appId}${path}`, {
+    method,
     headers: { authorization: `Bearer ${c.token}`, 'content-type': 'application/json' },
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   })
+}
+
+async function call<T>(path: string, body?: unknown): Promise<T> {
+  const c = config()
+  if (!c) throw new Error('Live classes are not configured.')
+  const res = await request(c, path, body === undefined ? 'GET' : 'POST', body)
   const json = (await res.json().catch(() => ({}))) as { data?: T; success?: boolean; errors?: unknown }
   if (!res.ok || !json.data) throw new Error(`RealtimeKit request failed (${res.status}): ${JSON.stringify(json.errors ?? json)}`)
   return json.data
@@ -67,4 +71,18 @@ export async function addParticipant(
   const token = data.token ?? data.authToken
   if (!token) throw new Error('RealtimeKit returned no participant token.')
   return token
+}
+
+// Ends the class for everyone still in it. The teacher's browser does the same, but this works even
+// when that browser has closed, and it is what puts "This class has ended" in front of listeners.
+export async function endSession(meetingId: string): Promise<void> {
+  const c = config()
+  if (!c) return
+  const res = await request(c, `/meetings/${meetingId}/active-session/kick-all`, 'POST')
+  if (res.ok) return
+  const detail = await res.text().catch(() => '')
+  // "No active session" means nobody is in the meeting any more, which is the state this is after.
+  // Any other 404, such as a mistyped path, is a real failure and must not pass as success.
+  if (res.status === 404 && detail.includes('No active session')) return
+  throw new Error(`RealtimeKit could not end the session (${res.status}): ${detail.slice(0, 200)}`)
 }

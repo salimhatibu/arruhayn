@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 
 import { hasRole } from '@/access/roles'
 import { TeacherRoom } from '@/components/live/TeacherRoom'
-import { realtimeConfigured } from '@/lib/realtimekit'
+import { presetNames, realtimeConfigured } from '@/lib/realtimekit'
 import { getPayloadClient } from '@/lib/payload'
 import type { User } from '@/payload-types'
 
@@ -40,7 +40,13 @@ export default async function TeachPage({ params }: { params: Promise<{ id: stri
       </p>
       <h1>{cls.title}</h1>
       {realtimeConfigured() ? (
-        <TeacherRoom classId={cls.id} title={cls.title} status={cls.status} />
+        <TeacherRoom
+          classId={cls.id}
+          title={cls.title}
+          status={cls.status}
+          hostPreset={presetNames().host}
+          session={{ startedAt: cls.startedAt, endedAt: cls.endedAt, liveMinutes: cls.liveMinutes, attendance: cls.attendance }}
+        />
       ) : (
         <p className="notice">
           Live classes aren&apos;t set up yet. Add the RealtimeKit settings (RTK_ACCOUNT_ID, RTK_APP_ID, RTK_API_TOKEN) to the

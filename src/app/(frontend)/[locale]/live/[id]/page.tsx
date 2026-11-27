@@ -4,9 +4,9 @@ import { notFound } from 'next/navigation'
 import { LiveRoom } from '@/components/live/LiveRoom'
 import { ShareButton } from '@/components/site/ShareButton'
 import { t, type Locale } from '@/i18n/dictionary'
-import { formatDateTime } from '@/lib/format'
+import { formatDateTime, speakerName } from '@/lib/format'
 import { getPayloadClient } from '@/lib/payload'
-import { realtimeConfigured } from '@/lib/realtimekit'
+import { presetNames, realtimeConfigured } from '@/lib/realtimekit'
 import { turnstileSiteKey } from '@/lib/turnstile'
 
 type Props = { params: Promise<{ locale: Locale; id: string }> }
@@ -27,19 +27,19 @@ export default async function ClassPage({ params }: Props) {
   const cls = Number.isInteger(Number(id)) ? await getClass(locale, Number(id)) : null
   if (!cls || cls.status === 'cancelled') notFound()
   const d = t(locale)
-  const teacher = typeof cls.teacher === 'object' ? cls.teacher : null
+  const speaker = speakerName(cls)
   return (
     <div className="wrap" style={{ maxWidth: 960 }}>
       <h1>{cls.title}</h1>
       <div className="byline">
-        {teacher ? <span>{teacher.name}</span> : null}
+        {speaker ? <span>{speaker}</span> : null}
         <span>{formatDateTime(cls.startsAt, locale)}</span>
         <ShareButton title={cls.title} path={`/${locale}/live/${cls.id}`} locale={locale} />
       </div>
       {cls.description ? <p className="reading">{cls.description}</p> : null}
       {cls.status === 'live' ? (
         realtimeConfigured() ? (
-          <LiveRoom classId={cls.id} title={cls.title} locale={locale} siteKey={turnstileSiteKey()} />
+          <LiveRoom classId={cls.id} title={cls.title} locale={locale} siteKey={turnstileSiteKey()} hostPreset={presetNames().host} />
         ) : (
           <p className="notice">{d.live.notConfigured}</p>
         )

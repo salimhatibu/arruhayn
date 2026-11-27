@@ -50,3 +50,10 @@ export function safeHref(url: string | null | undefined): string | undefined {
   if (/^(https?:|mailto:|tel:)/i.test(value) || /^[/#?]/.test(value)) return value
   return undefined
 }
+
+// The name shown for a class or recording: the speaker typed in for it, or else the staff member
+// it belongs to.
+export function speakerName(doc: { speaker?: string | null; teacher?: number | { name?: string | null } | null }): string | undefined {
+  if (doc.speaker?.trim()) return doc.speaker.trim()
+  return typeof doc.teacher === 'object' && doc.teacher?.name ? doc.teacher.name : undefined
+}

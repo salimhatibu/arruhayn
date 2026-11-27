@@ -30,7 +30,9 @@ The dashboard steps (live classes, recording uploads, your own domain, email) ar
 - **Calendar:** Gregorian and Hijri dates, Islamic occasions, Sunnah fasts, and classes. On phones
   the grid shows dots and the month's dates are listed underneath. Three calendar feeds (Google,
   Apple, or an ICS file) cover the next 12 months.
-- **Live classes:** listen in the browser, raise a hand to speak.
+- **Live classes:** listen in the browser, raise a hand to speak and share a screen once brought on
+  stage, watch full screen, and record the class to your own device. Listeners are told when the
+  class ends, and when a dropped sound is the speaker's connection rather than theirs.
 - **Saved:** save any fatwa, newsletter, guide, or recording; everything saved is listed newest
   first. Create named lists, then add saved items to them, and share a list as a link. All of
   this stays in the visitor's browser.
@@ -47,7 +49,9 @@ The dashboard steps (live classes, recording uploads, your own domain, email) ar
   edit and delete, status pills, and 10/25/50/100/200 rows per page.
 - Questions become draft fatwas with one tick; publishing marks the question answered.
 - Teachers run live classes with screen sharing and record to their own computer, then upload
-  the recording (converted to MP3 in the browser).
+  the recording (converted to MP3 in the browser). Each class keeps when it started and ended, how
+  long it ran, and how many people joined. Classes and recordings can name any speaker, such as a
+  guest, without them needing an account.
 - Newsletter issues are emailed to confirmed subscribers in the language each chose, with an
   unsubscribe link in every one. Sign-ups confirm by email first, and staff can reset their own
   password from the sign-in screen. Sending needs a Resend key and a switch in Site settings.

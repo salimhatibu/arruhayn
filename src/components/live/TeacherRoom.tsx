@@ -2,14 +2,36 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-import { AudioSink, ScreenView } from './Media'
+import { AudioSink, RoomNotices, Stage } from './Media'
 import { canWriteToFolder, downloadStored, LocalRecorder, storedRecordings, type RecorderMode } from './recorder'
-import { screenSharer, useRoom } from './useRoom'
+import { screenSharer, useRoom, weakSpeakers } from './useRoom'
 
 // The teacher's live room, on the admin Worker. Starts the class, manages who speaks, shares the
 // screen, and records to the teacher's own computer.
 
 type Request = { displayName: string; userId: string }
+
+// When the class last ran, as recorded by the start and end routes.
+export type Session = { startedAt?: string | null; endedAt?: string | null; liveMinutes?: number | null; attendance?: number | null }
+
+const when = (iso?: string | null) =>
+  iso ? new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'
+
+function SessionSummary({ session }: { session: Session }) {
+  if (!session.startedAt) return null
+  return (
+    <dl className="session-summary">
+      <dt>Started</dt>
+      <dd>{when(session.startedAt)}</dd>
+      <dt>Ended</dt>
+      <dd>{when(session.endedAt)}</dd>
+      <dt>Ran for</dt>
+      <dd>{session.liveMinutes == null ? '—' : `${session.liveMinutes} min`}</dd>
+      <dt>People who joined</dt>
+      <dd>{session.attendance ?? '—'}</dd>
+    </dl>
+  )
+}
 
 const mb = (bytes: number) => `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 const clock = (ms: number) => {
@@ -17,8 +39,21 @@ const clock = (ms: number) => {
   return `${Math.floor(s / 3600)}:${String(Math.floor((s % 3600) / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
 }
 
-export function TeacherRoom({ classId, title, status: initialStatus }: { classId: number; title: string; status: string }) {
-  const { meeting, join, leave, remote, speaker, rerender } = useRoom()
+export function TeacherRoom({
+  classId,
+  title,
+  status: initialStatus,
+  hostPreset,
+  session: initialSession,
+}: {
+  classId: number
+  title: string
+  status: string
+  hostPreset: string
+  session: Session
+}) {
+  const { meeting, join, leave, remote, speaker, rerender, connection, weak, dropped } = useRoom({ hostPreset })
+  const [session, setSession] = useState<Session>(initialSession)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState(initialStatus)
@@ -101,11 +136,27 @@ export function TeacherRoom({ classId, title, status: initialStatus }: { classId
   }
 
   async function end() {
+    if (!window.confirm('End the class for everyone? Listeners are told it has ended.')) return
     if (recorder) await stopRecording()
-    await meeting?.participants?.kickAll?.().catch(() => {})
+    // The server ends the meeting for everyone and records the session. If it can't be reached,
+    // this browser ends the meeting itself so listeners are not left waiting.
+    const res = await fetch(`/svc/staff/classes/${classId}/end`, { method: 'POST' }).catch((): null => null)
+    if (res?.ok) setSession((await res.json()) as Session)
+    else await meeting?.participants?.kickAll?.().catch(() => {})
     await leave()
-    await fetch(`/svc/staff/classes/${classId}/end`, { method: 'POST' })
     setStatus('ended')
+  }
+
+  async function toggleShare() {
+    setError('')
+    try {
+      if (meeting.self.screenShareEnabled) await meeting.self.disableScreenShare()
+      else await meeting.self.enableScreenShare()
+    } catch (err) {
+      const name = (err as DOMException)?.name
+      if (name !== 'NotAllowedError' && name !== 'AbortError') setError('Your screen could not be shared. Use Chrome or Edge on a computer.')
+    }
+    rerender()
   }
 
   if (!meeting) {
@@ -124,6 +175,7 @@ export function TeacherRoom({ classId, title, status: initialStatus }: { classId
           </div>
         ) : null}
         <p>{status === 'ended' ? 'This class has ended. You can start it again if you need to.' : 'Start the class when you are ready. Students on the public site will see a "Live now" banner.'}</p>
+        {status === 'ended' ? <SessionSummary session={session} /> : null}
         <button className="btn" onClick={start} disabled={busy}>
           {busy ? 'Starting…' : status === 'live' ? 'Rejoin the class' : 'Start the class'}
         </button>
@@ -142,22 +194,34 @@ export function TeacherRoom({ classId, title, status: initialStatus }: { classId
       ))}
       {sharer && !sharer.self ? <AudioSink track={sharer.tracks?.audio} /> : null}
 
-      <ScreenView track={sharer?.tracks?.video} label={sharer ? `${sharer.name} is sharing their screen` : 'Nobody is sharing their screen'} />
-
-      <div className="controls">
-        <button className="btn secondary" onClick={() => (meeting.self.audioEnabled ? meeting.self.disableAudio() : meeting.self.enableAudio()).then(rerender)}>
-          {meeting.self.audioEnabled ? 'Mute' : 'Unmute'}
-        </button>
-        <button
-          className="btn secondary"
-          onClick={() => (meeting.self.screenShareEnabled ? meeting.self.disableScreenShare() : meeting.self.enableScreenShare()).then(rerender).catch(() => {})}
-        >
-          {meeting.self.screenShareEnabled ? 'Stop sharing' : 'Share screen'}
-        </button>
-        <button className="btn danger" onClick={end}>
-          End class
-        </button>
-      </div>
+      <Stage
+        track={sharer?.tracks?.video}
+        label={sharer ? `${sharer.name} is sharing their screen` : 'Nobody is sharing their screen'}
+        expandLabel="Full screen"
+        shrinkLabel="Exit full screen"
+      >
+        <RoomNotices
+          connection={connection}
+          weakNames={weakSpeakers(remote, weak)}
+          dropped={dropped}
+          text={{
+            reconnecting: 'Your connection dropped. Reconnecting… Listeners are told it is your connection, not theirs.',
+            speakerWeak: (name) => `${name}'s connection is weak, so their sound may break up.`,
+            speakerDropped: (name) => `${name} has lost their connection.`,
+          }}
+        />
+        <div className="controls">
+          <button className="btn secondary" onClick={() => (meeting.self.audioEnabled ? meeting.self.disableAudio() : meeting.self.enableAudio()).then(rerender)}>
+            {meeting.self.audioEnabled ? 'Mute' : 'Unmute'}
+          </button>
+          <button className="btn secondary" onClick={toggleShare}>
+            {meeting.self.screenShareEnabled ? 'Stop sharing' : 'Share screen'}
+          </button>
+          <button className="btn danger" onClick={end}>
+            End class
+          </button>
+        </div>
+      </Stage>
 
       <div className="card">
         <h2 style={{ marginTop: 0, fontSize: '1.2rem' }}>Recording</h2>

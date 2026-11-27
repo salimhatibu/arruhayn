@@ -5,6 +5,7 @@ import * as migration_20261108_092718_staff_passwords from './20261108_092718_st
 import * as migration_20261113_151800_subscriber_names from './20261113_151800_subscriber_names';
 import * as migration_20261126_145643_add_confirm_sent_at from './20261126_145643_add_confirm_sent_at';
 import * as migration_20261127_181356_live_class_details from './20261127_181356_live_class_details';
+import * as migration_20261127_191613_recording_choice_drop_feed from './20261127_191613_recording_choice_drop_feed';
 
 export const migrations = [
   {
@@ -40,6 +41,11 @@ export const migrations = [
   {
     up: migration_20261127_181356_live_class_details.up,
     down: migration_20261127_181356_live_class_details.down,
-    name: '20261127_181356_live_class_details'
+    name: '20261127_181356_live_class_details',
+  },
+  {
+    up: migration_20261127_191613_recording_choice_drop_feed.up,
+    down: migration_20261127_191613_recording_choice_drop_feed.down,
+    name: '20261127_191613_recording_choice_drop_feed'
   },
 ];

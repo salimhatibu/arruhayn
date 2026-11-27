@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { audioContentType, shouldConvertAudioToMp3 } from '@/lib/audio-upload'
 
 // Uploads a recording from the teacher's computer straight to storage. Recordings made in the
-// live room are WebM/Opus; those are converted to MP3 first so every browser and podcast app plays
+// live room are WebM/Opus; those are converted to MP3 first so every browser plays
 // them. MP3 and M4A files are uploaded as they are.
 
 const SAMPLE_RATE = 16000

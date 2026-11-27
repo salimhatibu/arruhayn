@@ -93,12 +93,10 @@ export function ListeningRoom({
   recordings,
   initialId,
   locale,
-  rssHref,
 }: {
   recordings: RoomRecording[]
   initialId?: number
   locale: Locale
-  rssHref: string
 }) {
   const d = t(locale)
   const L = d.library
@@ -355,10 +353,6 @@ export function ListeningRoom({
             </li>
           ))}
         </ul>
-        <a className="songbook-rss" href={rssHref}>
-          <span>{L.rss}</span>
-          <span aria-hidden="true">↗</span>
-        </a>
       </aside>
     </div>
   )

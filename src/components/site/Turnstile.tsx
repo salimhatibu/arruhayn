@@ -30,8 +30,21 @@ function loadScript(): Promise<void> {
 }
 
 // Invisible-when-possible bot check for public forms. Calls onToken with each new token.
-export function Turnstile({ siteKey, onToken, locale }: { siteKey: string; onToken: (token: string) => void; locale: string }) {
+// A token works once: after a failed submit, the form changes `resetKey` to get a fresh one, so the
+// visitor can just try again instead of reloading the page.
+export function Turnstile({
+  siteKey,
+  onToken,
+  locale,
+  resetKey = 0,
+}: {
+  siteKey: string
+  onToken: (token: string) => void
+  locale: string
+  resetKey?: number
+}) {
   const ref = useRef<HTMLDivElement>(null)
+  const widget = useRef<string | undefined>(undefined)
   const cb = useRef(onToken)
   useEffect(() => {
     cb.current = onToken
@@ -43,7 +56,7 @@ export function Turnstile({ siteKey, onToken, locale }: { siteKey: string; onTok
     loadScript()
       .then(() => {
         if (cancelled || !ref.current || !window.turnstile) return
-        id = window.turnstile.render(ref.current, {
+        id = widget.current = window.turnstile.render(ref.current, {
           sitekey: siteKey,
           language: locale,
           appearance: 'always',
@@ -57,6 +70,12 @@ export function Turnstile({ siteKey, onToken, locale }: { siteKey: string; onTok
       if (id) window.turnstile?.remove(id)
     }
   }, [siteKey, locale])
+
+  useEffect(() => {
+    if (!resetKey || !widget.current) return
+    cb.current('')
+    window.turnstile?.reset(widget.current)
+  }, [resetKey])
 
   return <div ref={ref} />
 }

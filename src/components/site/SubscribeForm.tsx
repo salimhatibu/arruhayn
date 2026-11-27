@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from 'react'
 
-import { t, type Locale } from '@/i18n/dictionary'
+import { serverError, t, type Locale } from '@/i18n/dictionary'
 
 import { Turnstile } from './Turnstile'
 
@@ -21,6 +21,7 @@ export function SubscribeForm({
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [token, setToken] = useState('')
+  const [checkRound, setCheckRound] = useState(0)
   const [state, setState] = useState<{
     kind: 'idle' | 'busy' | 'done' | 'error'
     message?: string
@@ -30,19 +31,18 @@ export function SubscribeForm({
     e.preventDefault()
     if (askForName && !name.trim()) return setState({ kind: 'error', message: d.nameRequired })
     if (!/^\S+@\S+\.\S+$/.test(email)) return setState({ kind: 'error', message: d.invalidEmail })
-    if (!token)
-      return setState({
-        kind: 'error',
-        message: 'Please wait for the bot check to complete, then try again.',
-      })
+    if (!token) return setState({ kind: 'error', message: t(locale).errors.botCheck })
     setState({ kind: 'busy' })
     const res = await fetch('/svc/subscribe', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ ...(askForName ? { name: name.trim() } : {}), email, locale, token }),
     }).catch((): null => null)
-    const data = (await res?.json().catch(() => ({}))) as { pending?: boolean; error?: string }
-    if (!res?.ok) return setState({ kind: 'error', message: data?.error ?? d.invalidEmail })
+    const data = (await res?.json().catch(() => ({}))) as { pending?: boolean; error?: string; code?: string }
+    if (!res?.ok) {
+      setCheckRound((n) => n + 1)
+      return setState({ kind: 'error', message: serverError(locale, data, t(locale).errors.generic) })
+    }
     setState({ kind: 'done', message: data.pending ? d.subscribedPending : d.subscribed })
     try {
       localStorage.setItem('arruhayn-subscribed', '1')
@@ -100,7 +100,7 @@ export function SubscribeForm({
         </button>
       </div>
       {state.kind === 'error' ? <p className="error">{state.message}</p> : null}
-      <Turnstile siteKey={siteKey} onToken={setToken} locale={locale} />
+      <Turnstile siteKey={siteKey} onToken={setToken} locale={locale} resetKey={checkRound} />
     </form>
   )
 }

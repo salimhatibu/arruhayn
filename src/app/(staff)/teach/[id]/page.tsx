@@ -46,6 +46,7 @@ export default async function TeachPage({ params }: { params: Promise<{ id: stri
           status={cls.status}
           hostPreset={presetNames().host}
           session={{ startedAt: cls.startedAt, endedAt: cls.endedAt, liveMinutes: cls.liveMinutes, attendance: cls.attendance }}
+          allowRecording={Boolean(cls.allowRecording)}
         />
       ) : (
         <p className="notice">

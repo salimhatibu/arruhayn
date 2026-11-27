@@ -18,7 +18,7 @@ export async function recordJoin(payload: Payload, classId: number, visitor: str
 }
 
 // Marks a class live, starting a fresh session record unless it is being resumed.
-export async function startClass(payload: Payload, cls: Class, meetingId: string) {
+export async function startClass(payload: Payload, cls: Class, meetingId: string, allowRecording?: boolean) {
   const now = new Date()
   const endedLongAgo = cls.endedAt ? now.getTime() - new Date(cls.endedAt).getTime() > NEW_SESSION_AFTER_MS : false
   const fresh = !cls.startedAt || (cls.status !== 'live' && endedLongAgo)
@@ -33,20 +33,24 @@ export async function startClass(payload: Payload, cls: Class, meetingId: string
       meetingId,
       status: 'live',
       endedAt: null,
+      ...(allowRecording === undefined ? {} : { allowRecording }),
       ...(fresh ? { startedAt: now.toISOString(), liveMinutes: null, attendance: null } : {}),
     },
   })
 }
 
-// Ends a class for everyone still in it, and records when it ran and how many came.
+// Ends a class for everyone still in it, and records when it ran and how many came. The class is
+// marked ended before anyone is removed from the room: removing them makes their pages ask at once
+// whether anything is still live, and the answer must already be no.
 export async function endClass(payload: Payload, cls: Class) {
-  if (cls.meetingId) await endSession(cls.meetingId).catch((err: unknown) => payload.logger.error(err))
   const endedAt = new Date()
   const liveMinutes = cls.startedAt ? Math.max(0, Math.round((endedAt.getTime() - new Date(cls.startedAt).getTime()) / 60_000)) : null
-  return payload.update({
+  const ended = await payload.update({
     collection: 'classes',
     id: cls.id,
     overrideAccess: true,
     data: { status: 'ended', endedAt: endedAt.toISOString(), liveMinutes, attendance: await attendanceFor(payload, cls.id) },
   })
+  if (cls.meetingId) await endSession(cls.meetingId).catch((err: unknown) => payload.logger.error(err))
+  return ended
 }

@@ -9,7 +9,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params
   return {
     title: t(locale).library.title,
-    alternates: { types: { 'application/rss+xml': `/${locale}/feed.xml` } },
   }
 }
 

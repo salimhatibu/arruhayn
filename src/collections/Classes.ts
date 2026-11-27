@@ -64,6 +64,16 @@ export const Classes: CollectionConfig = {
       admin: { position: 'sidebar' },
     },
     {
+      name: 'allowRecording',
+      label: 'Listeners may record',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        position: 'sidebar',
+        description: 'Shows listeners a Record button that saves the class to their own device. The teacher can also change this when starting the class, or during it.',
+      },
+    },
+    {
       name: 'meetingId',
       type: 'text',
       admin: { position: 'sidebar', readOnly: true },

@@ -49,9 +49,6 @@ export async function Footer({ locale }: { locale: Locale }) {
           ))}
         </nav>
         <div className="footer-icons">
-          <a href={`/${locale}/feed.xml`} aria-label="RSS">
-            <Icon name="rss" size={20} />
-          </a>
           <Link href={`/${locale}/calendar`} aria-label={d.nav.calendar}>
             <Icon name="calendar" size={20} />
           </Link>

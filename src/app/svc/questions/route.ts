@@ -11,9 +11,9 @@ export async function POST(request: Request) {
     token?: string
   } | null
   const question = body?.question?.trim() ?? ''
-  if (question.length < 20 || question.length > 4000) return errorJson('Write your question in 20 to 4,000 characters.', 400)
+  if (question.length < 20 || question.length > 4000) return errorJson('Write your question in 20 to 4,000 characters.', 400, 'questionLength')
   if (!(await verifyTurnstile(body?.token, request.headers.get('cf-connecting-ip')))) {
-    return errorJson('The bot check failed. Reload the page and try again.', 403)
+    return errorJson('The bot check did not go through. Wait for it to finish, then try again.', 403, 'botCheck')
   }
   const email = body?.email?.trim().toLowerCase()
   const payload = await getPayloadClient()

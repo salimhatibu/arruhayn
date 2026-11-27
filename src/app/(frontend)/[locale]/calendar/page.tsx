@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
+import { LocalTime } from '@/components/site/LocalTime'
 import { t, type Locale } from '@/i18n/dictionary'
 import { getClassesBetween, getCustomEvents } from '@/lib/calendar'
 import { fastingDays, islamicDates, type CalendarEntry } from '@/lib/fasting'
@@ -37,13 +38,14 @@ export default async function CalendarPage({ params, searchParams }: Props) {
   const fasts = fastingDays(gridStart, gridEnd, overrides)
   const islamic = [...islamicDates(gridStart, gridEnd, overrides), ...custom]
 
-  const byDay = new Map<string, { kind: string; label: string; href?: string; title: string }[]>()
-  const add = (date: string, item: { kind: string; label: string; href?: string; title: string }) =>
+  // `at` is a class's start; its time is written in the visitor's own zone in the browser.
+  type Item = { kind: string; label: string; href?: string; title: string; at?: string }
+  const byDay = new Map<string, Item[]>()
+  const add = (date: string, item: Item) =>
     byDay.set(date, [...(byDay.get(date) ?? []), item])
   if (show.has('classes')) {
     for (const c of classes) {
-      const time = new Intl.DateTimeFormat(locale === 'ar' ? 'ar-EG' : 'en-GB', { hour: 'numeric', minute: '2-digit' }).format(new Date(c.startsAt))
-      add(c.startsAt.slice(0, 10), { kind: 'class', label: `${time} ${c.title}`, title: c.title, href: `/${locale}/live/${c.id}` })
+      add(c.startsAt.slice(0, 10), { kind: 'class', label: c.title, title: c.title, href: `/${locale}/live/${c.id}`, at: c.startsAt })
     }
   }
   const label = (e: CalendarEntry) => `${e.title[locale]}${e.expected ? ` (${d.expected})` : ''}`
@@ -146,10 +148,12 @@ export default async function CalendarPage({ params, searchParams }: Props) {
                       {items.map((it, i) =>
                         it.href ? (
                           <Link key={i} className={`e ${it.kind}`} href={it.href} title={it.title}>
+                            {it.at ? <><LocalTime value={it.at} locale={locale} options={{ hour: 'numeric', minute: '2-digit' }} /> </> : null}
                             {it.label}
                           </Link>
                         ) : (
                           <span key={i} className={`e ${it.kind}`} title={it.title}>
+                            {it.at ? <><LocalTime value={it.at} locale={locale} options={{ hour: 'numeric', minute: '2-digit' }} /> </> : null}
                             {it.label}
                           </span>
                         ),
@@ -179,11 +183,13 @@ export default async function CalendarPage({ params, searchParams }: Props) {
                   {(byDay.get(iso) ?? []).map((it, i) =>
                     it.href ? (
                       <Link key={i} className={`e ${it.kind}`} href={it.href}>
-                        {it.label}
+                        {it.at ? <><LocalTime value={it.at} locale={locale} options={{ hour: 'numeric', minute: '2-digit' }} /> </> : null}
+                            {it.label}
                       </Link>
                     ) : (
                       <span key={i} className={`e ${it.kind}`}>
-                        {it.label}
+                        {it.at ? <><LocalTime value={it.at} locale={locale} options={{ hour: 'numeric', minute: '2-digit' }} /> </> : null}
+                            {it.label}
                       </span>
                     ),
                   )}

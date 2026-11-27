@@ -26,7 +26,7 @@ The dashboard steps (live classes, recording uploads, your own domain, email) ar
 - **Newsletters, news, guides** (with a nikah checklist saved on the device), and a **glossary**
   whose terms show definitions when tapped or hovered in any article.
 - **Library:** a listening room with large controls, speed, skip, a seek bar, resume where you
-  stopped, and a listened count. Also an RSS feed.
+  stopped, and a listened count.
 - **Calendar:** Gregorian and Hijri dates, Islamic occasions, Sunnah fasts, and classes. On phones
   the grid shows dots and the month's dates are listed underneath. Three calendar feeds (Google,
   Apple, or an ICS file) cover the next 12 months.

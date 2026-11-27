@@ -7,9 +7,12 @@
 //   with any shared-screen sound.
 // - In "audio and screen" mode, each screen share is also saved as its own video file
 //   (screen-1, screen-2, …), so changing presenter never breaks a recording.
-// - Chunks are written to disk every 10 seconds. In Chrome and Edge they go straight into a folder
-//   the person picks; in other browsers they are kept in IndexedDB and saved when recording stops,
-//   or recovered after a crash.
+// - Chunks are written every 10 seconds. In Chrome and Edge they go into a folder the person picks;
+//   in other browsers they are kept in IndexedDB and saved as a download when recording stops.
+// - Chrome only commits a file written to a folder when it is closed, so a tab that crashes or a
+//   device that dies would lose the whole recording. Every chunk is therefore also kept in
+//   IndexedDB until the file has been closed safely, and anything left there is offered for saving
+//   the next time (see storedRecordings).
 
 const CHUNK_MS = 10_000
 const DB = 'arruhayn-recordings'
@@ -51,9 +54,26 @@ async function idbSink(file: string, type: string): Promise<Sink> {
   }
 }
 
-// Files left in IndexedDB, for example after the browser closed mid-class.
+// A recording holds a Web Lock under this prefix while it runs, so another tab does not mistake its
+// safety copy for one left behind.
+const LOCK = 'arruhayn-recording:'
+
+async function runningRecordings(): Promise<string[]> {
+  const snapshot: LockManagerSnapshot | null = navigator.locks ? await navigator.locks.query().catch((): null => null) : null
+  const names: string[] = (snapshot?.held ?? []).map((lock: LockInfo) => lock.name ?? '')
+  return names.filter((name) => name.startsWith(LOCK)).map((name) => name.slice(LOCK.length))
+}
+
+// Files left in IndexedDB, for example after the browser closed mid-class. Recordings still running
+// in another tab are not included.
 export async function storedRecordings(): Promise<string[]> {
   if (typeof indexedDB === 'undefined') return []
+  const running = await runningRecordings()
+  const files = await listStored()
+  return files.filter((f) => !running.some((base) => f.startsWith(base)))
+}
+
+async function listStored(): Promise<string[]> {
   const db = await openDb()
   return new Promise((resolve) => {
     const req = db.transaction('chunks').objectStore('chunks').index('file').openKeyCursor(null, 'nextunique')
@@ -82,13 +102,19 @@ export async function downloadStored(file: string) {
   a.download = file
   a.click()
   setTimeout(() => URL.revokeObjectURL(a.href), 60_000)
-  // Remove the chunks once saved.
+  await forgetStored(file)
+}
+
+// Removes a file's chunks from IndexedDB, once it has been saved some other way.
+async function forgetStored(file: string) {
+  const db = await openDb()
   await new Promise<void>((resolve) => {
     const tx = db.transaction('chunks', 'readwrite')
     const store = tx.objectStore('chunks')
     const keys = store.index('file').getAllKeys(file)
     keys.onsuccess = () => keys.result.forEach((k) => store.delete(k))
     tx.oncomplete = () => resolve()
+    tx.onerror = () => resolve()
   })
 }
 
@@ -104,6 +130,8 @@ export class LocalRecorder {
   private videoPart = 0
   private dir?: FileSystemDirectoryHandle
   private pending: Promise<void>[] = []
+  private releaseLock?: () => void
+  private silence?: ConstantSourceNode
   bytes = 0
   startedAt = 0
   readonly base: string
@@ -126,18 +154,35 @@ export class LocalRecorder {
       })
     }
     await this.ctx.resume()
+    // With nobody speaking the mix has no input, and Chrome then records nothing at all: the file
+    // would skip every pause, and a recording started during a silence would stay empty. A silent
+    // source keeps the mix running; it costs about 250 bytes a second.
+    this.silence = this.ctx.createConstantSource()
+    this.silence.offset.value = 0
+    this.silence.connect(this.dest)
+    this.silence.start()
+    navigator.locks?.request(LOCK + this.base, () => new Promise<void>((release) => (this.releaseLock = release))).catch(() => {})
     const type = AUDIO_TYPE()
     this.audioRec = await this.record(this.dest.stream, `${this.base}-audio.${ext(type)}`, type)
     this.startedAt = Date.now()
   }
 
   private async sink(file: string, type: string): Promise<Sink> {
-    if (this.dir) {
-      const handle = await this.dir.getFileHandle(file, { create: true })
-      const writable = await handle.createWritable()
-      return { write: (b) => writable.write(b), close: () => writable.close() }
+    const backup = await idbSink(file, type)
+    if (!this.dir) return backup
+    const handle = await this.dir.getFileHandle(file, { create: true })
+    const writable = await handle.createWritable()
+    return {
+      // The IndexedDB copy is only a safety net: a failure there must not stop the real file.
+      write: async (b) => {
+        await Promise.all([writable.write(b), backup.write(b).catch(() => {})])
+      },
+      // Once the file is closed it is safe on disk, so the backup copy is dropped.
+      close: async () => {
+        await writable.close()
+        await forgetStored(file)
+      },
     }
-    return idbSink(file, type)
   }
 
   private async record(stream: MediaStream, file: string, type: string) {
@@ -196,7 +241,9 @@ export class LocalRecorder {
     await new Promise((r) => setTimeout(r, 300))
     await Promise.all(this.pending)
     this.sources.forEach((n) => n.disconnect())
+    this.silence?.stop()
     await this.ctx.close().catch(() => {})
+    this.releaseLock?.()
   }
 
   get savedTo() {

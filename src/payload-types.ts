@@ -473,6 +473,10 @@ export interface Class {
   startsAt: string;
   durationMinutes?: number | null;
   status: 'scheduled' | 'live' | 'ended' | 'cancelled';
+  /**
+   * Shows listeners a Record button that saves the class to their own device. The teacher can also change this when starting the class, or during it.
+   */
+  allowRecording?: boolean | null;
   meetingId?: string | null;
   /**
    * When the teacher started the class.
@@ -533,10 +537,6 @@ export interface Recording {
   sizeBytes?: number | null;
   durationSeconds?: number | null;
   status: 'draft' | 'published';
-  /**
-   * Lists it in the library's podcast feed, so people who follow the feed in a podcast app get it automatically.
-   */
-  inFeed?: boolean | null;
   publishedAt?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -873,6 +873,7 @@ export interface ClassesSelect<T extends boolean = true> {
   startsAt?: T;
   durationMinutes?: T;
   status?: T;
+  allowRecording?: T;
   meetingId?: T;
   startedAt?: T;
   endedAt?: T;
@@ -908,7 +909,6 @@ export interface RecordingsSelect<T extends boolean = true> {
   sizeBytes?: T;
   durationSeconds?: T;
   status?: T;
-  inFeed?: T;
   publishedAt?: T;
   updatedAt?: T;
   createdAt?: T;

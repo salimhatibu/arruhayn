@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react'
 
+import { ControlButton } from './icons'
 import { AudioSink, RoomNotices, Stage } from './Media'
-import { canWriteToFolder, downloadStored, LocalRecorder, storedRecordings, type RecorderMode } from './recorder'
+import { canWriteToFolder, LocalRecorder, type RecorderMode } from './recorder'
+import { UnsavedRecordings } from './UnsavedRecordings'
 import { screenSharer, useRoom, weakSpeakers } from './useRoom'
 
 // The teacher's live room, on the admin Worker. Starts the class, manages who speaks, shares the
@@ -45,12 +47,14 @@ export function TeacherRoom({
   status: initialStatus,
   hostPreset,
   session: initialSession,
+  allowRecording: initialAllowRecording,
 }: {
   classId: number
   title: string
   status: string
   hostPreset: string
   session: Session
+  allowRecording: boolean
 }) {
   const { meeting, join, leave, remote, speaker, rerender, connection, weak, dropped } = useRoom({ hostPreset })
   const [session, setSession] = useState<Session>(initialSession)
@@ -61,15 +65,11 @@ export function TeacherRoom({
   const [recorder, setRecorder] = useState<LocalRecorder | null>(null)
   const [, setTick] = useState(0)
   const [now, setNow] = useState(0)
-  const [leftovers, setLeftovers] = useState<string[]>([])
+  const [allowRecording, setAllowRecording] = useState(initialAllowRecording)
   const recRef = useRef<LocalRecorder | null>(null)
   useEffect(() => {
     recRef.current = recorder
   }, [recorder])
-
-  useEffect(() => {
-    storedRecordings().then(setLeftovers).catch(() => {})
-  }, [])
 
   // Warn before closing the tab while recording.
   useEffect(() => {
@@ -101,9 +101,13 @@ export function TeacherRoom({
     setBusy(true)
     setError('')
     try {
-      const res = await fetch(`/svc/staff/classes/${classId}/start`, { method: 'POST' })
-      const data = (await res.json()) as { authToken?: string; error?: string }
-      if (!res.ok || !data.authToken) throw new Error(data.error ?? 'The class could not start.')
+      const res = await fetch(`/svc/staff/classes/${classId}/start`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ allowRecording }),
+      })
+      const data = (await res.json().catch(() => ({}))) as { authToken?: string; error?: string }
+      if (!res.ok || !data.authToken) throw new Error(data.error ?? 'The class could not start. Check the connection and try again.')
       const m = await join(data.authToken)
       if (m.stage.status !== 'ON_STAGE') {
         if (m.stage.status === 'OFF_STAGE') await m.stage.requestAccess().catch(() => {})
@@ -147,6 +151,25 @@ export function TeacherRoom({
     setStatus('ended')
   }
 
+  // Listeners see the change at their room's next status check, within half a minute.
+  async function changeRecording(allowed: boolean) {
+    setAllowRecording(allowed)
+    const res = await fetch(`/svc/staff/classes/${classId}/recording`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ allowRecording: allowed }),
+    }).catch((): null => null)
+    if (!res?.ok) {
+      setAllowRecording(!allowed)
+      setError('The recording setting could not be saved. Try again.')
+    }
+  }
+
+  async function toggleMic() {
+    await (meeting.self.audioEnabled ? meeting.self.disableAudio() : meeting.self.enableAudio()).catch(() => setError('Allow microphone access to speak.'))
+    rerender()
+  }
+
   async function toggleShare() {
     setError('')
     try {
@@ -159,23 +182,20 @@ export function TeacherRoom({
     rerender()
   }
 
+  const recordingChoice = (
+    <label className="check">
+      <input type="checkbox" checked={allowRecording} onChange={(e) => (meeting ? changeRecording(e.target.checked) : setAllowRecording(e.target.checked))} />
+      Let listeners record this class to their own devices
+    </label>
+  )
+
   if (!meeting) {
     return (
       <div className="stack">
-        {leftovers.length ? (
-          <div className="card">
-            <p>
-              <strong>Unsaved recordings were found in this browser.</strong> Save them before starting a new class.
-            </p>
-            {leftovers.map((f) => (
-              <button key={f} className="btn secondary small" onClick={() => downloadStored(f).then(() => setLeftovers((l) => l.filter((x) => x !== f)))}>
-                Save {f}
-              </button>
-            ))}
-          </div>
-        ) : null}
+        <UnsavedRecordings locale="en" />
         <p>{status === 'ended' ? 'This class has ended. You can start it again if you need to.' : 'Start the class when you are ready. Students on the public site will see a "Live now" banner.'}</p>
         {status === 'ended' ? <SessionSummary session={session} /> : null}
+        {recordingChoice}
         <button className="btn" onClick={start} disabled={busy}>
           {busy ? 'Starting…' : status === 'live' ? 'Rejoin the class' : 'Start the class'}
         </button>
@@ -197,34 +217,46 @@ export function TeacherRoom({
       <Stage
         track={sharer?.tracks?.video}
         label={sharer ? `${sharer.name} is sharing their screen` : 'Nobody is sharing their screen'}
-        expandLabel="Full screen"
-        shrinkLabel="Exit full screen"
-      >
-        <RoomNotices
-          connection={connection}
-          weakNames={weakSpeakers(remote, weak)}
-          dropped={dropped}
-          text={{
-            reconnecting: 'Your connection dropped. Reconnecting… Listeners are told it is your connection, not theirs.',
-            speakerWeak: (name) => `${name}'s connection is weak, so their sound may break up.`,
-            speakerDropped: (name) => `${name} has lost their connection.`,
-          }}
-        />
-        <div className="controls">
-          <button className="btn secondary" onClick={() => (meeting.self.audioEnabled ? meeting.self.disableAudio() : meeting.self.enableAudio()).then(rerender)}>
-            {meeting.self.audioEnabled ? 'Mute' : 'Unmute'}
-          </button>
-          <button className="btn secondary" onClick={toggleShare}>
-            {meeting.self.screenShareEnabled ? 'Stop sharing' : 'Share screen'}
-          </button>
-          <button className="btn danger" onClick={end}>
-            End class
-          </button>
-        </div>
-      </Stage>
+        fullLabel="Full screen"
+        exitLabel="Exit full screen"
+        top={
+          <>
+            <RoomNotices
+              connection={connection}
+              weakNames={weakSpeakers(remote, weak)}
+              dropped={dropped}
+              text={{
+                reconnecting: 'Your connection dropped. Reconnecting… Listeners are told it is your connection, not theirs.',
+                speakerWeak: (name) => `${name}'s connection is weak, so their sound may break up.`,
+                speakerDropped: (name) => `${name} has lost their connection.`,
+              }}
+            />
+            {error ? <p className="notice warn">{error}</p> : null}
+          </>
+        }
+        controls={
+          <div className="ctl-bar">
+            <ControlButton icon={meeting.self.audioEnabled ? 'mic' : 'micOff'} off={!meeting.self.audioEnabled} label={meeting.self.audioEnabled ? 'Mute' : 'Unmute'} onClick={toggleMic} />
+            <ControlButton
+              icon={meeting.self.screenShareEnabled ? 'stopShare' : 'share'}
+              on={meeting.self.screenShareEnabled}
+              label={meeting.self.screenShareEnabled ? 'Stop sharing' : 'Share screen'}
+              onClick={toggleShare}
+            />
+            <ControlButton
+              icon={recorder ? 'stop' : 'record'}
+              on={Boolean(recorder)}
+              label={recorder ? `Stop recording ${clock(Math.max(0, now - recorder.startedAt))}` : 'Record'}
+              onClick={recorder ? stopRecording : startRecording}
+            />
+            <ControlButton icon="leave" danger label="End class" onClick={end} />
+          </div>
+        }
+      />
 
       <div className="card">
         <h2 style={{ marginTop: 0, fontSize: '1.2rem' }}>Recording</h2>
+        {recordingChoice}
         {recorder ? (
           <>
             <p className="rec">
@@ -234,24 +266,18 @@ export function TeacherRoom({
               {recorder.savedTo ? `Saving into the folder "${recorder.savedTo}" as it records.` : 'Saving in this browser; the file downloads when you stop.'} Keep this tab
               open until you stop recording.
             </p>
-            <button className="btn secondary" onClick={stopRecording}>
-              Stop recording
-            </button>
           </>
         ) : (
           <>
             <fieldset style={{ border: 0, padding: 0, margin: '0 0 1rem' }}>
               <legend className="small muted">What to record</legend>
               <label style={{ fontWeight: 400 }}>
-                <input type="radio" name="mode" checked={mode === 'audio'} onChange={() => setMode('audio')} /> Audio only (about 30 MB an hour)
+                <input type="radio" name="mode" checked={mode === 'audio'} onChange={() => setMode('audio')} /> Audio only (no size limit; roughly 30 MB per hour)
               </label>
               <label style={{ fontWeight: 400 }}>
-                <input type="radio" name="mode" checked={mode === 'screen'} onChange={() => setMode('screen')} /> Audio and screen (about 500 MB an hour, plus an audio-only copy)
+                <input type="radio" name="mode" checked={mode === 'screen'} onChange={() => setMode('screen')} /> Audio and screen (no size limit; roughly 500 MB per hour, plus an audio-only copy)
               </label>
             </fieldset>
-            <button className="btn" onClick={startRecording}>
-              Start recording
-            </button>
             <p className="small muted">
               {canWriteToFolder()
                 ? 'You will be asked for a folder on your computer. Nothing is uploaded.'
@@ -299,7 +325,6 @@ export function TeacherRoom({
         )}
         <p className="muted small">{remote.length} people in the room.</p>
       </div>
-      {error ? <p className="error">{error}</p> : null}
     </section>
   )
 }

@@ -2,18 +2,20 @@
 
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 
+import { announceLive } from '@/components/site/LiveBannerView'
 import { Turnstile } from '@/components/site/Turnstile'
-import { t, type Locale } from '@/i18n/dictionary'
+import { serverError, t, type Locale } from '@/i18n/dictionary'
 
+import { ControlButton } from './icons'
 import { AudioSink, RoomNotices, Stage } from './Media'
-import { canWriteToFolder, downloadStored, LocalRecorder, storedRecordings, type RecorderMode } from './recorder'
+import { canWriteToFolder, LocalRecorder, type RecorderMode } from './recorder'
 import { screenSharer, useRoom, weakSpeakers } from './useRoom'
 
-// The student's view of a live class: listen, watch a shared screen, raise a hand to speak, and
-// record the class to their own device.
+// The student's view of a live class: listen, watch a shared screen, raise a hand to speak (and,
+// once on stage, share a screen), and record the class to their own device when the teacher allows.
 
-// How often a listener checks the class is still live, in case the room's own "ended" message was
-// missed (a closed laptop lid, a teacher whose browser closed before ending the class).
+// How often a listener checks the class is still live, and whether recording is still allowed, in
+// case the room's own messages were missed (a closed laptop lid, a teacher whose browser closed).
 const STATUS_EVERY_MS = 30_000
 
 const mb = (bytes: number) => `${(bytes / (1024 * 1024)).toFixed(1)} MB`
@@ -50,45 +52,55 @@ export function LiveRoom({
   locale,
   siteKey,
   hostPreset,
+  allowRecording: initialAllowRecording,
 }: {
   classId: number
   title: string
   locale: Locale
   siteKey: string
   hostPreset: string
+  allowRecording: boolean
 }) {
   const d = t(locale).live
   const { meeting, join, leave, remote, speaker, left, connection, weak, dropped, rerender } = useRoom({ hostPreset })
   const [name, setName] = useState(savedName)
   const [token, setToken] = useState('')
+  const [checkRound, setCheckRound] = useState(0)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [ended, setEnded] = useState(false)
+  const [allowRecording, setAllowRecording] = useState(initialAllowRecording)
   const [mode, setMode] = useState<RecorderMode>('audio')
   const [recorder, setRecorder] = useState<LocalRecorder | null>(null)
   const [recordNote, setRecordNote] = useState('')
-  const [leftovers, setLeftovers] = useState<string[]>([])
+  const [stageFailed, setStageFailed] = useState(false)
   const [now, setNow] = useState(0)
   const [, setTick] = useState(0)
   const recRef = useRef<LocalRecorder | null>(null)
+  const joiningStage = useRef(false)
   useEffect(() => {
     recRef.current = recorder
   }, [recorder])
 
   const classOver = ended || left === 'ended' || left === 'kicked'
   const lost = !classOver && (left === 'disconnected' || left === 'failed')
+  const stageStatus: string = meeting?.stage.status ?? 'OFF_STAGE'
 
+  // Tell the "Live now" banner straight away, rather than at its next check.
   useEffect(() => {
-    storedRecordings().then(setLeftovers).catch(() => {})
-  }, [])
+    if (classOver) announceLive(classId)
+  }, [classOver, classId])
 
-  // While in the room, check now and then that the class has not ended without word reaching us.
+  // While in the room, check now and then that the class has not ended without word reaching us,
+  // and whether the teacher has changed the recording setting.
   useEffect(() => {
     if (!meeting || classOver) return
     const timer = setInterval(async () => {
       const res = await fetch(`/svc/live/status?id=${classId}`, { cache: 'no-store' }).catch((): null => null)
-      const data = res?.ok ? ((await res.json().catch((): null => null)) as { status?: string } | null) : null
-      if (data?.status && data.status !== 'live') {
+      const data = res?.ok ? ((await res.json().catch((): null => null)) as { status?: string; allowRecording?: boolean } | null) : null
+      if (!data?.status) return
+      setAllowRecording(Boolean(data.allowRecording))
+      if (data.status !== 'live') {
         setEnded(true)
         leave()
       }
@@ -96,16 +108,38 @@ export function LiveRoom({
     return () => clearInterval(timer)
   }, [meeting, classOver, classId, leave])
 
-  // A recording still running when the class ends is stopped, which saves it.
+  // However the recording comes to an end (the class ends, the connection fails, or the teacher
+  // stops allowing it) it is stopped, which saves it to the device.
+  const mustStop = classOver || lost || !allowRecording
   useEffect(() => {
     const rec = recRef.current
-    if (!(classOver || lost) || !rec) return
+    if (!mustStop || !rec) return
     recRef.current = null
     rec.stop().then(() => {
       setRecorder(null)
-      setRecordNote(d.recordSaved)
+      setRecordNote(allowRecording ? d.recordSaved : d.recordingOff)
     })
-  }, [classOver, lost, d.recordSaved])
+  }, [mustStop, allowRecording, d.recordSaved, d.recordingOff])
+
+  // Brought on stage by the teacher: go up straight away, so the microphone and screen controls
+  // appear. Done once per acceptance; if it fails, a button lets the listener try themselves.
+  useEffect(() => {
+    if (stageStatus !== 'ACCEPTED_TO_JOIN_STAGE') {
+      joiningStage.current = false
+      return
+    }
+    if (joiningStage.current || !meeting) return
+    joiningStage.current = true
+    ;(async () => {
+      try {
+        await meeting.stage.join()
+        await meeting.self.enableAudio().catch(() => {})
+      } catch {
+        setStageFailed(true)
+      }
+      rerender()
+    })()
+  }, [stageStatus, meeting, rerender])
 
   // Warn before closing the tab while recording, and keep the timer moving.
   useEffect(() => {
@@ -136,6 +170,7 @@ export function LiveRoom({
   async function onJoin(e: FormEvent) {
     e.preventDefault()
     if (!name.trim()) return setError(d.yourName)
+    if (!token) return setError(t(locale).errors.botCheck)
     setBusy(true)
     setError('')
     try {
@@ -149,11 +184,15 @@ export function LiveRoom({
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ classId, name: name.trim(), token, visitor: visitorId() }),
       })
-      const data = (await res.json()) as { authToken?: string; error?: string }
-      if (!res.ok || !data.authToken) throw new Error(data.error ?? d.joinFailed)
+      const data = (await res.json().catch(() => ({}))) as { authToken?: string; error?: string; code?: string }
+      if (!res.ok || !data.authToken) {
+        setCheckRound((n) => n + 1)
+        return setError(serverError(locale, data, d.joinFailed))
+      }
       await join(data.authToken)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : d.joinFailed)
+    } catch {
+      setCheckRound((n) => n + 1)
+      setError(t(locale).errors.unreachable)
     } finally {
       setBusy(false)
     }
@@ -172,23 +211,11 @@ export function LiveRoom({
 
   async function stopRecording() {
     const rec = recorder
+    recRef.current = null
     setRecorder(null)
     await rec?.stop()
     setRecordNote(d.recordSaved)
   }
-
-  const leftoverList = leftovers.length ? (
-    <div className="card">
-      <p>
-        <strong>{d.unsaved}</strong>
-      </p>
-      {leftovers.map((f) => (
-        <button key={f} className="btn secondary small" onClick={() => downloadStored(f).then(() => setLeftovers((l) => l.filter((x) => x !== f)))}>
-          {d.save(f)}
-        </button>
-      ))}
-    </div>
-  ) : null
 
   if (classOver) {
     return (
@@ -215,35 +242,39 @@ export function LiveRoom({
 
   if (!meeting) {
     return (
-      <div className="stack">
-        {leftoverList}
-        <form onSubmit={onJoin} className="card" style={{ maxWidth: 480 }} noValidate>
-          <div className="field">
-            <label htmlFor="live-name">{d.yourName}</label>
-            <input id="live-name" type="text" autoComplete="nickname" maxLength={60} value={name} onChange={(e) => setName(e.target.value)} />
-          </div>
-          <Turnstile siteKey={siteKey} onToken={setToken} locale={locale} />
-          {error ? <p className="error">{error}</p> : null}
-          <button className="btn" type="submit" disabled={busy} style={{ marginTop: '1rem' }}>
-            {busy ? d.joining : d.join}
-          </button>
-          <p className="help">{d.tapToListen}</p>
-        </form>
-      </div>
+      <form onSubmit={onJoin} className="card" style={{ maxWidth: 480 }} noValidate>
+        <div className="field">
+          <label htmlFor="live-name">{d.yourName}</label>
+          <input id="live-name" type="text" autoComplete="nickname" maxLength={60} value={name} onChange={(e) => setName(e.target.value)} />
+        </div>
+        <Turnstile siteKey={siteKey} onToken={setToken} locale={locale} resetKey={checkRound} />
+        {error ? <p className="error">{error}</p> : null}
+        <button className="btn" type="submit" disabled={busy} style={{ marginTop: '1rem' }}>
+          {busy ? d.joining : d.join}
+        </button>
+        <p className="help">{d.tapToListen}</p>
+      </form>
     )
   }
 
-  const status: string = meeting.stage.status
-  const onStage = status === 'ON_STAGE'
+  const onStage = stageStatus === 'ON_STAGE'
+  const handRaised = stageStatus === 'REQUESTED_TO_JOIN_STAGE'
   const speakers = remote.filter((p) => p.audioEnabled || p.stageStatus === 'ON_STAGE')
 
   async function raiseHand() {
-    if (status === 'REQUESTED_TO_JOIN_STAGE') await meeting.stage.cancelRequestAccess()
+    if (handRaised) await meeting.stage.cancelRequestAccess()
     else await meeting.stage.requestAccess()
+    rerender()
   }
   async function goOnStage() {
-    await meeting.stage.join()
-    await meeting.self.enableAudio().catch(() => {})
+    setStageFailed(false)
+    try {
+      await meeting.stage.join()
+      await meeting.self.enableAudio().catch(() => {})
+    } catch {
+      setStageFailed(true)
+    }
+    rerender()
   }
   async function toggleShare() {
     setError('')
@@ -252,10 +283,44 @@ export function LiveRoom({
       else await meeting.self.enableScreenShare()
     } catch (err) {
       // Choosing Cancel in the browser's screen picker is not a failure.
-      if ((err as DOMException)?.name !== 'NotAllowedError' && (err as DOMException)?.name !== 'AbortError') setError(d.shareFailed)
+      const reason = (err as DOMException)?.name
+      if (reason !== 'NotAllowedError' && reason !== 'AbortError') setError(d.shareFailed)
     }
     rerender()
   }
+  async function toggleMic() {
+    await (meeting.self.audioEnabled ? meeting.self.disableAudio() : meeting.self.enableAudio()).catch(() => {})
+    rerender()
+  }
+
+  const controls = (
+    <div className="ctl-bar">
+      {onStage ? (
+        <>
+          <ControlButton icon={meeting.self.audioEnabled ? 'mic' : 'micOff'} off={!meeting.self.audioEnabled} label={meeting.self.audioEnabled ? d.mute : d.unmute} onClick={toggleMic} />
+          <ControlButton
+            icon={meeting.self.screenShareEnabled ? 'stopShare' : 'share'}
+            on={meeting.self.screenShareEnabled}
+            label={meeting.self.screenShareEnabled ? d.stopSharing : d.shareScreen}
+            onClick={toggleShare}
+          />
+        </>
+      ) : stageStatus === 'ACCEPTED_TO_JOIN_STAGE' ? (
+        <ControlButton icon="mic" on label={stageFailed ? d.joinStage : d.joiningStage} onClick={goOnStage} />
+      ) : (
+        <ControlButton icon="hand" on={handRaised} pressed={handRaised} label={handRaised ? d.lowerHand : d.raiseHand} onClick={raiseHand} />
+      )}
+      {allowRecording ? (
+        <ControlButton
+          icon={recorder ? 'stop' : 'record'}
+          on={Boolean(recorder)}
+          label={recorder ? `${d.stopRecordShort} ${clock(Math.max(0, now - recorder.startedAt))}` : d.recordShort}
+          onClick={recorder ? stopRecording : startRecording}
+        />
+      ) : null}
+      <ControlButton icon="leave" danger label={d.leave} onClick={leave} />
+    </div>
+  )
 
   return (
     <section className="room" aria-label={title}>
@@ -267,15 +332,21 @@ export function LiveRoom({
       <Stage
         track={sharer?.tracks?.video}
         label={sharer ? `${sharer.name} ${d.presenting}` : title}
-        expandLabel={d.fullScreen}
-        shrinkLabel={d.exitFullScreen}
+        fullLabel={d.fullScreen}
+        exitLabel={d.exitFullScreen}
+        top={
+          <>
+            <RoomNotices
+              connection={connection}
+              weakNames={weakSpeakers(remote, weak)}
+              dropped={dropped}
+              text={{ reconnecting: d.reconnecting, speakerWeak: d.speakerWeak, speakerDropped: d.speakerDropped }}
+            />
+            {error ? <p className="notice warn">{error}</p> : null}
+          </>
+        }
+        controls={controls}
       >
-        <RoomNotices
-          connection={connection}
-          weakNames={weakSpeakers(remote, weak)}
-          dropped={dropped}
-          text={{ reconnecting: d.reconnecting, speakerWeak: d.speakerWeak, speakerDropped: d.speakerDropped }}
-        />
         <div className="people" aria-label={d.speaking}>
           {speakers.map((p) => (
             <span key={p.id} className={`person ${speaker === p.id ? 'speaking' : ''}`}>
@@ -286,66 +357,40 @@ export function LiveRoom({
             {d.listeners(remote.length + 1)}
           </span>
         </div>
+        {handRaised ? <p className="notice">{d.handRaised}</p> : null}
 
-        <div className="controls">
-          {status === 'ACCEPTED_TO_JOIN_STAGE' ? (
-            <button className="btn" onClick={goOnStage}>
-              {d.onStage}
-            </button>
-          ) : onStage ? (
-            <>
-              <button className="btn secondary" onClick={() => (meeting.self.audioEnabled ? meeting.self.disableAudio() : meeting.self.enableAudio())}>
-                {meeting.self.audioEnabled ? d.mute : d.unmute}
-              </button>
-              <button className="btn secondary" onClick={toggleShare}>
-                {meeting.self.screenShareEnabled ? d.stopSharing : d.shareScreen}
-              </button>
-            </>
-          ) : (
-            <button className="btn secondary" onClick={raiseHand} aria-pressed={status === 'REQUESTED_TO_JOIN_STAGE'}>
-              {status === 'REQUESTED_TO_JOIN_STAGE' ? d.lowerHand : d.raiseHand}
-            </button>
-          )}
-          <button className="btn ghost" onClick={leave}>
-            {d.leave}
-          </button>
-        </div>
-        {status === 'REQUESTED_TO_JOIN_STAGE' ? <p className="notice">{d.handRaised}</p> : null}
-        {error ? <p className="error">{error}</p> : null}
+        {allowRecording ? (
+          <div className="card">
+            <h2 style={{ marginTop: 0, fontSize: '1.2rem' }}>{d.record}</h2>
+            {recorder ? (
+              <>
+                <p className="rec">
+                  {d.recordingNow} {clock(Math.max(0, now - recorder.startedAt))} · {mb(recorder.bytes)}
+                </p>
+                <p className="small muted">
+                  {recorder.savedTo ? d.recordSavingTo(recorder.savedTo) : d.recordBrowser} {d.recordKeepOpen}
+                </p>
+              </>
+            ) : (
+              <>
+                <fieldset style={{ border: 0, padding: 0, margin: '0 0 0.5rem' }}>
+                  <legend className="small muted">{d.recordModeLabel}</legend>
+                  <label style={{ fontWeight: 400 }}>
+                    <input type="radio" name="record-mode" checked={mode === 'audio'} onChange={() => setMode('audio')} /> {d.recordAudio}
+                  </label>
+                  <label style={{ fontWeight: 400 }}>
+                    <input type="radio" name="record-mode" checked={mode === 'screen'} onChange={() => setMode('screen')} /> {d.recordScreen}
+                  </label>
+                </fieldset>
+                <p className="small muted">{canWriteToFolder() ? d.recordFolder : d.recordBrowser}</p>
+              </>
+            )}
+            {recordNote ? <p className="small muted">{recordNote}</p> : null}
+          </div>
+        ) : recordNote ? (
+          <p className="small muted">{recordNote}</p>
+        ) : null}
       </Stage>
-
-      <div className="card">
-        <h2 style={{ marginTop: 0, fontSize: '1.2rem' }}>{d.record}</h2>
-        {recorder ? (
-          <>
-            <p className="rec">
-              {d.recordingNow} {clock(Math.max(0, now - recorder.startedAt))} · {mb(recorder.bytes)}
-            </p>
-            <p className="small muted">
-              {recorder.savedTo ? d.recordSavingTo(recorder.savedTo) : d.recordBrowser} {d.recordKeepOpen}
-            </p>
-            <button className="btn secondary" onClick={stopRecording}>
-              {d.stopRecording}
-            </button>
-          </>
-        ) : (
-          <>
-            <fieldset style={{ border: 0, padding: 0, margin: '0 0 1rem' }}>
-              <label style={{ fontWeight: 400 }}>
-                <input type="radio" name="record-mode" checked={mode === 'audio'} onChange={() => setMode('audio')} /> {d.recordAudio}
-              </label>
-              <label style={{ fontWeight: 400 }}>
-                <input type="radio" name="record-mode" checked={mode === 'screen'} onChange={() => setMode('screen')} /> {d.recordScreen}
-              </label>
-            </fieldset>
-            <button className="btn secondary" onClick={startRecording}>
-              {d.startRecording}
-            </button>
-            <p className="small muted">{canWriteToFolder() ? d.recordFolder : d.recordBrowser}</p>
-          </>
-        )}
-        {recordNote ? <p className="small muted">{recordNote}</p> : null}
-      </div>
     </section>
   )
 }

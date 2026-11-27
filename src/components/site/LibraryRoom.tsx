@@ -85,7 +85,7 @@ export async function LibraryRoom({ locale, selectedId, topic: topicSlug }: { lo
         ) : null}
       </header>
       {recordings.length ? (
-        <ListeningRoom recordings={recordings} initialId={selectedId} locale={locale} rssHref={`/${locale}/feed.xml`} />
+        <ListeningRoom recordings={recordings} initialId={selectedId} locale={locale} />
       ) : (
         <p className="story-deck" style={{ textAlign: 'center' }}>
           {L.none}

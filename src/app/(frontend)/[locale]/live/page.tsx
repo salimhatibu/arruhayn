@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
+import { LocalTime } from '@/components/site/LocalTime'
 import { t, type Locale } from '@/i18n/dictionary'
-import { formatDateTime, speakerName } from '@/lib/format'
+import { speakerName } from '@/lib/format'
 import { getPayloadClient } from '@/lib/payload'
 
 type Props = { params: Promise<{ locale: Locale }> }
@@ -35,7 +36,9 @@ export default async function LivePage({ params }: Props) {
         {c.title}
       </Link>
       <div className="meta">
-        <span>{formatDateTime(c.startsAt, locale)}</span>
+        <span>
+          <LocalTime value={c.startsAt} locale={locale} />
+        </span>
         {speakerName(c) ? <span>{speakerName(c)}</span> : null}
         {c.durationMinutes ? (
           <span>

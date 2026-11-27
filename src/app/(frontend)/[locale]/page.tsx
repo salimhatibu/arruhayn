@@ -7,6 +7,7 @@ import { Icon, type IconName } from '@/components/site/Icon'
 import { NewsletterBand } from '@/components/site/NewsletterBand'
 import { SubscribeForm } from '@/components/site/SubscribeForm'
 import { Tabs } from '@/components/site/Tabs'
+import { LocalTime } from '@/components/site/LocalTime'
 import type { Fatwa } from '@/payload-types'
 import { t, type Locale } from '@/i18n/dictionary'
 import { fastNotice } from '@/lib/fasting'
@@ -15,8 +16,6 @@ import { formatGregorian, formatHijri, toHijri, utcDay } from '@/lib/hijri'
 import { excerpt } from '@/lib/lexical'
 import { getMonthOverrides, getPayloadClient, getTopics } from '@/lib/payload'
 import { turnstileSiteKey } from '@/lib/turnstile'
-
-const intl = (locale: Locale) => (locale === 'ar' ? 'ar-EG' : 'en-GB')
 
 // A hand-drawn loop around the hero's accent word, drawn in when the page loads.
 function Scribble({ children }: { children: ReactNode }) {
@@ -423,21 +422,17 @@ export default async function Home({ params }: { params: Promise<{ locale: Local
                 </div>
                 <div className="panel-side">
                   {classes.docs.map((c) => {
-                    const when = new Date(c.startsAt)
-                    const fmt = (o: Intl.DateTimeFormatOptions) =>
-                      new Intl.DateTimeFormat(intl(locale), { ...o, timeZone: 'UTC' }).format(when)
+                    const at = (options: Intl.DateTimeFormatOptions) => <LocalTime value={c.startsAt} locale={locale} options={options} />
                     return (
                       <Link key={c.id} className="session" href={`/${locale}/live/${c.id}`}>
                         <span className="date-tile">
-                          <span className="date-tile-month">{fmt({ month: 'short' })}</span>
-                          <span className="date-tile-day">{fmt({ day: 'numeric' })}</span>
-                          <span className="date-tile-week">{fmt({ weekday: 'short' })}</span>
+                          <span className="date-tile-month">{at({ month: 'short' })}</span>
+                          <span className="date-tile-day">{at({ day: 'numeric' })}</span>
+                          <span className="date-tile-week">{at({ weekday: 'short' })}</span>
                         </span>
                         <span className="session-text">
                           <strong>{c.title}</strong>
-                          <span>
-                            {fmt({ hour: 'numeric', minute: '2-digit', timeZoneName: 'short' })}
-                          </span>
+                          <span>{at({ hour: 'numeric', minute: '2-digit', timeZoneName: 'short' })}</span>
                         </span>
                         <span className="btn small pill-btn">{d.home.reserve}</span>
                       </Link>

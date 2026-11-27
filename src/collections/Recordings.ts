@@ -80,16 +80,6 @@ export const Recordings: CollectionConfig = {
       ],
       admin: { position: 'sidebar' },
     },
-    {
-      name: 'inFeed',
-      label: 'Include in the RSS feed',
-      type: 'checkbox',
-      defaultValue: true,
-      admin: {
-        position: 'sidebar',
-        description: 'Lists it in the library\'s podcast feed, so people who follow the feed in a podcast app get it automatically.',
-      },
-    },
     { name: 'publishedAt', type: 'date', index: true, admin: { position: 'sidebar', readOnly: true } },
   ],
   hooks: {

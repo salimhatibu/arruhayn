@@ -17,11 +17,11 @@ export async function POST(request: Request) {
   } | null
   const name = typeof body?.name === 'string' ? body.name.trim() : ''
   const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : ''
-  if (name.length > 120) return errorJson('Your name must be 120 characters or fewer.', 400)
+  if (name.length > 120) return errorJson('Your name must be 120 characters or fewer.', 400, 'nameTooLong')
   if (!/^\S+@\S+\.\S+$/.test(email) || email.length > 254)
-    return errorJson('Enter a valid email address.', 400)
+    return errorJson('Enter a valid email address.', 400, 'invalidEmail')
   if (!(await verifyTurnstile(body?.token, request.headers.get('cf-connecting-ip')))) {
-    return errorJson('The bot check failed. Reload the page and try again.', 403)
+    return errorJson('The bot check did not go through. Wait for it to finish, then try again.', 403, 'botCheck')
   }
   const payload = await getPayloadClient()
   const canSend = await sendingEnabled(payload)

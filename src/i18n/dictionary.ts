@@ -184,6 +184,17 @@ const en = {
     intro: 'Short definitions of the terms used across the site.',
     more: 'More in the glossary',
   },
+  // Errors the server reports by code, worded for visitors.
+  errors: {
+    botCheck: "The bot check didn't go through. Wait for it to finish, then try again.",
+    notLive: "This class isn't live right now.",
+    notConfigured: "Live classes aren't set up yet.",
+    unreachable: "The live-class service couldn't be reached. Check your connection and try again.",
+    nameTooLong: 'Your name must be 120 characters or fewer.',
+    invalidEmail: 'Enter a valid email address.',
+    questionLength: 'Write your question in 20 to 4,000 characters.',
+    generic: 'Something went wrong. Check your connection and try again.',
+  },
   live: {
     title: 'Live classes',
     intro: 'Join classes live from your browser. You can listen without an account.',
@@ -220,8 +231,8 @@ const en = {
     endedHint: 'Thank you for joining. Recordings appear in the library once they are published.',
     shareFailed: "Your screen couldn't be shared. Screen sharing works in Chrome, Edge or Firefox on a computer.",
     record: 'Record this class',
-    recordAudio: 'Audio only (about 30 MB an hour)',
-    recordScreen: 'Audio and the shared screen (about 500 MB an hour)',
+    recordAudio: 'Audio only (no size limit; roughly 30 MB per hour)',
+    recordScreen: 'Audio and the shared screen (no size limit; roughly 500 MB per hour)',
     startRecording: 'Start recording',
     stopRecording: 'Stop recording',
     recordingNow: 'Recording',
@@ -233,6 +244,21 @@ const en = {
     recordSaved: 'Saved to your device.',
     unsaved: 'A recording from an earlier class was not saved.',
     save: (file: string) => `Save ${file}`,
+    startsIn: (left: string) => `Starts in ${left}.`,
+    startingSoon: 'Starting any moment now.',
+    opensItself: 'Keep this page open: the class opens here by itself when it starts.',
+    joinStage: 'Go on stage',
+    joiningStage: 'Putting you on stage…',
+    recordShort: 'Record',
+    stopRecordShort: 'Stop recording',
+    recordModeLabel: 'What to record',
+    recordingOff: 'The teacher has turned recording off. What you recorded so far has been saved.',
+    countdown: (mins: number) => {
+      const days = Math.floor(mins / 1440)
+      const hours = Math.floor((mins % 1440) / 60)
+      const m = mins % 60
+      return days ? `${days} d ${hours} h` : hours ? `${hours} h ${m} min` : `${m} min`
+    },
   },
   library: {
     title: 'Library',
@@ -241,7 +267,6 @@ const en = {
     resume: (t: string) => `Resume from ${t}`,
     speed: 'Speed',
     back15: 'Back 15 seconds',
-    rss: 'RSS feed',
     allTeachers: 'All teachers',
     duration: 'Length',
     kicker: 'The library',
@@ -506,6 +531,16 @@ const ar: Dictionary = {
     intro: 'تعريفات موجزة للمصطلحات المستعملة في الموقع.',
     more: 'المزيد في المصطلحات',
   },
+  errors: {
+    botCheck: 'لم يكتمل التحقق من أنك لست برنامجًا آليًا. انتظر حتى يكتمل، ثم حاول مرة أخرى.',
+    notLive: 'هذا الدرس غير مباشر الآن.',
+    notConfigured: 'لم تُفعَّل الدروس المباشرة بعد.',
+    unreachable: 'تعذّر الوصول إلى خدمة الدروس المباشرة. تحقّق من اتصالك وحاول مرة أخرى.',
+    nameTooLong: 'يجب ألا يزيد اسمك على 120 حرفًا.',
+    invalidEmail: 'أدخل بريدًا إلكترونيًا صحيحًا.',
+    questionLength: 'اكتب سؤالك في 20 إلى 4000 حرف.',
+    generic: 'حدث خطأ ما. تحقّق من اتصالك وحاول مرة أخرى.',
+  },
   live: {
     title: 'الدروس المباشرة',
     intro: 'احضر الدروس مباشرة من متصفحك، ويمكنك الاستماع دون حساب.',
@@ -542,8 +577,8 @@ const ar: Dictionary = {
     endedHint: 'جزاك الله خيرًا على الحضور. تُنشر التسجيلات في المكتبة حين تجهز.',
     shareFailed: 'تعذّرت مشاركة شاشتك. تعمل مشاركة الشاشة في متصفح Chrome أو Edge أو Firefox على الحاسوب.',
     record: 'سجّل هذا الدرس',
-    recordAudio: 'الصوت فقط (نحو 30 ميغابايت في الساعة)',
-    recordScreen: 'الصوت والشاشة المعروضة (نحو 500 ميغابايت في الساعة)',
+    recordAudio: 'الصوت فقط (بلا حدّ للحجم، نحو 30 ميغابايت في الساعة)',
+    recordScreen: 'الصوت والشاشة المعروضة (بلا حدّ للحجم، نحو 500 ميغابايت في الساعة)',
     startRecording: 'ابدأ التسجيل',
     stopRecording: 'أوقف التسجيل',
     recordingNow: 'جارٍ التسجيل',
@@ -555,6 +590,22 @@ const ar: Dictionary = {
     recordSaved: 'حُفظ التسجيل على جهازك.',
     unsaved: 'هناك تسجيل من درس سابق لم يُحفظ.',
     save: (file: string) => `احفظ ${file}`,
+    startsIn: (left: string) => `يبدأ بعد ${left}.`,
+    startingSoon: 'يبدأ بعد لحظات.',
+    opensItself: 'أبقِ هذه الصفحة مفتوحة، وسيُفتح الدرس هنا تلقائيًا حين يبدأ.',
+    joinStage: 'اصعد للحديث',
+    joiningStage: 'جارٍ إصعادك للحديث…',
+    recordShort: 'سجّل',
+    stopRecordShort: 'أوقف التسجيل',
+    recordModeLabel: 'ما الذي يُسجَّل',
+    recordingOff: 'أوقف الشيخ السماح بالتسجيل، وقد حُفظ ما سجّلته حتى الآن.',
+    countdown: (mins: number) => {
+      const n = (x: number) => x.toLocaleString('ar-EG')
+      const days = Math.floor(mins / 1440)
+      const hours = Math.floor((mins % 1440) / 60)
+      const m = mins % 60
+      return days ? `${n(days)} يوم و${n(hours)} ساعة` : hours ? `${n(hours)} ساعة و${n(m)} دقيقة` : `${n(m)} دقيقة`
+    },
   },
   library: {
     title: 'المكتبة الصوتية',
@@ -563,7 +614,6 @@ const ar: Dictionary = {
     resume: (t: string) => `تابع من ${t}`,
     speed: 'السرعة',
     back15: 'رجوع ١٥ ثانية',
-    rss: 'خلاصة RSS',
     allTeachers: 'كل المشايخ',
     duration: 'المدة',
     kicker: 'المكتبة',
@@ -654,3 +704,10 @@ const ar: Dictionary = {
 
 export const dictionaries: Record<Locale, Dictionary> = { en, ar }
 export const t = (locale: Locale) => dictionaries[locale]
+
+// A server error in the visitor's language: its code's wording if there is one, the server's own
+// English wording on English pages, or else the form's general message.
+export function serverError(locale: Locale, data: { error?: string; code?: string } | null | undefined, fallback: string) {
+  const byCode = data?.code ? (t(locale).errors as Record<string, string | undefined>)[data.code] : undefined
+  return byCode ?? (locale === 'en' && data?.error ? data.error : fallback)
+}

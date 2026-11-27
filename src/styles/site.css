@@ -440,19 +440,51 @@ label { display: block; font-weight: 500; margin-bottom: 0.35rem; color: var(--i
 .rec { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--rust); font-weight: 600; }
 .rec::before { content: ''; width: 10px; height: 10px; background: var(--rust); border-radius: 50%; animation: pulse-red 1.6s infinite; }
 
-/* The live stage. Its button enlarges it to full screen, or to cover the page where full screen
-   isn't offered; the controls and warnings passed in stay with it. */
+/* The live stage, played like a video. Enlarged, the video fills the screen and the warnings and
+   controls float over it on a soft gradient, fading out when the pointer rests (.is-idle), as in
+   YouTube and Zoom. */
 .live-stage { display: grid; gap: 1rem; }
 .live-stage-frame { position: relative; min-height: 0; }
-.live-stage-toggle { position: absolute; top: 0.6rem; inset-inline-end: 0.6rem; background: rgb(0 0 0 / 0.55); color: #fff; border: 1px solid rgb(255 255 255 / 0.35); border-radius: 999px; padding: 0.35rem 0.85rem; font: inherit; font-size: 0.85rem; cursor: pointer; }
-.live-stage-toggle:hover, .live-stage-toggle:focus-visible { background: rgb(0 0 0 / 0.8); }
-.live-stage.is-big { position: fixed; inset: 0; z-index: 1000; background: var(--night); color: #fff; padding: clamp(0.5rem, 2vw, 1rem); grid-template-rows: minmax(0, 1fr) auto; overflow: auto; }
-.live-stage.is-big .stage-screen { aspect-ratio: auto; height: 100%; border-radius: 0; }
-.live-stage.is-big .controls { justify-content: center; }
-.live-stage.is-big .btn.ghost { color: #fff; }
-.live-stage.is-big .btn.ghost:hover { background: rgb(255 255 255 / 0.12); }
-.live-stage.is-big .muted { color: rgb(255 255 255 / 0.75); }
-.live-stage.is-big .person { color: var(--ink); }
+.live-stage-top:empty { display: none; }
+.live-stage-bottom { display: flex; align-items: center; justify-content: center; gap: 1rem; }
+.live-fs { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 8px; background: rgb(0 0 0 / 0.5); color: #fff; cursor: pointer; }
+.live-fs:hover, .live-fs:focus-visible { background: rgb(0 0 0 / 0.8); }
+.live-stage-frame > .live-fs { position: absolute; bottom: 0.6rem; inset-inline-end: 0.6rem; }
+
+.live-stage.is-big { position: fixed; inset: 0; z-index: 1000; display: block; background: #000; color: #fff; }
+.live-stage.is-big .live-stage-frame { position: absolute; inset: 0; }
+.live-stage.is-big .stage-screen { aspect-ratio: auto; height: 100%; border-radius: 0; background: #000; }
+.live-stage.is-big .live-stage-top { position: absolute; top: 0; inset-inline: 0; display: grid; gap: 0.5rem; padding: max(1rem, env(safe-area-inset-top)) 1rem 2.5rem; background: linear-gradient(rgb(0 0 0 / 0.65), transparent); }
+.live-stage.is-big .live-stage-bottom { position: absolute; bottom: 0; inset-inline: 0; padding: 2.5rem 1rem max(1rem, env(safe-area-inset-bottom)); background: linear-gradient(transparent, rgb(0 0 0 / 0.75)); }
+.live-stage.is-big .live-stage-bottom > .live-fs { position: absolute; inset-inline-end: 1rem; bottom: max(1.4rem, calc(env(safe-area-inset-bottom) + 0.4rem)); background: transparent; }
+.live-stage.is-big .live-stage-top, .live-stage.is-big .live-stage-bottom { transition: opacity 0.3s; }
+.live-stage.is-big.is-idle { cursor: none; }
+.live-stage.is-big.is-idle .live-stage-top, .live-stage.is-big.is-idle .live-stage-bottom { opacity: 0; pointer-events: none; }
+
+/* Round controls with an icon and a short label under it, as in Zoom and Meet. */
+.ctl-bar { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem 0.75rem; }
+.ctl { display: inline-grid; justify-items: center; gap: 0.3rem; min-width: 68px; max-width: 96px; padding: 0.25rem; border: 0; background: none; color: var(--ink); font: inherit; font-size: 0.76rem; line-height: 1.2; text-align: center; cursor: pointer; }
+.ctl-icon { display: grid; place-items: center; width: 50px; height: 50px; border-radius: 50%; background: var(--card); border: 1px solid var(--line-strong); color: var(--ink); transition: background 0.15s, border-color 0.15s, transform 0.1s; }
+.ctl:hover .ctl-icon { border-color: var(--plum); }
+.ctl:active .ctl-icon { transform: scale(0.95); }
+.ctl:focus-visible { outline: none; }
+.ctl:focus-visible .ctl-icon { outline: 3px solid var(--plum); outline-offset: 2px; }
+.ctl.is-on .ctl-icon { background: var(--plum); border-color: var(--plum); color: #fff; }
+.ctl.is-off .ctl-icon { background: var(--cream); border-color: var(--rust); color: var(--rust); }
+.ctl.is-danger .ctl-icon { background: var(--rust); border-color: var(--rust); color: #fff; }
+.live-stage.is-big .ctl { color: #fff; }
+.live-stage.is-big .ctl-icon { background: rgb(255 255 255 / 0.16); border-color: transparent; color: #fff; }
+.live-stage.is-big .ctl.is-on .ctl-icon { background: #fff; color: var(--plum); }
+.live-stage.is-big .ctl.is-off .ctl-icon { background: rgb(255 255 255 / 0.9); color: var(--rust); }
+.live-stage.is-big .ctl.is-danger .ctl-icon { background: var(--rust); color: #fff; }
+@media (max-width: 520px) {
+  .ctl { min-width: 56px; font-size: 0.7rem; }
+  .ctl-icon { width: 44px; height: 44px; }
+  .live-stage.is-big .live-stage-bottom > .live-fs { inset-inline-end: 0.5rem; }
+  .live-stage.is-big .live-stage-bottom { padding-inline: 0.5rem 3.5rem; }
+}
+.check { display: flex; gap: 0.5rem; align-items: flex-start; font-weight: 400; cursor: pointer; }
+.check input { margin-top: 0.25rem; }
 .live-notices:empty { display: none; }
 .live-notices { display: grid; gap: 0.5rem; }
 .notice.warn { background: var(--cream); color: var(--ink); border-inline-start: 3px solid var(--rust); }
@@ -813,8 +845,6 @@ a.boxed:hover { background: var(--rust); color: #fff; }
 .songbook-list button[aria-current='true'] { background: var(--night-2); color: #f3dcc7; }
 .songbook-list button[aria-current='true'] .count { color: rgb(243 220 199 / 0.7); }
 .songbook-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.songbook-rss { display: flex; justify-content: space-between; margin-top: 1.1rem; color: var(--ink-2); text-decoration: none; font-size: 0.9rem; }
-.songbook-rss:hover { color: var(--rust); }
 @media (max-width: 1000px) { .songbook { position: static; } }
 
 /* Print: a fatwa, newsletter, or guide prints as a clean newspaper page with its address. */

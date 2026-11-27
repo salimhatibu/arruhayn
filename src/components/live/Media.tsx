@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 
+import { LiveIcon } from './icons'
 import type { Connection } from './useRoom'
 
 // Plays one remote audio track.
@@ -30,24 +31,33 @@ export function ScreenView({ track, label, muted = true }: { track?: MediaStream
   )
 }
 
-// The shared screen with a button that makes it fill the window. Real full screen is used where the
-// browser allows it on an element; elsewhere, notably on iPhones, the stage covers the page instead.
-// Whatever is passed as children (controls, warnings) stays on screen while it is enlarged.
+// The shared screen, played like a video. Its corner button makes it fill the screen; real full
+// screen is used where the browser allows it on an element, and elsewhere (notably iPhones) the stage
+// covers the page instead. Enlarged, the video takes the whole screen and `top` (warnings) and
+// `controls` float over it, fading away after a few seconds without movement, as in YouTube and
+// Zoom. `children` only shows at normal size.
+const IDLE_MS = 3000
+
 export function Stage({
   track,
   label,
-  expandLabel,
-  shrinkLabel,
+  fullLabel,
+  exitLabel,
+  top,
+  controls,
   children,
 }: {
   track?: MediaStreamTrack
   label: string
-  expandLabel: string
-  shrinkLabel: string
+  fullLabel: string
+  exitLabel: string
+  top?: ReactNode
+  controls?: ReactNode
   children?: ReactNode
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const [big, setBig] = useState(false)
+  const [idle, setIdle] = useState(false)
 
   // Leaving full screen with the browser's own Escape key shrinks the stage too.
   useEffect(() => {
@@ -58,16 +68,28 @@ export function Stage({
     return () => document.removeEventListener('fullscreenchange', onChange)
   }, [])
 
-  // Where the stage only covers the page, Escape still closes it and the page behind does not scroll.
+  // Enlarged: Escape closes it, the page behind does not scroll, and the controls hide when idle.
   useEffect(() => {
     if (!big) return
+    const el = ref.current
+    let timer = setTimeout(() => setIdle(true), IDLE_MS)
+    const wake = () => {
+      setIdle(false)
+      clearTimeout(timer)
+      timer = setTimeout(() => setIdle(true), IDLE_MS)
+    }
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setBig(false)
+      else wake()
     }
+    const events = ['pointermove', 'pointerdown', 'focusin'] as const
+    for (const e of events) el?.addEventListener(e, wake)
     window.addEventListener('keydown', onKey)
     const overflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => {
+      clearTimeout(timer)
+      for (const e of events) el?.removeEventListener(e, wake)
       window.removeEventListener('keydown', onKey)
       document.body.style.overflow = overflow
     }
@@ -79,19 +101,29 @@ export function Stage({
       setBig(false)
       return
     }
+    setIdle(false)
     setBig(true)
     ref.current?.requestFullscreen?.().catch(() => {})
   }
 
+  const fullButton = (
+    <button type="button" className="live-fs" onClick={toggle} title={big ? exitLabel : fullLabel} aria-label={big ? exitLabel : fullLabel} aria-pressed={big}>
+      <LiveIcon name={big ? 'exitFullscreen' : 'fullscreen'} size={24} />
+    </button>
+  )
+
   return (
-    <div ref={ref} className={`live-stage${big ? ' is-big' : ''}`}>
+    <div ref={ref} className={`live-stage${big ? ' is-big' : ''}${big && idle ? ' is-idle' : ''}`}>
       <div className="live-stage-frame">
         <ScreenView track={track} label={label} />
-        <button type="button" className="live-stage-toggle" onClick={toggle} aria-pressed={big}>
-          {big ? shrinkLabel : expandLabel}
-        </button>
+        {big ? null : fullButton}
       </div>
-      {children}
+      {top ? <div className="live-stage-top">{top}</div> : null}
+      <div className="live-stage-bottom">
+        {controls}
+        {big ? fullButton : null}
+      </div>
+      {big ? null : children}
     </div>
   )
 }

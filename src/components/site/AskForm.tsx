@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from 'react'
 
-import { t, type Locale } from '@/i18n/dictionary'
+import { serverError, t, type Locale } from '@/i18n/dictionary'
 
 import { Turnstile } from './Turnstile'
 
@@ -12,12 +12,14 @@ export function AskForm({ locale, siteKey }: { locale: Locale; siteKey: string }
   const [language, setLanguage] = useState<Locale>(locale)
   const [email, setEmail] = useState('')
   const [token, setToken] = useState('')
+  const [checkRound, setCheckRound] = useState(0)
   const [error, setError] = useState('')
   const [state, setState] = useState<'idle' | 'busy' | 'sent'>('idle')
 
   async function submit(e: FormEvent) {
     e.preventDefault()
     if (question.trim().length < 20) return setError(d.tooShort)
+    if (!token) return setError(t(locale).errors.botCheck)
     setState('busy')
     const res = await fetch('/svc/questions', {
       method: 'POST',
@@ -26,7 +28,9 @@ export function AskForm({ locale, siteKey }: { locale: Locale; siteKey: string }
     }).catch((): null => null)
     if (!res?.ok) {
       setState('idle')
-      return setError(d.failed)
+      setCheckRound((n) => n + 1)
+      const data = (await res?.json().catch(() => ({}))) as { error?: string; code?: string } | undefined
+      return setError(serverError(locale, data, d.failed))
     }
     setState('sent')
   }
@@ -67,7 +71,7 @@ export function AskForm({ locale, siteKey }: { locale: Locale; siteKey: string }
         <input id="ask-email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
         <p className="help">{d.emailHelp}</p>
       </div>
-      <Turnstile siteKey={siteKey} onToken={setToken} locale={locale} />
+      <Turnstile siteKey={siteKey} onToken={setToken} locale={locale} resetKey={checkRound} />
       <button className="btn" type="submit" disabled={state === 'busy'} style={{ marginTop: '1rem' }}>
         {state === 'busy' ? d.sending : d.submit}
       </button>

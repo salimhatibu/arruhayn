@@ -290,7 +290,7 @@ export interface Question {
   createdAt: string;
 }
 /**
- * Scheduled issues are published on the site automatically. Email sending switches on with your own domain.
+ * Scheduled issues go up on the site by themselves. Once an issue is published it is emailed to confirmed subscribers within 15 minutes, and "Emailed at" records that it went.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "newsletters".

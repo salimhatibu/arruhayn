@@ -6,6 +6,23 @@ import { errorJson, staffUser } from '@/lib/staff'
 const CONTENT_TYPES = new Set(['audio/aac', 'audio/mp4', 'audio/mpeg', 'audio/ogg', 'audio/opus', 'audio/wav', 'audio/webm'])
 const MAX_PARTS = 10_000
 
+// R2 refuses a body whose length it cannot see, and the stream this route is handed has lost the
+// one the browser sent. Rebuilding it around Content-Length keeps the upload streaming; without
+// that header there is nothing to rebuild from, so the body is read into memory instead.
+async function sizedBody(request: Request): Promise<ReadableStream | ArrayBuffer | null> {
+  if (!request.body) return null
+  const declared = Number(request.headers.get('content-length'))
+  // FixedLengthStream belongs to the Workers runtime; `next dev` runs this in Node, where the
+  // body is read into memory instead. Parts are 8 MB, so that costs little.
+  if (typeof FixedLengthStream !== 'undefined' && Number.isInteger(declared) && declared > 0) {
+    const fixed = new FixedLengthStream(declared)
+    // Deliberately not awaited: this pipe fills the stream while R2 drains the other half.
+    void request.body.pipeTo(fixed.writable).catch(() => {})
+    return fixed.readable
+  }
+  return await request.arrayBuffer()
+}
+
 function uploadIdFrom(url: URL) {
   const uploadId = url.searchParams.get('uploadId') ?? ''
   return uploadId.length > 0 && uploadId.length <= 2048 ? uploadId : null
@@ -36,8 +53,9 @@ async function handle(request: Request) {
       if (!uploadId || !Number.isInteger(partNumber) || partNumber < 1 || partNumber > MAX_PARTS) {
         return errorJson('Invalid multipart upload part.', 400)
       }
-      if (!request.body) return errorJson('The upload part was empty.', 400)
-      const part = await env.R2.resumeMultipartUpload(key, uploadId).uploadPart(partNumber, request.body)
+      const partBody = await sizedBody(request)
+      if (!partBody) return errorJson('The upload part was empty.', 400)
+      const part = await env.R2.resumeMultipartUpload(key, uploadId).uploadPart(partNumber, partBody)
       return Response.json(part)
     }
 
@@ -70,8 +88,9 @@ async function handle(request: Request) {
     }
 
     if (!action && request.method === 'PUT') {
-      if (!request.body) return errorJson('The upload was empty.', 400)
-      await env.R2.put(key, request.body, {
+      const body = await sizedBody(request)
+      if (!body) return errorJson('The upload was empty.', 400)
+      await env.R2.put(key, body, {
         httpMetadata: { contentType: request.headers.get('content-type') ?? 'application/octet-stream' },
       })
       return new Response(null, { status: 204 })
